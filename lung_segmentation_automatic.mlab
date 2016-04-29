@@ -2,6 +2,268 @@
 network  {
   watchlist = ""
 }
+module Arithmetic2 {
+  internal  {
+    frame = "701 483 144 80"
+    moduleGroupName = "Remove outside"
+    showNetworkPanel = true
+    windows  {
+      window _default {
+        geometry = "791 522 353 94"
+        sizeHint = "353 94"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = Combine_Regions2
+    function = Max
+    outputImageSize = InvalidateOutputIfSizesDiffer
+    constant = 0
+    autoReplicate = FALSE
+  }
+}
+module Arithmetic1 {
+  internal  {
+    frame = "957 589 120 72"
+    moduleGroupName = "Remove outside"
+    showNetworkPanel = true
+    windows  {
+      window _default {
+        geometry = "723 528 285 64"
+        sizeHint = "283 64"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = Arithmetic1
+    function = Multiply
+    constant = 1
+  }
+}
+module RegionGrowing {
+  internal  {
+    frame = "965 705 120 64"
+    moduleGroupName = "Remove outside"
+    windows  {
+      window _default {
+        geometry = "318 171 573 591"
+        sizeHint = "573 591"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = Back_Center
+    autoUpdateMode = AutoUpdate
+    lowerThreshold = 0.95
+    upperThreshold = 1.05
+    enableAutoThresholdInterval = TRUE
+    basicNeighborhoodType = BNBH_3D_6_XYZ
+    extendedNeighborhoodType = ENBH_2D_4_XY
+    useAdditionalSeed = TRUE
+    additionalSeed = "251 511 0 0 0 0"
+    additionalSeedType = 0
+    additionalSeedCoordSystem = VoxelCoordinates
+    initStackSizeTweak = 0.100000001490116
+    prohibitInputScalingTweak = FALSE
+    incrementalUpdateMode = Smart
+    useExtendedNBH = FALSE
+    calcBoundaryOverlap = FALSE
+    unitType = UnitTypeGrayValue
+    internalAccuracy = Auto
+    autoUpdateUnitType = FALSE
+    stretchOutputOverTime = FALSE
+    showPartialResults = FALSE
+    acceptedMarkerType = -1
+    autoSelectHigherCoords = TRUE
+    cCoord = 0
+    uCoord = 0
+    posFillValue = -1
+    negFillValue = 0
+    invertResult = FALSE
+    showOuterBoundariesOnly = FALSE
+    upperVolumeLimit_ml = 100
+    enableUpperVolumeLimit = FALSE
+    autoThresholdIntervalSizeInPercent = 5
+  }
+}
+module StringUtils {
+  internal  {
+    frame = "413 729 152 64"
+    moduleGroupName = ""
+    windows  {
+      window _default {
+        geometry = "226 425 370 331"
+        sizeHint = "370 331"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = Back_Center_Position
+    operationType = Concatenate
+    string1 = 251
+    string2 = 511
+    string3 = ""
+    string4 = ""
+    string5 = ""
+    string6 = ""
+    stringPrefix = [
+    stringPostfix = ]
+    toggle1 = TRUE
+    toggle2 = TRUE
+    toggle3 = FALSE
+    toggle4 = FALSE
+    toggle5 = FALSE
+    toggle6 = FALSE
+    togglePrefix = FALSE
+    togglePostfix = FALSE
+    separator = ""
+    selectSeparator = 1
+    toggleIgnoreCase = FALSE
+    inPos1 = 0
+    inPos2 = 0
+  }
+}
+module GetVoxelValue {
+  internal  {
+    frame = "657 849 144 64"
+    moduleGroupName = "Remove outside"
+    windows  {
+      window _default {
+        geometry = "184 126 301 281"
+        sizeHint = "301 281"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = Back_Center_Is_Air
+    position = "251 511 0 0 0 0"
+    updateMode = AutoUpdate
+    coordinateType = Voxel
+  }
+}
+module View3D {
+  internal  {
+    frame = "1093 879 144 56"
+    moduleGroupName = "Remove outside"
+    windows  {
+      window _default {
+        geometry = "498 247 939 645"
+        sizeHint = "939 645"
+        wasOpen = no
+      }
+    }
+  }
+  fields  {
+    instanceName = View3D
+    autoViewAll = TRUE
+    inventorInputOn = TRUE
+    inventorOutputOn = FALSE
+    lutType = Ramp
+    currentTimePoint = 0
+    staticSamplingRate = 1
+    quality = 1
+    lutEditorColorPoints = "[ 0 0 0 0, 4095 1 1 1 ]"
+    lutEditorAlphaPoints = "[ 0 0, 4095 1 ]"
+    lutEditorRelativeLut = FALSE
+    lutEditorColorInterpolation = InterpolateRGB
+    lutEditorAlphaFactor = 1
+    orientationProjectionType = PERSPECTIVE
+    orientationLocation = LOWER_RIGHT
+    orientationOn = TRUE
+    orientationModel = CUBE
+    greyCenter = 1
+    greyWidth = 0
+    alphaFactor = 1
+    colorFactor = "1 1 1"
+    camType = TRUE
+    camPosition = "-563.340576171875 422.432159423828 -190.619354248047"
+    camOrientation = "0.320461243391037 -0.33452907204628 -0.886225044727325 2.49226117134094"
+    initialCameraOrientation = CAMERA_KEEP_AS_IS
+    camFar = 1101.2045
+    camNear = 477.9646
+    camFocal = 789.27374
+    camHeight = 0.78539801
+    decoration = FALSE
+    hiResRendering = TRUE
+    annotations = TRUE
+    background = TRUE
+    mode = VolumeRendering
+    interactiveQuality = Medium
+  }
+  internalFields  {
+    renderer.gradientQuality = GradientQualityAutomatic
+    renderer.enhancementAlphaMix = 0.25
+    renderer.boundaryEnhancement = FALSE
+    renderer.boundaryEnhancementFactor = 1
+    renderer.boundaryEnhancementExponent = 1
+    renderer.boundaryEnhancementGradientBias = 0
+    renderer.silhouetteEnhancement = FALSE
+    renderer.silhouetteEnhancementExponent = 1
+    renderer.silhouetteEnhancementFactor = 1
+    renderer.toneShading = FALSE
+    renderer.toneShadingWarmColor = "0.67451000213623 0.533333003520966 0.141176000237465"
+    renderer.toneShadingColdColor = "0 0 0.400000005960464"
+    renderer.toneShadingWarmDiffuse = 0.60000002
+    renderer.toneShadingColdDiffuse = 0.2
+    renderer.toneShadingAngle = 45
+    renderer.materialAmbient = 0.60000002
+    renderer.materialDiffuse = 1
+    renderer.materialSpecular = 1
+    renderer.materialSpecularity = 32
+    renderer.light1Enabled = TRUE
+    renderer.light1DiffuseIntensity = 1
+    renderer.light1SpecularIntensity = 1
+    renderer.light1Color = "1 1 1"
+    renderer.light1PolarPhi = 45
+    renderer.light1PolarRho = 0
+    renderer.light2Enabled = FALSE
+    renderer.light2DiffuseIntensity = 1
+    renderer.light2SpecularIntensity = 1
+    renderer.light2Color = "1 1 1"
+    renderer.light2PolarPhi = 0
+    renderer.light2PolarRho = 0
+    renderer.light3Enabled = FALSE
+    renderer.light3DiffuseIntensity = 1
+    renderer.light3SpecularIntensity = 1
+    renderer.light3Color = "1 1 1"
+    renderer.light3PolarPhi = -45
+    renderer.light3PolarRho = 0
+    renderer.sizeOutputX = 512
+    renderer.sizeOutputY = 512
+    renderer.sizeOutputZ = 325
+    renderer.subVolumeStartX = 0
+    renderer.subVolumeStartY = 0
+    renderer.subVolumeStartZ = 0
+    renderer.subVolumeEndX = 512
+    renderer.subVolumeEndY = 512
+    renderer.subVolumeEndZ = 325
+    clip.hideGeometry = FALSE
+    clip.on = FALSE
+    clip.left = FALSE
+    clip.right = FALSE
+    clip.top = FALSE
+    clip.bottom = FALSE
+    clip.rear = FALSE
+    clip.front = FALSE
+    clip.translation0 = "1 0 0"
+    clip.translation1 = "-1 0 0"
+    clip.translation2 = "0 1 0"
+    clip.translation3 = "0 -1 0"
+    clip.translation4 = "0 0 1"
+    clip.translation5 = "0 0 -1"
+    clip.rotation0 = "0 0 0.999999940395355 1.57079994678497"
+    clip.rotation1 = "0 0 -0.999999940395355 1.57079994678497"
+    clip.rotation2 = "0 0 -1 3.1415901184082"
+    clip.rotation3 = "0 0 1 0"
+    clip.rotation4 = "-0.999999940395355 0 0 1.57079994678497"
+    clip.rotation5 = "0.999999940395355 0 0 1.57079994678497"
+  }
+}
 module StringUtils {
   internal  {
     frame = "65 829 96 56"
@@ -18,7 +280,7 @@ module StringUtils {
     instanceName = StringUtils3
     operationType = Concatenate
     string1 = $(NETWORK)/
-    string2 = 1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
+    string2 = ""
     string3 = ""
     string4 = ""
     string5 = ""
@@ -48,109 +310,21 @@ module FieldIterator {
       window _default {
         geometry = "1065 106 415 317"
         sizeHint = "415 317"
-        wasOpen = yes
+        wasOpen = no
       }
     }
   }
   fields  {
     instanceName = FieldIterator
     fieldNames = ""
-    fieldValues = "1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.108197895896446896160048741492.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.109002525524522225658609808059.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.111172165674661221381920536987.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.124154461048929153767743874565.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.126121460017257137098781143514.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.126264578931778258890371755354.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.128023902651233986592378348912.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.129055977637338639741695800950.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.130438550890816550994739120843.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.134996872583497382954024478441.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.137763212752154081977261297097.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.138080888843357047811238713686.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.139258777898746693365877042411.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.139713436241461669335487719526.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.141069661700670042960678408762.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.144438612068946916340281098509.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.146429221666426688999739595820.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.154677396354641150280013275227.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.187451715205085403623595258748.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.188209889686363159853715266493.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.188376349804761988217597754952.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.194440094986948071643661798326.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.194465340552956447447896167830.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.202811684116768680758082619196.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.210837812047373739447725050963.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.213140617640021803112060161074.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.216882370221919561230873289517.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.219087313261026510628926082729.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.219909753224298157409438012179.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.227962600322799211676960828223.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.231645134739451754302647733304.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.238522526736091851696274044574.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.241570579760883349458693655367.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.249530219848512542668813996730.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.250438451287314206124484591986.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.250863365157630276148828903732.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.269689294231892620436462818860.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.272042302501586336192628818865.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.277445975068759205899107114231.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.278660284797073139172446973682.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.280972147860943609388015648430.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.281489753704424911132261151767.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.293757615532132808762625441831.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.294188507421106424248264912111.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.295298571102631191572192562523.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.295420274214095686326263147663.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.302134342469412607966016057827.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.303421828981831854739626597495.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.305858704835252413616501469037.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.310548927038333190233889983845.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.310626494937915759224334597176.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.311981398931043315779172047718.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.313334055029671473836954456733.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.313605260055394498989743099991.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.313835996725364342034830119490.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.317087518531899043292346860596.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.323302986710576400812869264321.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.323859712968543712594665815359.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.332453873575389860371315979768.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.333145094436144085379032922488.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.334517907433161353885866806005.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.395623571499047043765181005112.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.404364125369979066736354549484.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.417815314896088956784723476543.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.430109407146633213496148200410.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.450501966058662668272378865145.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.511347030803753100045216493273.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.525937963993475482158828421281.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.534006575256943390479252771547.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.534083630500464995109143618896.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.564534197011295112247542153557.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.566816709786169715745131047975.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.621916089407825046337959219998.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.640729228179368154416184318668.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.657775098760536289051744981056.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.716498695101447665580610403574.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.724251104254976962355686318345.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.752756872840730509471096155114.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.805925269324902055566754756843.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.826812708000318290301835871780.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.832260670372728970918746541371.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.868211851413924881662621747734.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.898642529028521482602829374444.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.905371958588660410240398317235.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.975254950136384517744116790879.mhd
-1.3.6.1.4.1.14519.5.2.1.6279.6001.979083010707182900091062408058.mhd"
+    fieldValues = ""
     fieldSeparator = [,;]
     valueSeparator = "\\n\\r|\\r\\n|[\\n\\r\\\\]"
     valueHeader = FALSE
     indexTranslation = 0
     newValueEnable = TRUE
     verbose = TRUE
-    curIndex = 4
+    curIndex = -1
     delay = 1
     autoReset = FALSE
     loop = FALSE
@@ -186,7 +360,7 @@ module FileDirectory {
 }
 module OrthoView2D {
   internal  {
-    frame = "709 -499 120 56"
+    frame = "1053 -539 120 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -221,14 +395,14 @@ module OrthoView2D {
     valueHighPrecision = TRUE
     annoCoords = Voxel
     showCurrentPos = TRUE
-    worldPosition = "48.8671836853027 -162.578125 1065.55004882812"
+    worldPosition = "75.8715515136719 -326.27734375 -192.771469116211"
     coloredMode = FALSE
     hiResRendering = TRUE
   }
 }
 module Histogram {
   internal  {
-    frame = "1221 637 88 56"
+    frame = "-243 661 88 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -257,7 +431,7 @@ module Histogram {
 }
 module StylePalette {
   internal  {
-    frame = "1317 637 104 56"
+    frame = "-147 661 104 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -366,7 +540,7 @@ module StylePalette {
 }
 module SoRenderArea {
   internal  {
-    frame = "1225 421 112 56"
+    frame = "-239 445 112 56"
     moduleGroupName = ""
     windows  {
       window _viewer {
@@ -407,7 +581,7 @@ module SoRenderArea {
 }
 module SoDiagram2D {
   internal  {
-    frame = "1233 509 112 56"
+    frame = "-231 533 112 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -491,11 +665,11 @@ module SoDiagram2D {
 }
 module View2D {
   internal  {
-    frame = "949 325 120 56"
+    frame = "1149 173 120 56"
     moduleGroupName = ""
     windows  {
       window _default {
-        geometry = "698 156 400 400"
+        geometry = "183 126 1185 775"
         sizeHint = "400 400"
         wasOpen = no
       }
@@ -506,7 +680,7 @@ module View2D {
     inventorInputOn = TRUE
     inventorOutputOn = FALSE
     view2DExtensionsOn = TRUE
-    startSlice = 0
+    startSlice = 188
     numSlices = 1
     numXSlices = 1
     sliceStep = 1
@@ -551,7 +725,7 @@ module View2D {
 }
 module Arithmetic2 {
   internal  {
-    frame = "681 533 96 56"
+    frame = "665 587 136 64"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
@@ -562,7 +736,7 @@ module Arithmetic2 {
     }
   }
   fields  {
-    instanceName = Arithmetic2
+    instanceName = Combine_Regions
     function = Max
     outputImageSize = AdaptOutputImageSize
     constant = 0
@@ -571,7 +745,7 @@ module Arithmetic2 {
 }
 module RegionGrowing {
   internal  {
-    frame = "737 613 128 56"
+    frame = "745 667 120 64"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
@@ -582,7 +756,7 @@ module RegionGrowing {
     }
   }
   fields  {
-    instanceName = Back
+    instanceName = Back_Corner
     autoUpdateMode = AutoUpdate
     lowerThreshold = 0.95
     upperThreshold = 1.05
@@ -618,12 +792,12 @@ module RegionGrowing {
 }
 module Calculator {
   internal  {
-    frame = "409 613 96 56"
+    frame = "273 581 96 56"
     moduleGroupName = ""
     windows  {
       window _default {
-        geometry = "113 538 700 656"
-        sizeHint = "700 656"
+        geometry = "97 238 700 662"
+        sizeHint = "700 650"
         wasOpen = no
       }
     }
@@ -632,7 +806,7 @@ module Calculator {
     instanceName = Calculator1
     exp1 = i1-1
     exp2 = i2-1
-    exp3 = ""
+    exp3 = (i1/2)-5
     exp4 = ""
     exp5 = ""
     exp6 = ""
@@ -702,7 +876,7 @@ module Calculator {
 }
 module StringUtils {
   internal  {
-    frame = "409 549 96 56"
+    frame = "405 569 152 64"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -713,7 +887,7 @@ module StringUtils {
     }
   }
   fields  {
-    instanceName = StringUtils2
+    instanceName = Back_Corner_Position
     operationType = Concatenate
     string1 = 511
     string2 = 511
@@ -740,7 +914,7 @@ module StringUtils {
 }
 module Info {
   internal  {
-    frame = "409 677 64 56"
+    frame = "289 685 64 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -770,7 +944,7 @@ module StringUtils {
     instanceName = StringUtils1
     operationType = Concatenate
     string1 = $(NETWORK)/output/
-    string2 = 1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
+    string2 = data/subset0/1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874.mhd
     string3 = ""
     string4 = ""
     string5 = ""
@@ -807,7 +981,7 @@ module StringUtils {
   fields  {
     instanceName = StringUtils
     operationType = Substring
-    string1 = $(NETWORK)/1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
+    string1 = $(NETWORK)/data/subset0/1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874.mhd
     string2 = ""
     string3 = ""
     string4 = ""
@@ -832,7 +1006,7 @@ module StringUtils {
 }
 module Calculator {
   internal  {
-    frame = "906 -133 88 56"
+    frame = "1051 -218 88 56"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -852,7 +1026,7 @@ module Calculator {
     exp6 = ""
     exp7 = ""
     exp8 = ""
-    i1 = 124
+    i1 = 325
     i2 = 0
     i3 = 0
     i4 = 0
@@ -919,7 +1093,7 @@ i1 = n layers
 }
 module Info {
   internal  {
-    frame = "906 -69 56 56"
+    frame = "1051 -154 56 56"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -935,13 +1109,13 @@ module Info {
 }
 module itkImageFileWriter {
   internal  {
-    frame = "41 -355 128 56"
+    frame = "721 -507 128 56"
     moduleGroupName = ""
     windows  {
       window _default {
         geometry = "157 314 307 403"
         sizeHint = "256 403"
-        wasOpen = yes
+        wasOpen = no
       }
     }
   }
@@ -951,13 +1125,13 @@ module itkImageFileWriter {
     correctSubVoxelShift = FALSE
     forceDirectionCosineWrite = TRUE
     outputVoxelType = int8
-    info = "File saved successfully"
-    unresolvedFileName = $(NETWORK)/output/1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
+    info = ""
+    unresolvedFileName = $(NETWORK)/output/data/subset0/1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874.mhd
   }
 }
 module View3D {
   internal  {
-    frame = "273 -467 144 56"
+    frame = "873 -531 144 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -985,17 +1159,17 @@ module View3D {
     orientationLocation = LOWER_RIGHT
     orientationOn = FALSE
     orientationModel = CUBE
-    greyCenter = 0.652499794960022
-    greyWidth = 0.717499613761902
+    greyCenter = 0.467499971389771
+    greyWidth = 0.562499940395355
     alphaFactor = 0.507
     colorFactor = "1 1 1"
     camType = TRUE
-    camPosition = "-298.541870117188 -706.47998046875 785.298950195312"
-    camOrientation = "-0.940474390983582 -0.0709428861737251 0.332377851009369 4.13194942474365"
+    camPosition = "-98.4452972412109 -262.932189941406 -956.295715332031"
+    camOrientation = "0.978146970272064 0.192127764225006 -0.0794692486524582 3.0097324848175"
     initialCameraOrientation = CAMERA_KEEP_AS_IS
-    camFar = 940.15942
-    camNear = 415.93658
-    camFocal = 677.78625
+    camFar = 989.93359
+    camNear = 536.13959
+    camFocal = 762.80988
     camHeight = 0.78539801
     decoration = FALSE
     hiResRendering = TRUE
@@ -1044,13 +1218,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 124
+    renderer.sizeOutputZ = 325
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 124
+    renderer.subVolumeEndZ = 325
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -1075,11 +1249,11 @@ module View3D {
 }
 module View3D {
   internal  {
-    frame = "868 -210 144 56"
+    frame = "1013 -295 144 56"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
-        geometry = "327 490 939 645"
+        geometry = "414 315 939 645"
         sizeHint = "939 645"
         wasOpen = no
       }
@@ -1108,12 +1282,12 @@ module View3D {
     alphaFactor = 1
     colorFactor = "1 1 1"
     camType = TRUE
-    camPosition = "49.6819152832031 -814.4375 1152.99365234375"
-    camOrientation = "-0.933466911315918 -0.277638643980026 0.227060288190842 4.83245706558228"
+    camPosition = "119.120712280273 -449.330688476562 -182.337188720703"
+    camOrientation = "-0.965111315250397 -0.241450488567352 0.101300671696663 5.38249588012695"
     initialCameraOrientation = CAMERA_KEEP_AS_IS
-    camFar = 876.23749
-    camNear = 479.73019
-    camFocal = 677.78625
+    camFar = 1076.1495
+    camNear = 502.96918
+    camFocal = 789.27374
     camHeight = 0.78539801
     decoration = FALSE
     hiResRendering = TRUE
@@ -1162,13 +1336,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 124
+    renderer.sizeOutputZ = 325
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 124
+    renderer.subVolumeEndZ = 325
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -1193,7 +1367,7 @@ module View3D {
 }
 module IntervalThreshold {
   internal  {
-    frame = "658 -105 136 64"
+    frame = "805 -183 136 64"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1209,9 +1383,9 @@ module IntervalThreshold {
     innerType = UserDef
     upperType = UserDef
     centerWidthSet = FALSE
-    threshCenter = 50064
-    threshWidth = 99872
-    threshMin = 128
+    threshCenter = 50167.5
+    threshWidth = 99665
+    threshMin = 335
     threshMax = 100000
     lowerUserValue = 0
     innerUserValue = 1
@@ -1223,7 +1397,7 @@ module IntervalThreshold {
 }
 module Arithmetic2 {
   internal  {
-    frame = "506 -177 152 64"
+    frame = "621 -279 152 64"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1243,7 +1417,7 @@ module Arithmetic2 {
 }
 module ConnectedComponents {
   internal  {
-    frame = "678 -9 160 64"
+    frame = "823 -94 160 64"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1286,7 +1460,7 @@ module itkImageFileReader {
       window _default {
         geometry = "1405 336 299 395"
         sizeHint = "299 395"
-        wasOpen = yes
+        wasOpen = no
       }
     }
   }
@@ -1304,16 +1478,16 @@ module itkImageFileReader {
     loaderType = MetaImageIO
     outputMetaDataStr = "ITK_InputFilterName : MetaImageIO
 "
-    unresolvedFileName = $(NETWORK)/1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720.mhd
+    unresolvedFileName = $(NETWORK)/data/subset0/1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874.mhd
   }
 }
 module OrthoView2D {
   internal  {
-    frame = "933 605 120 56"
+    frame = "1113 791 120 56"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
-        geometry = "779 160 400 430"
+        geometry = "518 199 400 430"
         sizeHint = "400 430"
         wasOpen = no
       }
@@ -1344,19 +1518,19 @@ module OrthoView2D {
     valueHighPrecision = TRUE
     annoCoords = Voxel
     showCurrentPos = TRUE
-    worldPosition = "116.07160949707 1.85559141635895 872.349975585938"
+    worldPosition = "15.796875 194.453125 -835.599975585938"
     coloredMode = FALSE
     hiResRendering = TRUE
   }
 }
 module View3D {
   internal  {
-    frame = "768 199 144 56"
+    frame = "929 97 144 56"
     moduleGroupName = "Lung selection"
     windows  {
       window _default {
-        geometry = "158 339 943 645"
-        sizeHint = "943 645"
+        geometry = "173 338 939 645"
+        sizeHint = "939 645"
         wasOpen = no
       }
     }
@@ -1384,12 +1558,12 @@ module View3D {
     alphaFactor = 1
     colorFactor = "1 1 1"
     camType = TRUE
-    camPosition = "726.578674316406 175.639694213867 107.885757446289"
-    camOrientation = "-0.455109417438507 -0.496667712926865 -0.739051163196564 4.1678671836853"
+    camPosition = "270.517669677734 -585.900756835938 -658.353698730469"
+    camOrientation = "-0.889238476753235 -0.443337827920914 0.112723141908646 4.72165155410767"
     initialCameraOrientation = CAMERA_KEEP_AS_IS
-    camFar = 1030.1699
-    camNear = 503.74118
-    camFocal = 766.69293
+    camFar = 1050.9308
+    camNear = 528.13806
+    camFocal = 789.27374
     camHeight = 0.78539801
     decoration = FALSE
     hiResRendering = TRUE
@@ -1438,13 +1612,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 124
+    renderer.sizeOutputZ = 325
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 124
+    renderer.subVolumeEndZ = 325
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -1469,7 +1643,7 @@ module View3D {
 }
 module OrthoView2D {
   internal  {
-    frame = "749 -251 120 56"
+    frame = "869 -291 120 56"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1511,7 +1685,7 @@ module OrthoView2D {
 }
 module ConnectedComponents {
   internal  {
-    frame = "608 275 160 64"
+    frame = "769 173 160 64"
     moduleGroupName = "Lung selection"
     windows  {
       window _default {
@@ -1548,7 +1722,7 @@ module ConnectedComponents {
 }
 module Arithmetic2 {
   internal  {
-    frame = "545 465 128 64"
+    frame = "869 387 128 64"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
@@ -1568,7 +1742,7 @@ module Arithmetic2 {
 }
 module IntervalThreshold {
   internal  {
-    frame = "549 725 136 56"
+    frame = "825 927 136 56"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
@@ -1598,7 +1772,7 @@ module IntervalThreshold {
 }
 module RegionGrowing {
   internal  {
-    frame = "613 613 120 56"
+    frame = "617 667 120 64"
     moduleGroupName = "Remove outside"
     windows  {
       window _default {
@@ -1644,6 +1818,17 @@ module RegionGrowing {
   }
 }
 connections  {
+  Combine_Regions2.input0 = Combine_Regions.output0
+  Combine_Regions2.input1 = Arithmetic1.output0
+  Arithmetic1.input0 = Back_Center.output0
+  Arithmetic1.constant = Back_Center_Is_Air.outputValue
+  Back_Center.input0 = IntervalThreshold2.output0
+  Back_Center.additionalSeed = Back_Center_Position.result
+  Back_Center_Position.string1 = Calculator1.resultScalar3
+  Back_Center_Position.string2 = Calculator1.resultScalar2
+  Back_Center_Is_Air.input0 = IntervalThreshold2.output0
+  Back_Center_Is_Air.position = Back_Center_Position.result
+  View3D.inImage = IntervalThreshold2.output0
   StringUtils3.string2 = FieldIterator.curValue
   FieldIterator.fieldValues = FileDirectory.fileList
   OrthoView2D.image = Subtract_small_blobs.output0
@@ -1652,13 +1837,13 @@ connections  {
   SoDiagram2D.inCurveList = Histogram.outputHistogramCurve
   SoDiagram2D.inStylePalette = StylePalette0.outStylePalette
   View2D1.inImage = Subtract_outside.output0
-  Arithmetic2.input0 = Front.output0
-  Arithmetic2.input1 = Back.output0
-  Back.input0 = IntervalThreshold2.output0
+  Combine_Regions.input0 = Front.output0
+  Combine_Regions.input1 = Back_Corner.output0
+  Back_Corner.input0 = IntervalThreshold2.output0
   Calculator1.i1 = Info1.sizeX
   Calculator1.i2 = Info1.sizeY
-  StringUtils2.string1 = Calculator1.resultScalar1
-  StringUtils2.string2 = Calculator1.resultScalar2
+  Back_Corner_Position.string1 = Calculator1.resultScalar1
+  Back_Corner_Position.string2 = Calculator1.resultScalar2
   Info1.input0 = itkImageFileReader.output0
   StringUtils1.string2 = StringUtils.result
   StringUtils.string1 = itkImageFileReader.unresolvedFileName
@@ -1679,11 +1864,11 @@ connections  {
   View3D1.inImage = Select_lung.output2
   OrthoView2D2.image = Select_small_blobs.output0
   Select_lung.input0 = Subtract_outside.output0
-  Subtract_outside.input0 = IntervalThreshold2.output0
-  Subtract_outside.input1 = Arithmetic2.output0
+  Subtract_outside.input0 = Combine_Regions2.output0
+  Subtract_outside.input1 = IntervalThreshold2.output0
   IntervalThreshold2.input0 = itkImageFileReader.output0
   Front.input0 = IntervalThreshold2.output0
-  Front.additionalSeed = StringUtils2.result
+  Front.additionalSeed = Back_Corner_Position.result
 }
 networkModel  {
   parentItems  {
