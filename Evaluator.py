@@ -5,8 +5,9 @@ import glob
 
 from functools import partial
 from multiprocessing import Pool
+from sklearn.externals import joblib
 
-from scipy.ndimage import binary_closing
+from scipy.ndimage import binary_closing, binary_dilation, binary_erosion
 
 DATA_PATH = "data/subset0/"
 test_images = glob.glob(DATA_PATH + "output/*.mhd")
@@ -17,6 +18,7 @@ def calculate_dice(train,truth,filename):
     #print "Dice {0:.5f}, overlap {1:.5f}\n".format(dice, np.mean(truth==train)),
     if dice < 0.5:
         print "Failure for file", filename, "dice=",dice
+
     return dice
 
 
@@ -26,7 +28,6 @@ def process_image(name, do_closing, closing_structure):
     image_truth,_,_ = LoadImages.load_itk_image(name)
     truth = np.zeros(image_truth.shape, dtype=np.uint8)
     truth[image_truth >0]=1
-
     if do_closing:
         image_train = binary_closing(image_train, closing_structure,1)
 
@@ -41,8 +42,6 @@ if __name__ == "__main__":
     pool = Pool(processes=4)
 
     #Take subset
-    #test_images = test_image[:20]
-
     print "N images", len(test_images)
 
     #for kernel_size in [3,5,7,9]:
@@ -54,4 +53,7 @@ if __name__ == "__main__":
         print "\n---"
         print "Kernel size", kernel_size
         print "mean: ",np.mean(scores)
+        print "median", np.median(scores)
         print "standard deviation: ",np.std(scores)
+
+    joblib.dump(scores, 'data/subset0/dice_scores.pkl')
