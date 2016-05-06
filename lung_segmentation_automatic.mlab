@@ -37,12 +37,12 @@ module View3D {
     alphaFactor = 1
     colorFactor = "1 1 1"
     camType = TRUE
-    camPosition = "469.712707519531 -335.613647460938 158.839416503906"
-    camOrientation = "-0.717903912067413 -0.606930911540985 -0.34095287322998 5.16903591156006"
+    camPosition = "-78.0044708251953 -446.877838134766 -504.793731689453"
+    camOrientation = "-0.96412456035614 -0.213837951421738 0.15728098154068 4.00802850723267"
     initialCameraOrientation = CAMERA_KEEP_AS_IS
-    camFar = 958.95203
-    camNear = 401.70825
-    camFocal = 680.05225
+    camFar = 786.25079
+    camNear = 374.46445
+    camFocal = 580.15234
     camHeight = 0.78539801
     decoration = FALSE
     hiResRendering = TRUE
@@ -91,13 +91,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 274
+    renderer.sizeOutputZ = 433
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 274
+    renderer.subVolumeEndZ = 433
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -122,7 +122,7 @@ module View3D {
 }
 module View3D {
   internal  {
-    frame = "1102 -322 144 56"
+    frame = "1149 -322 144 56"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -155,12 +155,12 @@ module View3D {
     alphaFactor = 1
     colorFactor = "1 1 1"
     camType = TRUE
-    camPosition = "-57.123420715332 -179.371917724609 -831.085205078125"
-    camOrientation = "0.0556790269911289 0.986516714096069 -0.153898566961288 3.21871089935303"
+    camPosition = "-380.215270996094 468.943420410156 -98.1295471191406"
+    camOrientation = "-0.439336508512497 0.510508298873901 0.73916482925415 3.06187152862549"
     initialCameraOrientation = CAMERA_KEEP_AS_IS
-    camFar = 906.05579
-    camNear = 454.49869
-    camFocal = 680.05225
+    camFar = 789.57489
+    camNear = 371.14722
+    camFocal = 580.15234
     camHeight = 0.78539801
     decoration = FALSE
     hiResRendering = TRUE
@@ -209,13 +209,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 274
+    renderer.sizeOutputZ = 433
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 274
+    renderer.subVolumeEndZ = 433
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -292,7 +292,7 @@ module Arithmetic1 {
   fields  {
     instanceName = Arithmetic1
     function = Multiply
-    constant = 0
+    constant = 1
   }
 }
 module RegionGrowing {
@@ -316,7 +316,7 @@ module RegionGrowing {
     basicNeighborhoodType = BNBH_3D_6_XYZ
     extendedNeighborhoodType = ENBH_2D_4_XY
     useAdditionalSeed = TRUE
-    additionalSeed = "-10 -1 0 0 0 0"
+    additionalSeed = "246 511 0 0 0 0"
     additionalSeedType = 0
     additionalSeedCoordSystem = VoxelCoordinates
     initStackSizeTweak = 0.100000001490116
@@ -344,7 +344,7 @@ module RegionGrowing {
 }
 module StringUtils {
   internal  {
-    frame = "413 729 152 64"
+    frame = "493 641 152 64"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -357,8 +357,8 @@ module StringUtils {
   fields  {
     instanceName = Back_Center_Position
     operationType = Concatenate
-    string1 = -10
-    string2 = -1
+    string1 = 246
+    string2 = 511
     string3 = ""
     string4 = ""
     string5 = ""
@@ -394,7 +394,7 @@ module GetVoxelValue {
   }
   fields  {
     instanceName = Back_Center_Is_Air
-    position = "-10 -1 0 0 0 0"
+    position = "246 511 0 0 0 0"
     updateMode = AutoUpdate
     coordinateType = Voxel
   }
@@ -488,13 +488,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 274
+    renderer.sizeOutputZ = 433
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 274
+    renderer.subVolumeEndZ = 433
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -533,7 +533,7 @@ module StringUtils {
     instanceName = StringUtils3
     operationType = Concatenate
     string1 = $(NETWORK)/
-    string2 = ""
+    string2 = 1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd
     string3 = ""
     string4 = ""
     string5 = ""
@@ -561,7 +561,7 @@ module FieldIterator {
     moduleGroupName = ""
     windows  {
       window _default {
-        geometry = "1065 106 415 317"
+        geometry = "1063 105 415 317"
         sizeHint = "415 317"
         wasOpen = no
       }
@@ -570,17 +570,105 @@ module FieldIterator {
   fields  {
     instanceName = FieldIterator
     fieldNames = ""
-    fieldValues = ""
+    fieldValues = "1.3.6.1.4.1.14519.5.2.1.6279.6001.100684836163890911914061745866.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.104562737760173137525888934217.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.106719103982792863757268101375.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.108231420525711026834210228428.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.111017101339429664883879536171.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.113697708991260454310623082679.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.114218724025049818743426522343.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.121824995088859376862458155637.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.128059192202504367870633619224.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.128881800399702510818644205032.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.134370886216012873213579659366.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.139595277234735528205899724196.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.140527383975300992150799777603.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.144943344795414353192059796098.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.145759169833745025756371695397.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.146603910507557786636779705509.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.152684536713461901635595118048.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.161002239822118346732951898613.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.161073793312426102774780216551.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.162207236104936931957809623059.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.162718361851587451505896742103.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.162901839201654862079549658100.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.163994693532965040247348251579.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.168037818448885856452592057286.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.168605638657404145360275453085.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.169128136262002764211589185953.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.171919524048654494439256263785.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.173106154739244262091404659845.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.179049373636438705059720603192.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.179162671133894061547290922949.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.183184435049555024219115904825.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.183843376225716802567192412456.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.184019785706727365023450012318.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.186021279664749879526003668137.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.193408384740507320589857096592.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.193808128386712859512130599234.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.197987940182806628828566429132.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.200558451375970945040979397866.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.206539885154775002929031534291.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.208737629504245244513001631764.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.216652640878960522552873394709.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.222087811960706096424718056430.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.226456162308124493341905600418.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.231002159523969307155990628066.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.231834776365874788440767645596.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.243094273518213382155770295147.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.247769845138587733933485039556.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.250397690690072950000431855143.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.259018373683540453277752706262.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.259543921154154401875872845498.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.270390050141765094612147226290.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.272961322147784625028175033640.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.275766318636944297772360944907.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.282512043257574309474415322775.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.286647622786041008124419915089.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.287966244644280690737019247886.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.300271604576987336866436407488.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.306948744223170422945185006551.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.308183340111270052562662456038.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.309672797925724868457151381131.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.310395752124284049604069960014.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.314789075871001236641548593165.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.315214756157389122376518747372.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.325164338773720548739146851679.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.326057189095429101398977448288.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.331211682377519763144559212009.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.334105754605642100456249422350.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.335866409407244673864352309754.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.336894364358709782463716339027.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.458525794434429386945463560826.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.479402560265137632920333093071.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.503980049263254396021509831276.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.561458563853929400124470098603.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.616033753016904899083676284739.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.655242448149322898770987310561.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.663019255629770796363333877035.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.674809958213117379592437424616.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.690929968028676628605553365896.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.756684168227383088294595834066.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.768276876111112560631432843476.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.801945620899034889998809817499.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.802595762867498341201607992711.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.861997885565255340442123234170.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.888291896309937415860209787179.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.892375496445736188832556446335.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.910607280658963002048724648683.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.935683764293840351008008793409.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.952265563663939823135367733681.mhd
+1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd"
     fieldSeparator = [,;]
     valueSeparator = "\\n\\r|\\r\\n|[\\n\\r\\\\]"
     valueHeader = FALSE
     indexTranslation = 0
     newValueEnable = TRUE
     verbose = TRUE
-    curIndex = -1
-    delay = 30
+    curIndex = 88
+    delay = 15
     autoReset = FALSE
-    loop = TRUE
+    loop = FALSE
   }
 }
 module FileDirectory {
@@ -640,7 +728,7 @@ module OrthoView2D {
     enableSlicing = TRUE
     borderOn = TRUE
     borderColor = "0.899999976158142 0.899999976158142 0.899999976158142"
-    grayWidth = 1
+    grayWidth = 2
     grayCenter = 1
     annotationOn = TRUE
     annotationSizeMode = ANNO_SHOW_DETAILED
@@ -959,7 +1047,7 @@ module View2D {
     useShaders = TRUE
     useManagedInteraction = FALSE
     lutCenter = 0
-    lutWidth = 0
+    lutWidth = 2
     annotationOn = TRUE
     annotationMode = ANNO_MODE_AUTO
     annotationSizeMode = ANNO_SHOW_DETAILED
@@ -1045,7 +1133,7 @@ module RegionGrowing {
 }
 module Calculator {
   internal  {
-    frame = "273 581 96 56"
+    frame = "241 637 96 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1065,8 +1153,8 @@ module Calculator {
     exp6 = ""
     exp7 = ""
     exp8 = ""
-    i1 = 0
-    i2 = 0
+    i1 = 512
+    i2 = 512
     i3 = 0
     i4 = 0
     i5 = 0
@@ -1129,7 +1217,7 @@ module Calculator {
 }
 module StringUtils {
   internal  {
-    frame = "405 569 152 64"
+    frame = "493 569 152 64"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1142,8 +1230,8 @@ module StringUtils {
   fields  {
     instanceName = Back_Corner_Position
     operationType = Concatenate
-    string1 = -1
-    string2 = -1
+    string1 = 511
+    string2 = 511
     string3 = ""
     string4 = ""
     string5 = ""
@@ -1167,7 +1255,7 @@ module StringUtils {
 }
 module Info {
   internal  {
-    frame = "289 685 64 56"
+    frame = "241 709 64 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1183,7 +1271,7 @@ module Info {
 }
 module StringUtils {
   internal  {
-    frame = "161 381 96 56"
+    frame = "665 -3 96 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1197,7 +1285,7 @@ module StringUtils {
     instanceName = StringUtils1
     operationType = Concatenate
     string1 = $(NETWORK)/output/
-    string2 = ""
+    string2 = 1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd
     string3 = ""
     string4 = ""
     string5 = ""
@@ -1221,7 +1309,7 @@ module StringUtils {
 }
 module StringUtils {
   internal  {
-    frame = "157 469 88 56"
+    frame = "669 69 88 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1234,7 +1322,7 @@ module StringUtils {
   fields  {
     instanceName = StringUtils
     operationType = Substring
-    string1 = $(NETWORK)
+    string1 = $(NETWORK)/1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd
     string2 = ""
     string3 = ""
     string4 = ""
@@ -1259,7 +1347,7 @@ module StringUtils {
 }
 module itkImageFileWriter {
   internal  {
-    frame = "721 -507 128 56"
+    frame = "897 -499 128 56"
     moduleGroupName = ""
     windows  {
       window _default {
@@ -1275,13 +1363,13 @@ module itkImageFileWriter {
     correctSubVoxelShift = FALSE
     forceDirectionCosineWrite = TRUE
     outputVoxelType = int8
-    info = ""
-    unresolvedFileName = $(NETWORK)/output
+    info = "File saved successfully"
+    unresolvedFileName = $(NETWORK)/output/1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd
   }
 }
 module Arithmetic2 {
   internal  {
-    frame = "918 -326 112 64"
+    frame = "965 -326 112 64"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1301,7 +1389,7 @@ module Arithmetic2 {
 }
 module ConnectedComponents {
   internal  {
-    frame = "1070 -230 160 64"
+    frame = "1117 -230 160 64"
     moduleGroupName = "Lung fill"
     windows  {
       window _default {
@@ -1338,11 +1426,11 @@ module ConnectedComponents {
 }
 module itkImageFileReader {
   internal  {
-    frame = "221 829 136 56"
+    frame = "197 821 136 56"
     moduleGroupName = ""
     windows  {
       window _default {
-        geometry = "1242 318 299 395"
+        geometry = "750 105 299 395"
         sizeHint = "299 395"
         wasOpen = no
       }
@@ -1354,17 +1442,15 @@ module itkImageFileReader {
     autoDetermineDataType = FALSE
     correctSubVoxelShift = FALSE
     fileDimension = 3
-    info = " Could not create IO object for file D:/luna16
-The file couldn't be opened for reading. 
-Filename: D:/luna16
- Loaded data may be undefined."
-    numDims = 0
-    fileType = TypeNotApplicable
-    componentType = ""
-    pixelType = UNKNOWNPIXELTYPE
-    loaderType = ""
-    outputMetaDataStr = ""
-    unresolvedFileName = $(NETWORK)
+    info = "Loading okay."
+    numDims = 3
+    fileType = Binary
+    componentType = int16
+    pixelType = SCALAR
+    loaderType = MetaImageIO
+    outputMetaDataStr = "ITK_InputFilterName : MetaImageIO
+"
+    unresolvedFileName = $(NETWORK)/1.3.6.1.4.1.14519.5.2.1.6279.6001.970264865033574190975654369557.mhd
   }
 }
 module OrthoView2D {
@@ -1411,7 +1497,7 @@ module OrthoView2D {
 }
 module View3D {
   internal  {
-    frame = "1105 -27 144 56"
+    frame = "1149 -29 144 56"
     moduleGroupName = "Lung selection"
     windows  {
       window _default {
@@ -1498,13 +1584,13 @@ module View3D {
     renderer.light3PolarRho = 0
     renderer.sizeOutputX = 512
     renderer.sizeOutputY = 512
-    renderer.sizeOutputZ = 274
+    renderer.sizeOutputZ = 433
     renderer.subVolumeStartX = 0
     renderer.subVolumeStartY = 0
     renderer.subVolumeStartZ = 0
     renderer.subVolumeEndX = 512
     renderer.subVolumeEndY = 512
-    renderer.subVolumeEndZ = 274
+    renderer.subVolumeEndZ = 433
     clip.hideGeometry = FALSE
     clip.on = FALSE
     clip.left = FALSE
@@ -1529,7 +1615,7 @@ module View3D {
 }
 module ConnectedComponents {
   internal  {
-    frame = "913 65 160 64"
+    frame = "957 63 160 64"
     moduleGroupName = "Lung selection"
     windows  {
       window _default {
@@ -1635,7 +1721,7 @@ module RegionGrowing {
     basicNeighborhoodType = BNBH_3D_6_XYZ
     extendedNeighborhoodType = ENBH_2D_4_XY
     useAdditionalSeed = TRUE
-    additionalSeed = "-1 -1 0 0 0 0"
+    additionalSeed = "511 511 0 0 0 0"
     additionalSeedType = 0
     additionalSeedCoordSystem = VoxelCoordinates
     initStackSizeTweak = 0.100000001490116
