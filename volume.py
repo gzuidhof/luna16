@@ -38,7 +38,7 @@ if __name__ == "__main__":
     scores = joblib.load(DATA_PATH+'dice_scores.pkl')
 
     zp = zip(volumes, scores, test_images)
-    zp.sort(key=operator.itemgetter(0))
+    zp.sort(key=operator.itemgetter(1))
 
 
     #Determine failed segmentations
@@ -47,5 +47,10 @@ if __name__ == "__main__":
         return vol < 0.02
     failures = filter(is_failed, zp)
 
+    print "Sorted by score"
+    for x in zp:
+        print x
+
+    print "Failures:"
     for failure in failures:
         print failure
