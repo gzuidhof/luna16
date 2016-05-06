@@ -91,8 +91,20 @@ def determine_dice_scores():
 
     joblib.dump(scores, 'data/subset0/dice_scores.pkl')
 
+def normalize_slices_of_image(filename):
+    im = LoadImages.load_itk_image_rescaled(filename,slice_mm=1.0)
+    LoadImages.save_itk(im, filename.replace('output','rescaled'))
+    print im.shape
+
+def normalize_slices():
+    pool = Pool(processes=3)
+    pool.map(normalize_slices_of_image, test_images)
+    print "Done!"
+
 import SimpleITK as sitk
 if __name__ == "__main__":
+    normalize_slices()
+
     #determine_dice_scores()
     images = []
     for name in test_images:

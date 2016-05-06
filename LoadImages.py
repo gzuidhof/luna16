@@ -9,7 +9,6 @@ def load_itk_image(filename):
     numpyImage = sitk.GetArrayFromImage(itkimage)
     numpyOrigin = np.array(list(reversed(itkimage.GetOrigin())))
     numpySpacing = np.array(list(reversed(itkimage.GetSpacing())))
-    print numpySpacing
     return numpyImage, numpyOrigin, numpySpacing
 
 
