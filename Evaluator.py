@@ -37,7 +37,7 @@ def process_image(name, do_closing, closing_structure):
 
     return score
 
-if __name__ == "__main__":
+def determine_dice_scores():
     dice_scores = []
 
     #Let's multiprocess
@@ -90,3 +90,18 @@ if __name__ == "__main__":
     print "standard deviation: ",np.std(scores)
 
     joblib.dump(scores, 'data/subset0/dice_scores.pkl')
+
+import SimpleITK as sitk
+if __name__ == "__main__":
+    #determine_dice_scores()
+    images = []
+    for name in test_images:
+        print name
+        #try:
+        im = LoadImages.load_itk_image_rescaled(name,1)
+
+        LoadImages.save_itk(im, name.replace('output','rescaled'))
+        #images.append(im)
+        print im.shape
+        #except:
+            #print "Failed!"
