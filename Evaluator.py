@@ -31,6 +31,8 @@ def process_image(name, do_closing, closing_structure):
     if do_closing:
         image_train = binary_closing(image_train, closing_structure,1)
 
+    image_train = binary_closing(image_train, [[[1]],[[1]],[[1]],[[1]],[[1]]],1)
+
     score = calculate_dice(image_train,truth, name)
 
     return score
@@ -44,16 +46,47 @@ if __name__ == "__main__":
     #Take subset
     print "N images", len(test_images)
 
-    #for kernel_size in [3,5,7,9]:
-    for kernel_size in [7]:
 
-        process_func = partial(process_image, do_closing=True, closing_structure=np.ones((kernel_size,kernel_size,1)))
-        scores = pool.map(process_func, test_images)
+    kernel7 = np.array([[[0,0,1,1,1,0,0],
+            [0,1,1,1,1,1,0],
+            [1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1],
+            [0,1,1,1,1,1,0],
+            [0,0,1,1,1,0,0]]])
 
-        print "\n---"
-        print "Kernel size", kernel_size
-        print "mean: ",np.mean(scores)
-        print "median", np.median(scores)
-        print "standard deviation: ",np.std(scores)
+
+    kernel9 = np.array([[[0,0,0,1,1,1,0,0,0],
+                         [0,1,1,1,1,1,1,1,0],
+                         [0,1,1,1,1,1,1,1,0],
+                         [1,1,1,1,1,1,1,1,1],
+                         [1,1,1,1,1,1,1,1,1],
+                         [1,1,1,1,1,1,1,1,1],
+                         [0,1,1,1,1,1,1,1,0],
+                         [0,1,1,1,1,1,1,1,0],
+                         [0,0,0,1,1,1,0,0,0]]])
+
+    kernel12 = np.array([[[0,0,0,0,1,1,1,1,0,0,0,0],
+                     [0,0,1,1,1,1,1,1,1,1,0,0],
+                     [0,1,1,1,1,1,1,1,1,1,1,0],
+                     [0,1,1,1,1,1,1,1,1,1,1,0],
+                     [1,1,1,1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1,1,1,1],
+                     [1,1,1,1,1,1,1,1,1,1,1,1],
+                     [0,1,1,1,1,1,1,1,1,1,1,0],
+                     [0,1,1,1,1,1,1,1,1,1,1,0],
+                     [0,0,1,1,1,1,1,1,1,1,0,0],
+                     [0,0,0,0,1,1,1,1,0,0,0,0]]])
+
+    kernel = kernel9
+    process_func = partial(process_image, do_closing=True, closing_structure=kernel)
+    scores = pool.map(process_func, test_images)
+
+    print "\n---"
+    print "Kernel size", kernel.shape
+    print "mean: ",np.mean(scores)
+    print "median", np.median(scores)
+    print "standard deviation: ",np.std(scores)
 
     joblib.dump(scores, 'data/subset0/dice_scores.pkl')
