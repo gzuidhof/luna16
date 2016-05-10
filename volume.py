@@ -3,7 +3,8 @@ import numpy as np
 import LoadImages
 import glob
 import operator
-
+import Evaluator
+from skimage.draw import circle
 from functools import partial
 from multiprocessing import Pool
 
@@ -13,7 +14,8 @@ from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
 DATA_PATH = "data/subset0/"
-test_images = glob.glob(DATA_PATH + "output/*.mhd")
+test_images = glob.glob(DATA_PATH + "subset0mask/*.mhd")
+threshold = -350
 
 def process_image(name):
     image,_,_ = LoadImages.load_itk_image(name)
@@ -21,7 +23,31 @@ def process_image(name):
 
     return volume
 
+def process_failure(name):
+    name = name.replace("mask","truth")
+    name2 = name.replace("truth","")
+    image,_,_ = LoadImages.load_itk_image(name2)
+    #image_cropped = image[:,120:420,60:460]
+    image_mask = np.zeros(image.shape)
+    center = 256
+    cc,rr = circle(center+20,center,160)
+    image_mask[:,cc,rr] = 1
+    image[image>threshold]=0
+    image[image!=0]=1
+    image = image*image_mask
+    #image_cropped[image_cropped>threshold]=0
+    #image_cropped[image_cropped!=0]=1
 
+    kernel20 = np.zeros((19,19))
+    cc,rr = circle(9,9,10)
+    kernel20[cc,rr]=1
+    image = binary_closing(image, [kernel20],1)
+    #image[:,:,:]=0
+    #image[:,120:420,60:460]=image_cropped
+    truth,_,_ = LoadImages.load_itk_image(name)
+    print Evaluator.calculate_dice(image,truth,name)
+    image = np.array(image,dtype=np.int8)
+    LoadImages.save_itk(image,"failure_boxed.mhd")
 
 if __name__ == "__main__":
 
@@ -54,3 +80,4 @@ if __name__ == "__main__":
     print "Failures:"
     for failure in failures:
         print failure
+        process_failure(failure[2])
