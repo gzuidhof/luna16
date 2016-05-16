@@ -1,7 +1,9 @@
 import SimpleITK as sitk
 import numpy as np
 import normalize as norm
-from IPython.core.display import Image, display
+from skimage import filters
+from skimage import exposure
+from skimage import feature
 import matplotlib.pyplot as plt
 
 def return_surrounding(coords, image_array, radius):
@@ -18,19 +20,40 @@ def load_itk_image(filename):
 
     return numpy_image, numpy_origin, numpy_spacing
 
-
-
 def show_images(images):
     for image in images:
         plt.figure()
-        plt.imshow(image)
+        plt.imshow(image, cmap='Greys_r')
     plt.show()
 
+def threshold_by_histogram(image):
+    val = filters.threshold_otsu(image)
+    return image < val
+
+def label_image(image):
+    l = 4
+    n = 20
+    image = filters.gaussian(image, sigma=l / (4. * n))
+    blobs = image > image.mean()
+    return blobs
 
 img_path    =   '1.3.6.1.4.1.14519.5.2.1.6279.6001.100332161840553388986847034053.mhd'
 numpy_image, numpy_origin, numpy_spacing = load_itk_image(img_path)
-slice = numpy_image[240,:,:]
-normalized = norm.normalize(return_surrounding([240,240,240],numpy_image, 240))
-show_images([slice,normalized])
+print "loaded image"
+# slice = numpy_image[240,:,:]
+# normalized = norm.normalize(return_surrounding([240,240,240],numpy_image, 240))
+# thresholded = threshold_by_histogram(normalized)
+# blobs = label_image(thresholded)
+# show_images([blobs, normalized, thresholded])
 
-
+# normalized3d = norm.normalize(numpy_image)
+# thresholded3d = threshold_by_histogram(normalized3d)
+list = []
+image = threshold_by_histogram(norm.normalize(numpy_image))
+print "normalized and thresholded"
+for slice in image:
+    blob = feature.blob_doh(slice)
+    print blob.shape
+    list.append(blob)
+# blobs_log = feature.blob_log(thresholded3d)
+# print blobs_log
