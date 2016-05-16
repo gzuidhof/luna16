@@ -5,6 +5,8 @@ from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from tqdm import tqdm
 
+CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
+
 
 #Merge candidates of a single scan
 def merge_candidates_scan(candidates, seriesuid, distance=5.):
@@ -32,7 +34,7 @@ def merge_candidates_scan(candidates, seriesuid, distance=5.):
 
     data= zip(labels,x,y,z,class_name)
 
-    new_candidates = pd.DataFrame(data,columns=['seriesuid','coordX','coordY','coordZ','class'])
+    new_candidates = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
 
     return new_candidates
 
@@ -62,7 +64,6 @@ def load_candidates(filename, as_coords=False):
     candidates = pd.read_csv(filename)
     return candidates
 
-
 # Save candidates given filename and pandas dataframe
 # Dataframe with columns:
 # seriesuid, coordX, coordY, coordZ, class
@@ -70,8 +71,19 @@ def load_candidates(filename, as_coords=False):
 def save_candidates(filename, df_candidates):
     df_candidates.to_csv(filename, index=False)
 
+def coords_to_candidates(coords, seriesuid):
+    x = coords[:,0]
+    y = coords[:,1]
+    z = coords[:,2]
+    names = [seriesuid]*len(x)
+    class_name = [0]*len(x)
+
+    data = zip(names,x,y,z,class_name)
+    candidates = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
+    return candidates
+
 if __name__ == "__main__":
 
-    df = load_candidates('../data/candidates.csv')
-    new_candidates = merge_candidates(df)
-    save_candidates('test.csv', new_candidates)
+    #df = load_candidates('../data/candidates.csv')
+    #new_candidates = merge_candidates(df)
+    #save_candidates('test.csv', new_candidates)
