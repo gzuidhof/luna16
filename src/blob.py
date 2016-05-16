@@ -53,10 +53,6 @@ def blob_image(image):
     #print "normalized and thresholded"
 
     for z, slice in tqdm(enumerate(image)):
-        #if z > 5:
-        #    blobs=[]
-        #print slice
-        #else:
         blobs = feature.blob_doh(slice)
         #print blobs.shape
         #print blobs
