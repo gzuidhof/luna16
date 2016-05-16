@@ -61,6 +61,16 @@ def merge_candidates(df_candidates, distance=5.):
     return new_candidates
 
 
+def world_2_voxel(worldCoord, origin, spacing):
+    stretchedVoxelCoord = np.absolute(worldCoord - origin)
+    voxelCoord = stretchedVoxelCoord / spacing
+    return voxelCoord
+
+def voxel_2_world(voxelCoord, origin, spacing):
+    stretchedVoxelCoord = voxelCoord * spacing
+    worldCoord = stretchedVoxelCoord + origin
+    return worldCoord
+
 def load_candidates(filename, as_coords=False):
     candidates = pd.read_csv(filename)
     return candidates
