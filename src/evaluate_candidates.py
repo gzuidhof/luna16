@@ -4,7 +4,7 @@ import numpy as np
 global annotations
 
 def check_coordinates(image_coord,candidate):
-    diameter = candidate[4]*100
+    diameter = candidate[4]
     coord_x = candidate[1]
     coord_y = candidate[2]
     coord_z = candidate[3]
