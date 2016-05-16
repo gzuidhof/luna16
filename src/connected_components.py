@@ -58,6 +58,7 @@ def blob_image(filename):
 
     for z, slice in tqdm(enumerate(image)):
         #print slice
+        #blobs = feature.blob_log(slice)
         blobs = feature.blob_doh(slice)
         #print blobs.shape
         #print blobs

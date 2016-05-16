@@ -5,6 +5,7 @@ from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from tqdm import tqdm
 import connected_components
+import pickle
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
 
@@ -101,3 +102,5 @@ if __name__ == "__main__":
 
 
     coords = connected_components.blob_image('../data/hoi.mhd')
+    with open('../data/hoi_coords.pkl','w') as f:
+        pickle.dump(coords, f)
