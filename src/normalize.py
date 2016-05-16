@@ -1,7 +1,7 @@
 import numpy as np
 
-MIN_BOUND = -1000
-MAX_BOUND = 400
+MIN_BOUND = -1000.0
+MAX_BOUND = 400.0
 
 def normalize(image):
     image = (image - MIN_BOUND) / (MAX_BOUND - MIN_BOUND)
