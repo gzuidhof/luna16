@@ -41,7 +41,7 @@ def merge_candidates(df_candidates, distance=5.):
         candidates[:,2]=z
 
         new = merge_candidates_scan(candidates, distance)
-        new_candidates = np.append(new_candidates, new)
+        new_candidates = np.append(new_candidates, new,axis=0)
 
     print new_candidates
 
