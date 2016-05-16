@@ -4,8 +4,10 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from tqdm import tqdm
-import connected_components
+import blob
 import pickle
+
+from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
 
@@ -101,6 +103,33 @@ if __name__ == "__main__":
     #save_candidates('test.csv', new_candidates)
 
 
-    coords = connected_components.blob_image('../data/hoi.mhd')
-    with open('../data/hoi_coords.pkl','w') as f:
-        pickle.dump(coords, f)
+    #coords = blob.blob_image('../data/hoi.mhd')
+    #with open('../data/hoi_coords.pkl','w') as f:
+    #    pickle.dump(coords, f)
+    with open('../data/hoi_coords.pkl','r') as f:
+        candidates = pickle.load(f)
+
+    coords = []
+    #coords = [y for y in [x for x in candidates]]
+
+    #slice, blob, xyz
+
+    for slice in candidates:
+        #print slice
+        for blob in slice:
+            coords.append(blob)
+    #print coords
+
+    image, origin, spacing = load_itk_image('../data/hoi.mhd')
+
+    world_coords = np.array([voxel_2_world(y,origin,spacing) for y in coords])
+
+    #print world_coords
+
+
+    candidates = coords_to_candidates(world_coords, '1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260')
+    print len(candidates)
+    candidates = merge_candidates(candidates)
+    print len(candidates)
+
+    save_candidates('../data/hoi_candidates.csv', candidates)
