@@ -4,6 +4,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from tqdm import tqdm
+import connected_components
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
 
@@ -87,3 +88,6 @@ if __name__ == "__main__":
     #df = load_candidates('../data/candidates.csv')
     #new_candidates = merge_candidates(df)
     #save_candidates('test.csv', new_candidates)
+
+
+    coords = connected_components.blob_image('../data/hoi.mhd')
