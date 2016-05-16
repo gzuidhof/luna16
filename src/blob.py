@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 import normalize as norm
-from skimage import filters
+from skimage import filter as filters
 from skimage import exposure
 from skimage import feature
 import matplotlib.pyplot as plt
@@ -38,11 +38,9 @@ def label_image(image):
     blobs = image > image.mean()
     return blobs
 
-def blob_image(filename):
+def blob_image(image):
     #img_path    =   '../1.3.6.1.4.1.14519.5.2.1.6279.6001.100332161840553388986847034053.mhd'
-    img_path = filename
-
-    numpy_image, numpy_origin, numpy_spacing = load_itk_image(img_path)
+    numpy_image = image
     print "loaded image"
     # slice = numpy_image[240,:,:]
     # normalized = norm.normalize(return_surrounding([240,240,240],numpy_image, 240))
