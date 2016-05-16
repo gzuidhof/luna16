@@ -1,4 +1,4 @@
-import candidates
+import candidates as ca
 import numpy as np
 
 global annotations
@@ -52,7 +52,7 @@ def run(candidates):
     #print is_candidate([-130,-177,-299],"1.3.6.1.4.1.14519.5.2.1.6279.6001.100225287222365663678666836860")
     #candidates = candidates.load_candidates("../data/annotations/candidates.csv")
 
-    annotations = candidates.load_candidates("../data/annotations.csv")
+    annotations = ca.load_candidates("../data/annotations.csv")
     #candidates = candidates.load_candidates("../data/hoi_candidates.csv")
     train_candidates = []
     for object in candidates:
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     #candidates = candidates.load_candidates("../data/annotations/candidates.csv")
 
     annotations = candidates.load_candidates("../data/annotations.csv")
-    candidates = candidates.load_candidates("../data/hoi_candidates.csv")
+    candidates = ca.load_candidates("../data/hoi_candidates.csv")
     train_candidates = []
     for object in candidates.values:
         train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})

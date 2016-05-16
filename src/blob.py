@@ -40,8 +40,6 @@ def label_image(image):
 
 def blob_image(image):
     #img_path    =   '../1.3.6.1.4.1.14519.5.2.1.6279.6001.100332161840553388986847034053.mhd'
-    numpy_image = image
-    print "loaded image"
     # slice = numpy_image[240,:,:]
     # normalized = norm.normalize(return_surrounding([240,240,240],numpy_image, 240))
     # thresholded = threshold_by_histogram(normalized)
@@ -51,11 +49,14 @@ def blob_image(image):
     # normalized3d = norm.normalize(numpy_image)
     # thresholded3d = threshold_by_histogram(normalized3d)
     list = []
-    image = norm.normalize(numpy_image)
-    print "normalized and thresholded"
+    image = norm.normalize(image)
+    #print "normalized and thresholded"
 
     for z, slice in tqdm(enumerate(image)):
+        #if z > 5:
+        #    blobs=[]
         #print slice
+        #else:
         blobs = feature.blob_doh(slice)
         #print blobs.shape
         #print blobs
