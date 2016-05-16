@@ -22,7 +22,3 @@ def load_itk_image_rescaled(filename, slice_mm):
 def save_itk(image, filename):
     im = sitk.GetImageFromArray(image, isVector=False)
     sitk.WriteImage(im, filename, True)
-
-def load_candidates(filename):
-    list = pandas.read_csv(filename)
-    return list
