@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-import LoadImages
+import image_read_write
 import glob
 
 from functools import partial
@@ -9,8 +9,8 @@ from sklearn.externals import joblib
 
 from scipy.ndimage import binary_closing, binary_dilation, binary_erosion
 
-DATA_PATH = "data/subset0/"
-test_images = glob.glob(DATA_PATH + "output/*.mhd")
+DATA_PATH = "data/subset1/"
+test_images = glob.glob(DATA_PATH + "subset1mask/*.mhd")
 
 
 def calculate_dice(train,truth,filename):
@@ -23,9 +23,9 @@ def calculate_dice(train,truth,filename):
 
 
 def process_image(name, do_closing, closing_structure):
-    image_train,_,_ = LoadImages.load_itk_image(name)
-    name = name.replace("output","truth")
-    image_truth,_,_ = LoadImages.load_itk_image(name)
+    image_train,_,_ = image_read_write.load_itk_image(name)
+    name = name.replace("mask","truth")
+    image_truth,_,_ = image_read_write.load_itk_image(name)
     truth = np.zeros(image_truth.shape, dtype=np.uint8)
     truth[image_truth >0]=1
     if do_closing:
@@ -89,11 +89,11 @@ def determine_dice_scores():
     print "median", np.median(scores)
     print "standard deviation: ",np.std(scores)
 
-    joblib.dump(scores, 'data/subset0/dice_scores.pkl')
+    joblib.dump(scores, 'data/subset1/dice_scores.pkl')
 
 def normalize_slices_of_image(filename):
-    im = LoadImages.load_itk_image_rescaled(filename,slice_mm=1.0)
-    LoadImages.save_itk(im, filename.replace('output','rescaled'))
+    im = image_read_write.load_itk_image_rescaled(filename,slice_mm=1.0)
+    image_read_write.save_itk(im, filename.replace('output','rescaled'))
     print im.shape
 
 def normalize_slices():
@@ -103,17 +103,17 @@ def normalize_slices():
 
 import SimpleITK as sitk
 if __name__ == "__main__":
-    normalize_slices()
+    #normalize_slices()
 
-    #determine_dice_scores()
-    images = []
-    for name in test_images:
-        print name
-        #try:
-        im = LoadImages.load_itk_image_rescaled(name,1)
-
-        LoadImages.save_itk(im, name.replace('output','rescaled'))
-        #images.append(im)
-        print im.shape
-        #except:
-            #print "Failed!"
+    determine_dice_scores()
+    # images = []
+    # for name in test_images:
+    #     print name
+    #     #try:
+    #     im = LoadImages.load_itk_image_rescaled(name,1)
+    #
+    #     LoadImages.save_itk(im, name.replace('output','rescaled'))
+    #     #images.append(im)
+    #     print im.shape
+    #     #except:
+    #         #print "Failed!"
