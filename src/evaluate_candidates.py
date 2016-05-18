@@ -64,7 +64,7 @@ def run(candidates):
 
     #print candidates
     for object in candidates.values:
-        train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
+        train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
     evaluate(train_candidates)
 
 
