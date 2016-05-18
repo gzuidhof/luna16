@@ -23,7 +23,7 @@ def load_data(image_names):
 if __name__ == "__main__":
     for subset in xrange(0,1):
         #image_names = glob.glob("../data/subset{}/subset{}/*.mhd".format(subset,subset))
-        image_names = glob.glob("../data/subset{0}_rescaled/*.mhd".format(subset,subset))[1:30]
+        image_names = glob.glob("../data/subset0/*.mhd")[1:30]
         images,origins,spacings = load_data(image_names)
 
         blob_images = []
