@@ -2,13 +2,7 @@ from __future__ import division
 import numpy as np
 import image_read_write
 import glob
-import operator
-from skimage.draw import circle
-from functools import partial
-from multiprocessing import Pool
 import candidates
-from scipy.ndimage import binary_closing
-from sklearn.externals import joblib
 import os
 import create_lung_segmented_same_spacing_data
 import matplotlib.pyplot as plt
@@ -22,12 +16,12 @@ def draw_circles(image,cands,origin,spacing):
         coord_x = ca[3]
         coord_y = ca[2]
         coord_z = ca[1]
-        print diameter
+        #print diameter
 
         image_coord = np.array((coord_x,coord_y,coord_z))
         #print ca
         image_coord = candidates.world_2_voxel(image_coord,origin,spacing)
-        print image_coord
+        #print image_coord
         #print image_coord
 
         #print np.linalg.norm(image_coord-coords)
@@ -49,12 +43,14 @@ def draw_circles(image,cands,origin,spacing):
     #image_read_write.save_itk(image_mask,"../data/circle_sample.mhd")
 
 if __name__ == "__main__":
-    cads = candidates.load_candidates("../data/annotations.csv")
-    index = 1
-    image_names = glob.glob("../data/subset0/*.mhd")[0:30]
-    image,origin,spacing = image_read_write.load_itk_image(image_names[index])
-    name = os.path.split(image_names[index])[1].replace('.mhd','')
-    image_cads = cads[cads['seriesuid'] == name]
-    print name
-    image_mask=draw_circles(image,image_cads,origin,spacing)
-    #create_lung_segmented_same_spacing_data.save_itk(image_mask,origin,spacing,"../data/circle_sample.mhd")
+    for i in xrange(0,2):
+        cads = candidates.load_candidates("../data/annotations.csv")
+        #index = 2
+        image_names = glob.glob("../data/subset{}/*.mhd".format(i))
+        for image_name in image_names:
+            image,origin,spacing = image_read_write.load_itk_image(image_name)
+            name = os.path.split(image_name)[1].replace('.mhd','')
+            image_cads = cads[cads['seriesuid'] == name]
+            print name
+            image_mask=draw_circles(image,image_cads,origin,spacing)
+            create_lung_segmented_same_spacing_data.save_itk(image_mask,origin,spacing,"../data/annotation_masks/subset{}/{}.mhd".format(i,name))

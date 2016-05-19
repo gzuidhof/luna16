@@ -1,7 +1,11 @@
 import candidates as ca
 import numpy as np
 
-global annotations
+
+annotations = ca.load_candidates("../data/annotations.csv")
+found_candidates = np.zeros((len(annotations),1))
+nr_candidates = 0
+nr_annotations = 0
 
 def check_coordinates(image_coord,candidate):
     diameter = candidate[4]
@@ -21,10 +25,9 @@ def check_coordinates(image_coord,candidate):
     return False
 
 
-def is_candidate(image_coord,image_name):
+def is_candidate(image_coord,image_annotations):
     #print annotations['seriesuid']
     #print image_name
-    image_annotations = annotations[annotations['seriesuid'] == image_name]
 
     #print "Amount of actual nodules:",len(image_annotations.values)
     #if len(image_annotations.values) > 0:
@@ -37,28 +40,32 @@ def is_candidate(image_coord,image_name):
 
 
 def evaluate(train_candidates):
-    found_candidates = np.zeros((len(annotations),1))
+    global annotations
     #found_candidates = 0
     #print found_candidates.shape
+    global nr_annotations
+    global nr_candidates
+    image_annotations = annotations[annotations['seriesuid'] == train_candidates[0]["image_name"]]
+    nr_annotations += len(image_annotations)
+    nr_candidates += len(train_candidates)
     for candidate in train_candidates:
         #print candidate
-        can =  is_candidate(candidate["image_coord"],candidate["image_name"])
+        can =  is_candidate(candidate["image_coord"],image_annotations)
         if can is not False:
             index = np.where(annotations.values==can.all())[0]
             found_candidates[index] = 1
 
-    print "recall",float(np.sum(found_candidates))/len(annotations)
-    print "precision",float(np.sum(found_candidates))/len(train_candidates)
+    if nr_annotations != 0:
+        print "recall",float(np.sum(found_candidates))/nr_annotations
+        print "precision",float(np.sum(found_candidates))/nr_candidates
 
 
 
 def run(candidates):
-    global annotations
+
     #annotations = candidates.load_candidates("../data/annotations/annotations.csv")
     #print is_candidate([-130,-177,-299],"1.3.6.1.4.1.14519.5.2.1.6279.6001.100225287222365663678666836860")
     #candidates = candidates.load_candidates("../data/annotations/candidates.csv")
-
-    annotations = ca.load_candidates("../data/annotations.csv")
     #candidates = candidates.load_candidates("../data/hoi_candidates.csv")
     train_candidates = []
 

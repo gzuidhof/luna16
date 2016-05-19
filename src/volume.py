@@ -3,7 +3,6 @@ import numpy as np
 import image_read_write
 import glob
 import operator
-import evaluator
 from skimage.draw import circle
 from functools import partial
 from multiprocessing import Pool
