@@ -7,6 +7,7 @@ from skimage import exposure
 from skimage import feature
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import math
 
 def return_surrounding(coords, image_array, radius):
     patch = image_array[coords[0], coords[1]-radius:coords[1]+radius, coords[2]-radius:coords[2]+radius]
@@ -55,35 +56,6 @@ def blob_image_multiscale2(image, type=0):
             if type == 2:
                 featureblobs.append(feature.blob_log(slice, 2**x, 2**(x+1)))
         # init list of blob coords
-        blob_coords = np.zeros((len(featureblobs[0]),4))
-        # start at biggest blob size
-        for featureblob in reversed(featureblobs):
-            i = 0
-            # for every blob found of a blobsize
-            for blob in enumerate(featureblob):
-                # if that blob is not within range of another blob, add it
-                if(not within_range(blob, blob_coords)):
-                    blob_coords[i] = [z, blob[0], blob[1], blob[2]]
-                    i = i + 1
-        list.append(blob_coords[0:3])
-    return list
-
-def blob_image_multiscale3(image, type=0):
-    # function that return a list of blob_coordinates, 0 = dog, 1 = doh, 2 = log
-    list = []
-    image = norm.normalize(image)
-    for z, slice in tqdm(enumerate(image)):
-        # init list of different sigma/zoom blobs
-        featureblobs = []
-        # x = 0,1,2
-        for x in xrange(3):
-            if type == 0:
-                featureblobs[x] = feature.blob_dog(slice, 3^x, 3^(x+1))
-            if type == 1:
-                featureblobs[x] = feature.blob_doh(slice, 3^x, 3^(x+1))
-            if type == 2:
-                featureblobs[x] = feature.blob_log(slice, 3^x, 3^(x+1))
-        # init list of blob coords
         blob_coords = []
         # start at biggest blob size
         for featureblob in reversed(featureblobs):
@@ -95,11 +67,12 @@ def blob_image_multiscale3(image, type=0):
         list.append(blob_coords[0:3])
     return list
 
+
 def within_range(blob, blob_coords):
-    if blob_coords:
+    if blob_coords is not []:
         for coords in blob_coords:
             print (blob[0] - coords[1])**2
-            if((blob[0] - coords[1])**2) + (blob[1] - coords[2])**2 < coords[3]**2:
+            if math.pow(blob[0] - coords[1],2) + math.pow(blob[1] - coords[2],2) < math.pow(coords[3],2):
                 return 1
     return 0
 
@@ -126,4 +99,32 @@ def blob_image(image):
         list.append(blob_coords)
 
     #print list
+    return list
+
+
+def blob_image_multiscale3(image, type=0):
+    # function that return a list of blob_coordinates, 0 = dog, 1 = doh, 2 = log
+    list = []
+    image = norm.normalize(image)
+    for z, slice in tqdm(enumerate(image)):
+        # init list of different sigma/zoom blobs
+        featureblobs = []
+        # x = 0,1,2
+        for x in xrange(3):
+            if type == 0:
+                featureblobs[x] = feature.blob_dog(slice, 3^x, 3^(x+1))
+            if type == 1:
+                featureblobs[x] = feature.blob_doh(slice, 3^x, 3^(x+1))
+            if type == 2:
+                featureblobs[x] = feature.blob_log(slice, 3^x, 3^(x+1))
+        # init list of blob coords
+        blob_coords = []
+        # start at biggest blob size
+        for featureblob in reversed(featureblobs):
+            # for every blob found of a blobsize
+            for blob in enumerate(featureblob):
+                # if that blob is not within range of another blob, add it
+                if not within_range(blob, blob_coords):
+                    blob_coords.append([z, blob[0], blob[1], blob[2]])
+        list.append(blob_coords[0:3])
     return list
