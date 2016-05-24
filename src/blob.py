@@ -64,7 +64,7 @@ def blob_image_multiscale2(image, type=0,scale=2):
                 if type == 1:
                     featureblobs.append(feature.blob_doh(slice, 2**x, 2**(x+1)))
                 if type == 2:
-                    featureblobs.append(feature.blob_log(slice, 2**x, 2**(x+1)))
+                    featureblobs.append(feature.blob_log(slice, 2**x, 2**(x+1),16,.1))
         else:
             for x in xrange(0,4):
                 if type == 0:

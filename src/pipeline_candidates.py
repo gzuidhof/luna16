@@ -23,8 +23,8 @@ def load_data(image_names):
 
 if __name__ == "__main__":
     for subset in xrange(0,1):
-        #image_names = glob.glob("../data/subset{}/subset{}/*.mhd".format(subset,subset))
-        image_names = glob.glob("../data/subset0_rescaled/subset0/*.mhd")[3:30]
+        #image_names = glob.glob("../data/subset{}/*.mhd".format(subset,subset))
+        image_names = glob.glob("data/subset0/*.mhd")
         images,origins,spacings = load_data(image_names)
 
         blob_images = []
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
             #candidates = ca.merge_candidates(candidates)
             #print len(candidates)
-            ca.save_candidates("../data/blob_candidates/{0}.csv".format(name), candidates)
+            ca.save_candidates("data/blob_candidates/{0}.csv".format(name), candidates)
             #image_read_write.save_candidates('../data/blob_candidates/', candidates)
 
             evaluate_candidates.run(candidates)

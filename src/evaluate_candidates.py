@@ -2,7 +2,7 @@ import candidates as ca
 import numpy as np
 
 
-annotations = ca.load_candidates("../data/annotations.csv")
+annotations = ca.load_candidates("../../CSVFILES/CSVFILES/annotations.csv")
 found_candidates = np.zeros((len(annotations),1))
 nr_candidates = 0
 nr_annotations = 0
