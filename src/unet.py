@@ -212,7 +212,7 @@ if __name__ == "__main__":
     network = net_dict['out']
 
     params = lasagne.layers.get_all_params(network, trainable=True)
-    loss_weighing = target_var*10+1
+    loss_weighing = target_var*1750+1
 
 
     prediction = lasagne.layers.get_output(network)
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                       dtype=theano.config.floatX)
 
     updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=0.0001, momentum=0.99)
+            loss, params, learning_rate=0.01, momentum=0.99)
 
 
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
@@ -267,8 +267,8 @@ if __name__ == "__main__":
     filenames_val = filenames[600:]
     filenames_test = filenames_val
 
-    filenames_train = filenames_train[:500]
-    filenames_val = filenames_val[:100]
+    filenames_train = filenames_train[:4]
+    filenames_val = filenames_val[:6]
     filenames_test = filenames_test[100:200]
 
     num_epochs = 400
