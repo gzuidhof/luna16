@@ -53,7 +53,7 @@ class ParallelBatchIterator(object):
 		job_queue.close()
 
 	def __len__(self):
-		return len(self.X)
+		return len(self.X)/self.batch_size
 
 	def _start_producers(self, result_queue):
 		jobs = Queue()
