@@ -1,3 +1,4 @@
+from __future__ import division
 import time
 import numpy as np
 
@@ -10,6 +11,7 @@ from lasagne.init import GlorotUniform
 from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer
 from lasagne.regularization import regularize_layer_params_weighted, l2, l1
+from lasagne.layers import autocrop
 
 from tqdm import tqdm
 
@@ -169,8 +171,11 @@ if __name__ == "__main__":
     loss = loss * loss_weighing
     loss = loss.mean()
 
+    acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+                      dtype=theano.config.floatX)
+
     updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=0.01, momentum=0.99)
+            loss, params, learning_rate=0.0001, momentum=0.99)
 
 
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
@@ -186,20 +191,20 @@ if __name__ == "__main__":
 
 
     print "Defining train function"
-    train_fn = theano.function([input_var, target_var], loss, updates=updates)
+    train_fn = theano.function([input_var, target_var],[loss, acc], updates=updates)
 
     print "Defining validation function"
     val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
 
 
-    X_train = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)
+    X_train = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
     y_train = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
 
-    X_val = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)
+    X_val = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
     y_val = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
 
-    X_test = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)
+    X_test = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
     y_test = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
 
     num_epochs = 100
@@ -210,11 +215,14 @@ if __name__ == "__main__":
     for epoch in range(num_epochs):
         # In each epoch, we do a full pass over the training data:
         train_err = 0
+        train_acc = 0
         train_batches = 0
         start_time = time.time()
         for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
             inputs, targets = batch
-            train_err += train_fn(inputs, targets)
+            err, acc = train_fn(inputs, targets)
+            train_err += err
+            train_acc += acc
             train_batches += 1
             #print "batcheroo"
 
@@ -224,8 +232,6 @@ if __name__ == "__main__":
         val_batches = 0
         for batch in iterate_minibatches(X_val, y_val, 2, shuffle=False):
             inputs, targets = batch
-            print inputs.shape
-            print targets.shape
             err, acc = val_fn(inputs, targets)
             val_err += err
             val_acc += acc
@@ -235,6 +241,7 @@ if __name__ == "__main__":
         print("Epoch {} of {} took {:.3f}s".format(
             epoch + 1, num_epochs, time.time() - start_time))
         print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
+        print("  training accuracy:\t\t{:.2f} %".format(train_acc / train_batches))
         print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
         print("  validation accuracy:\t\t{:.2f} %".format(
             val_acc / val_batches * 100))
