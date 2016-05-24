@@ -148,7 +148,7 @@ def define_network(input_var, target_var):
                                     nonlinearity=nonlinearities.rectify)
 
     # Output layer
-    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=2, filter_size=(1,1), pad=0,
+    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=1, filter_size=(1,1), pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
@@ -197,6 +197,8 @@ def load_slice_multiple(filenames):
     slices = map(load_slice, filenames)
     lungs, truths = zip(*slices)
 
+    #print np.concatenate(lungs,axis=0).shape
+
     return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0)
 
 
@@ -210,23 +212,26 @@ if __name__ == "__main__":
     network = net_dict['out']
 
     params = lasagne.layers.get_all_params(network, trainable=True)
-    loss_weighing = target_var*100+1
+    loss_weighing = target_var*10+1
 
 
     prediction = lasagne.layers.get_output(network)
     #loss = lasagne.objectives.binary_crossentropy(T.clip(prediction,0.001,0.999), target_var)
-    e = T.exp(prediction)
-    softmax = (e / T.stack([e.sum(axis=1),e.sum(axis=1)], axis=1))[:,0,:,:]
+    #e = T.exp(prediction)
+    #softmax = e[:,0,:,:]
+    #softmax = (e / T.stack([e.sum(axis=1),e.sum(axis=1)], axis=1))[:,0,:,:]
+    #print softmax.shape
 
-    loss = lasagne.objectives.binary_crossentropy(softmax, target_var)
+    #loss = lasagne.objectives.binary_crossentropy(softmax, target_var)
+    loss = lasagne.objectives.squared_error(prediction, target_var)
     loss = loss * loss_weighing
     loss = loss.mean()
 
 
-    acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var),
-                      dtype=theano.config.floatX)
-    #acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+    #acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var),
     #                  dtype=theano.config.floatX)
+    acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+                      dtype=theano.config.floatX)
 
     updates = lasagne.updates.nesterov_momentum(
             loss, params, learning_rate=0.0001, momentum=0.99)
@@ -235,17 +240,18 @@ if __name__ == "__main__":
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
 
 
-    e_test = T.exp(test_prediction)
-    softmax_test = (e_test / T.stack([e_test.sum(axis=1),e_test.sum(axis=1)], axis=1))[:,0,:,:]
+    #e_test = T.exp(test_prediction)
+    #softmax_test = (e_test / T.stack([e_test.sum(axis=1),e_test.sum(axis=1)], axis=1))
 
-    test_loss = lasagne.objectives.binary_crossentropy(softmax_test, target_var)
+    #test_loss = lasagne.objectives.binary_crossentropy(softmax_test, target_var)
+    test_loss = lasagne.objectives.squared_error(test_prediction, target_var)
     #test_loss = lasagne.objectives.binary_crossentropy(T.clip(test_prediction,0.001,0.999), target_var)
     test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
-    test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
-                      dtype=theano.config.floatX)
-    #test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
+    #test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
     #                  dtype=theano.config.floatX)
+    test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
+                      dtype=theano.config.floatX)
 
 
     print "Defining train function"
@@ -261,7 +267,7 @@ if __name__ == "__main__":
     filenames_val = filenames[600:]
     filenames_test = filenames_val
 
-    filenames_train = filenames_train[:100]
+    filenames_train = filenames_train[:500]
     filenames_val = filenames_val[:100]
     filenames_test = filenames_test[100:200]
 
@@ -279,11 +285,14 @@ if __name__ == "__main__":
 
         np.random.shuffle(filenames_train)
         #filenames_train = shuffle(filenames_train)
-        train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True, batch_size=1)
+        #train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True, batch_size=1)
+        train_gen = ParallelBatchIterator(load_slice_multiple, filenames_train, ordered=True, batch_size=4)
 
         #for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
-        for batch in train_gen:
+        for batch in tqdm(train_gen):
             inputs, targets = batch
+            #print inputs.shape
+            #print targets.shape
             err, acc = train_fn(inputs, targets)
             train_err += err
             train_acc += acc
@@ -298,7 +307,7 @@ if __name__ == "__main__":
         #val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=2)
         val_gen = ParallelBatchIterator(load_slice, filenames_val, ordered=True, batch_size=1)
 
-        for batch in val_gen:
+        for batch in tqdm(val_gen):
             inputs, targets = batch
             err, acc = val_fn(inputs, targets)
             val_err += err
