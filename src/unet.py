@@ -28,6 +28,12 @@ from parallel import ParallelBatchIterator
 INPUT_SIZE = 572
 OUTPUT_SIZE = 388
 
+FILTER_STEP1 = 16
+FILTER_STEP2 = 32
+FILTER_STEP3 = 64
+FILTER_STEP4 = 128
+FILTER_STEP5 = 256
+
 def define_network(input_var, target_var):
     batch_size = None
     net = {}
@@ -36,95 +42,95 @@ def define_network(input_var, target_var):
 
     #First step
     net['conv1_1'] = Conv2DLayer(net['input'],
-                                num_filters=64, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP1, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['conv1_2'] = Conv2DLayer(net['conv1_1'],
-                                num_filters=64, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP1, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['pool1'] = MaxPool2DLayer(net['conv1_2'], pool_size=2, stride=2)
 
     # Second step
     net['conv2_1'] = Conv2DLayer(net['pool1'],
-                                num_filters=128, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP2, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['conv2_2'] = Conv2DLayer(net['conv2_1'],
-                                num_filters=128, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP2, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['pool2'] = MaxPool2DLayer(net['conv2_2'], pool_size=2, stride=2)
 
     # Third step
     net['conv3_1'] = Conv2DLayer(net['pool2'],
-                                num_filters=256, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP3, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['conv3_2'] = Conv2DLayer(net['conv3_1'],
-                                num_filters=256, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP3, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['pool3'] = MaxPool2DLayer(net['conv3_2'], pool_size=2, stride=2)
 
     # Fourth step
     net['conv4_1'] = Conv2DLayer(net['pool3'],
-                                num_filters=512, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP4, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['conv4_2'] = Conv2DLayer(net['conv4_1'],
-                                num_filters=512, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP4, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['pool4'] = MaxPool2DLayer(net['conv4_2'], pool_size=2, stride=2)
 
     # Last step
     net['conv5_1'] = Conv2DLayer(net['pool4'],
-                                num_filters=1024, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP5, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
     net['conv5_2'] = Conv2DLayer(net['conv5_1'],
-                                num_filters=1024, filter_size=3, pad=0,
+                                num_filters=FILTER_STEP5, filter_size=3, pad=0,
                                 W=GlorotUniform(),
                                 nonlinearity=nonlinearities.rectify)
 
     # Fourth unstep
     #net['unpool5'] = InverseLayer(net['conv5_2'], net['pool4'])
     net['upconv4'] = TransposedConv2DLayer(net['conv5_2'],
-                                    num_filters=512, filter_size=2, stride=2,
+                                    num_filters=FILTER_STEP4, filter_size=2, stride=2,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge4'] = ConcatLayer([net['upconv4']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv4_2'] = Conv2DLayer(net['bridge4'], num_filters=512, filter_size=3, pad=0,
+    net['_conv4_2'] = Conv2DLayer(net['bridge4'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
-    net['_conv4_1'] = Conv2DLayer(net['_conv4_2'], num_filters=512, filter_size=3, pad=0,
+    net['_conv4_1'] = Conv2DLayer(net['_conv4_2'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
     # Third unstep
     net['upconv3'] = TransposedConv2DLayer(net['_conv4_1'],
-                                    num_filters=256, filter_size=2, stride=2,
+                                    num_filters=FILTER_STEP3, filter_size=2, stride=2,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge3'] = ConcatLayer([net['upconv3']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv3_2'] = Conv2DLayer(net['bridge3'], num_filters=256, filter_size=3, pad=0,
+    net['_conv3_2'] = Conv2DLayer(net['bridge3'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
-    net['_conv3_1'] = Conv2DLayer(net['_conv3_2'], num_filters=256, filter_size=3, pad=0,
+    net['_conv3_1'] = Conv2DLayer(net['_conv3_2'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
     # Second unstep
     net['upconv2'] = TransposedConv2DLayer(net['_conv3_1'],
-                                    num_filters=128, filter_size=2, stride=2,
+                                    num_filters=FILTER_STEP2, filter_size=2, stride=2,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge2'] = ConcatLayer([net['upconv2']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv2_2'] = Conv2DLayer(net['bridge2'], num_filters=128, filter_size=3, pad=0,
+    net['_conv2_2'] = Conv2DLayer(net['bridge2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
-    net['_conv2_1'] = Conv2DLayer(net['_conv2_2'], num_filters=128, filter_size=3, pad=0,
+    net['_conv2_1'] = Conv2DLayer(net['_conv2_2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
@@ -134,15 +140,15 @@ def define_network(input_var, target_var):
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge1'] = ConcatLayer([net['upconv1']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv1_2'] = Conv2DLayer(net['bridge1'], num_filters=64, filter_size=3, pad=0,
+    net['_conv1_2'] = Conv2DLayer(net['bridge1'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
-    net['_conv1_1'] = Conv2DLayer(net['_conv1_2'], num_filters=64, filter_size=3, pad=0,
+    net['_conv1_1'] = Conv2DLayer(net['_conv1_2'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
     # Output layer
-    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=1, filter_size=(1,1), pad=0,
+    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=2, filter_size=(1,1), pad=0,
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
@@ -166,7 +172,7 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
 x_folder = '../data/1_1_1mm_512_x_512_lung_slices/subset0/'
 
 def load_slice(filename):
-
+    #print "----------------"+str(filename)+"----------------"
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
@@ -185,10 +191,14 @@ def load_slice(filename):
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.float32)
 
-    #(1,1,512,512)
-    #(512,512)
-
     return lung, truth
+
+def load_slice_multiple(filenames):
+    slices = map(load_slice, filenames)
+    lungs, truths = zip(*slices)
+
+    return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0)
+
 
 if __name__ == "__main__":
     # create Theano variables for input and target minibatch
@@ -204,12 +214,19 @@ if __name__ == "__main__":
 
 
     prediction = lasagne.layers.get_output(network)
-    loss = lasagne.objectives.binary_crossentropy(T.clip(prediction,0.001,0.999), target_var)
+    #loss = lasagne.objectives.binary_crossentropy(T.clip(prediction,0.001,0.999), target_var)
+    e = T.exp(prediction)
+    softmax = (e / T.stack([e.sum(axis=1),e.sum(axis=1)], axis=1))[:,0,:,:]
+
+    loss = lasagne.objectives.binary_crossentropy(softmax, target_var)
     loss = loss * loss_weighing
     loss = loss.mean()
 
-    acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+
+    acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var),
                       dtype=theano.config.floatX)
+    #acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+    #                  dtype=theano.config.floatX)
 
     updates = lasagne.updates.nesterov_momentum(
             loss, params, learning_rate=0.0001, momentum=0.99)
@@ -218,13 +235,17 @@ if __name__ == "__main__":
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
 
 
-    test_loss = lasagne.objectives.binary_crossentropy(T.clip(test_prediction,0.001,0.999), target_var)
+    e_test = T.exp(test_prediction)
+    softmax_test = (e_test / T.stack([e_test.sum(axis=1),e_test.sum(axis=1)], axis=1))[:,0,:,:]
+
+    test_loss = lasagne.objectives.binary_crossentropy(softmax_test, target_var)
+    #test_loss = lasagne.objectives.binary_crossentropy(T.clip(test_prediction,0.001,0.999), target_var)
     test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
-    #test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
-    #                  dtype=theano.config.floatX)
-    test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
+    test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
                       dtype=theano.config.floatX)
+    #test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
+    #                  dtype=theano.config.floatX)
 
 
     print "Defining train function"
@@ -240,9 +261,9 @@ if __name__ == "__main__":
     filenames_val = filenames[600:]
     filenames_test = filenames_val
 
-    filenames_train = filenames_train[:10]
-    filenames_val = filenames_val[:10]
-    filenames_test = filenames_test[10:20]
+    filenames_train = filenames_train[:100]
+    filenames_val = filenames_val[:100]
+    filenames_test = filenames_test[100:200]
 
     num_epochs = 400
 
@@ -258,7 +279,7 @@ if __name__ == "__main__":
 
         np.random.shuffle(filenames_train)
         #filenames_train = shuffle(filenames_train)
-        train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True)
+        train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True, batch_size=1)
 
         #for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
         for batch in train_gen:
@@ -274,7 +295,8 @@ if __name__ == "__main__":
         val_acc = 0
         val_batches = 0
 
-        val_gen = ParallelBatchIterator(load_slice, filenames_val, ordered=True)
+        #val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=2)
+        val_gen = ParallelBatchIterator(load_slice, filenames_val, ordered=True, batch_size=1)
 
         for batch in val_gen:
             inputs, targets = batch
@@ -299,7 +321,7 @@ if __name__ == "__main__":
     test_err = 0
     test_acc = 0
     test_batches = 0
-    test_gen = ParallelBatchIterator(load_slice, filenames_test, ordered=True)
+    test_gen = ParallelBatchIterator(load_slice, filenames_test, ordered=True, batch_size=2)
     #for batch in iterate_minibatches(X_test, y_test, 3, shuffle=False):
     for batch in test_gen:
         inputs, targets = batch
