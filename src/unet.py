@@ -179,8 +179,12 @@ if __name__ == "__main__":
     test_loss = lasagne.objectives.squared_error(test_prediction, target_var)
     test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
-    test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
+    #test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
+    #                  dtype=theano.config.floatX)
+    test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
                       dtype=theano.config.floatX)
+
+
     print "Defining train function"
     train_fn = theano.function([input_var, target_var], loss, updates=updates)
 
