@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 import os
 import evaluate_candidates
+import pandas
 
 def load_data(image_names):
     print "loading images"
@@ -53,6 +54,8 @@ if __name__ == "__main__":
 
             #candidates = ca.merge_candidates(candidates)
             #print len(candidates)
+            pandas.save(candidates,"../data/blob_candidates/{0}".format(name))
+            #image_read_write.save_candidates('../data/blob_candidates/', candidates)
 
-            #image_read_write.save_candidates('../data/hoi_candidates.csv', candidates)
             evaluate_candidates.run(candidates)
+
