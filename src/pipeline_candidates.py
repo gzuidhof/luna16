@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
         blob_images = []
         for index,image in enumerate(images):
-            blobs = blob.blob_image(image)
+            blobs = blob.blob_image_multiscale2(image,type=1)
 
             coords = []
             #coords = [y for y in [x for x in candidates]]

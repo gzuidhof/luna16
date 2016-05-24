@@ -2,7 +2,7 @@ import SimpleITK as sitk
 import numpy as np
 import normalize as norm
 from skimage import filter as filters
-from joblib import Parallel
+#from joblib import Parallel
 from skimage import exposure
 from skimage import feature
 import matplotlib.pyplot as plt
@@ -47,13 +47,13 @@ def blob_image_multiscale2(image, type=0):
         # init list of different sigma/zoom blobs
         featureblobs = []
         # x = 0,1,2,3,4
-        for x in xrange(5):
+        for x in xrange(0,2):
             if type == 0:
-                featureblobs[x] = feature.blob_dog(slice, 2^x, 2^(x+1))
+                featureblobs.append(feature.blob_dog(slice, 2**x, 2**(x+1)))
             if type == 1:
-                featureblobs[x] = feature.blob_doh(slice, 2^x, 2^(x+1))
+                featureblobs.append(feature.blob_doh(slice, 2**x, 2**(x+1)))
             if type == 2:
-                featureblobs[x] = feature.blob_log(slice, 2^x, 2^(x+1))
+                featureblobs.append(feature.blob_log(slice, 2**x, 2**(x+1)))
         # init list of blob coords
         blob_coords = np.zeros((len(featureblobs[0]),4))
         # start at biggest blob size
@@ -84,23 +84,23 @@ def blob_image_multiscale3(image, type=0):
             if type == 2:
                 featureblobs[x] = feature.blob_log(slice, 3^x, 3^(x+1))
         # init list of blob coords
-        blob_coords = np.zeros((len(featureblobs[0]),4))
+        blob_coords = []
         # start at biggest blob size
         for featureblob in reversed(featureblobs):
-            i = 0
             # for every blob found of a blobsize
             for blob in enumerate(featureblob):
                 # if that blob is not within range of another blob, add it
                 if not within_range(blob, blob_coords):
-                    blob_coords[i] = [z, blob[0], blob[1], blob[2]]
-                    i = i + 1
+                    blob_coords.append([z, blob[0], blob[1], blob[2]])
         list.append(blob_coords[0:3])
     return list
 
 def within_range(blob, blob_coords):
-    for coords in blob_coords:
-        if((blob[0] - coords[1])^2 + (blob[1] - coords[2]) < coords[3]^2):
-            return 1
+    if blob_coords:
+        for coords in blob_coords:
+            print (blob[0] - coords[1])**2
+            if((blob[0] - coords[1])**2) + (blob[1] - coords[2])**2 < coords[3]**2:
+                return 1
     return 0
 
 def blob_image(image):
