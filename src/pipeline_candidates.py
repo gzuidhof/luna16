@@ -24,12 +24,12 @@ def load_data(image_names):
 if __name__ == "__main__":
     for subset in xrange(0,1):
         #image_names = glob.glob("../data/subset{}/subset{}/*.mhd".format(subset,subset))
-        image_names = glob.glob("../data/subset0/*.mhd")[0:30]
+        image_names = glob.glob("../data/subset0_rescaled/subset0/*.mhd")[3:30]
         images,origins,spacings = load_data(image_names)
 
         blob_images = []
         for index,image in enumerate(images):
-            blobs = blob.blob_image_multiscale2(image,type=1)
+            blobs = blob.blob_image_multiscale2(image,type=2)
 
             coords = []
             #coords = [y for y in [x for x in candidates]]
@@ -39,22 +39,15 @@ if __name__ == "__main__":
             for slice in blobs:
                 for s in slice:
                     coords.append(s)
-            #print coords
+            world_coords = np.array([ca.voxel_2_world(y[0:3],origins[index],spacings[index]) for y in coords])
 
-            #print spacings[index]
-            #print coords
-            world_coords = np.array([ca.voxel_2_world(y,origins[index],spacings[index]) for y in coords])
-            #print world_coords
-            #print world_coords
             name = os.path.split(image_names[index])[1].replace('.mhd','')
-            #print name
-            #print np.array(world_coords).shape
+
             candidates = ca.coords_to_candidates(world_coords, name)
-            #print candidates
 
             #candidates = ca.merge_candidates(candidates)
             #print len(candidates)
-            pandas.save(candidates,"../data/blob_candidates/{0}".format(name))
+            ca.save_candidates("../data/blob_candidates/{0}.csv".format(name), candidates)
             #image_read_write.save_candidates('../data/blob_candidates/', candidates)
 
             evaluate_candidates.run(candidates)

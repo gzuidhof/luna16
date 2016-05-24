@@ -51,21 +51,28 @@ def blob_image_multiscale2(image, type=0,scale=2):
         featureblobs = []
         # x = 0,1,2,3,4
         if scale == 2:
+            # for x in xrange(0,6):
+            #     if type == 0:
+            #         featureblobs.append(feature.blob_dog(slice, 2**x, 2**x))
+            #     if type == 1:
+            #         featureblobs.append(feature.blob_doh(slice, 2**x, 2**x))
+            #     if type == 2:
+            #         featureblobs.append(feature.blob_log(slice, 2**x, 2**x))
             for x in xrange(0,5):
                 if type == 0:
-                    featureblobs.append(feature.blob_dog(slice, math.pow(2,x), math.pow(2,x+1)))
+                    featureblobs.append(feature.blob_dog(slice, 2**x, 2**(x+1)))
                 if type == 1:
-                    featureblobs.append(feature.blob_doh(slice, math.pow(2,x), math.pow(2,x+1)))
+                    featureblobs.append(feature.blob_doh(slice, 2**x, 2**(x+1)))
                 if type == 2:
-                    featureblobs.append(feature.blob_log(slice, math.pow(2,x), math.pow(2,x+1)))
+                    featureblobs.append(feature.blob_log(slice, 2**x, 2**(x+1)))
         else:
-            for x in xrange(0,3):
+            for x in xrange(0,4):
                 if type == 0:
-                    featureblobs.append(feature.blob_dog(slice, math.pow(3,x), math.pow(3,x+1)))
+                    featureblobs.append(feature.blob_dog(slice, 3**x, 3**x))
                 if type == 1:
-                    featureblobs.append(feature.blob_doh(slice, math.pow(3,x), math.pow(3,x+1)))
+                    featureblobs.append(feature.blob_doh(slice, 3**x, 3**x))
                 if type == 2:
-                    featureblobs.append(feature.blob_log(slice, math.pow(3,x), math.pow(3,x+1)))
+                    featureblobs.append(feature.blob_log(slice, 3**x, 3**x))
         # init list of blob coords
         blob_coords = []
         #print featureblobs
@@ -78,7 +85,7 @@ def blob_image_multiscale2(image, type=0,scale=2):
                 blob = blob[1]
                 if not within_range(blob, blob_coords):
                     blob_coords.append([z, blob[0], blob[1], blob[2]])
-        list.append(blob_coords[0:3])
+        list.append(blob_coords)
     return list
 
 
