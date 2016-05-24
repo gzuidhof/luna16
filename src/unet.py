@@ -1,19 +1,28 @@
 from __future__ import division
 import time
 import numpy as np
+import normalize
 
-import theano
-import theano.tensor as T
-import lasagne
+if __name__ == "__main__":
+    import theano
+    import theano.tensor as T
+    import lasagne
 
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer
-from lasagne.init import GlorotUniform
-from lasagne import nonlinearities
-from lasagne.layers import ConcatLayer
-from lasagne.regularization import regularize_layer_params_weighted, l2, l1
-from lasagne.layers import autocrop
+    from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer, NonlinearityLayer
+    from lasagne.init import GlorotUniform
+    from lasagne import nonlinearities
+    from lasagne.layers import ConcatLayer
+    from lasagne.regularization import regularize_layer_params_weighted, l2, l1
+
+    from lasagne.layers import autocrop
 
 from tqdm import tqdm
+from glob import glob
+import gzip
+
+import cPickle as pickle
+from parallel import ParallelBatchIterator
+
 
 
 INPUT_SIZE = 572
@@ -137,6 +146,8 @@ def define_network(input_var, target_var):
                                     W=GlorotUniform(),
                                     nonlinearity=nonlinearities.rectify)
 
+    #net['out'] = NonlinearityLayer(net['flap'], nonlinearity=lasagne.nonlinearities.softmax)
+    #print lasagne.layers.get_output_shape(net['out'])
     #print lasagne.layers.get_output_shape(net['out'])
     return net
 
@@ -152,6 +163,32 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
             excerpt = slice(start_idx, start_idx + batchsize)
         yield inputs[excerpt], targets[excerpt]
 
+x_folder = '../data/1_1_1mm_512_x_512_lung_slices/subset0/'
+
+def load_slice(filename):
+
+    with gzip.open(filename,'rb') as f:
+        lung = pickle.load(f)
+
+    with gzip.open(filename.replace('lung','nodule'),'rb') as f:
+        truth = pickle.load(f)
+
+    lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
+
+    lung = np.array(normalize.normalize(lung),dtype=np.float32)
+
+    # Crop truth
+    crop_size = OUTPUT_SIZE
+    offset = (truth.shape[0]-crop_size)//2
+    truth = truth[offset:offset+crop_size,offset:offset+crop_size]
+
+    lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
+    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.float32)
+
+    #(1,1,512,512)
+    #(512,512)
+
+    return lung, truth
 
 if __name__ == "__main__":
     # create Theano variables for input and target minibatch
@@ -163,11 +200,11 @@ if __name__ == "__main__":
     network = net_dict['out']
 
     params = lasagne.layers.get_all_params(network, trainable=True)
-    loss_weighing = target_var*3+1
+    loss_weighing = target_var*100+1
 
 
     prediction = lasagne.layers.get_output(network)
-    loss = lasagne.objectives.squared_error(prediction, target_var)
+    loss = lasagne.objectives.binary_crossentropy(T.clip(prediction,0.001,0.999), target_var)
     loss = loss * loss_weighing
     loss = loss.mean()
 
@@ -181,7 +218,7 @@ if __name__ == "__main__":
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
 
 
-    test_loss = lasagne.objectives.squared_error(test_prediction, target_var)
+    test_loss = lasagne.objectives.binary_crossentropy(T.clip(test_prediction,0.001,0.999), target_var)
     test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
     #test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
@@ -197,17 +234,17 @@ if __name__ == "__main__":
     val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
 
+    filenames = glob(x_folder+ '*.pkl.gz')
+    np.random.shuffle(filenames)
+    filenames_train = filenames[:600]
+    filenames_val = filenames[600:]
+    filenames_test = filenames_val
 
-    X_train = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
-    y_train = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
+    filenames_train = filenames_train[:10]
+    filenames_val = filenames_val[:10]
+    filenames_test = filenames_test[10:20]
 
-    X_val = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
-    y_val = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
-
-    X_test = np.array(np.random.rand(10,1,INPUT_SIZE,INPUT_SIZE), dtype=np.float32)-0.5
-    y_test = np.array(np.random.randint(2,size=(10,1,OUTPUT_SIZE,OUTPUT_SIZE)), dtype=np.float32)
-
-    num_epochs = 100
+    num_epochs = 400
 
     # Finally, launch the training loop.
     print("Starting training...")
@@ -218,7 +255,13 @@ if __name__ == "__main__":
         train_acc = 0
         train_batches = 0
         start_time = time.time()
-        for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
+
+        np.random.shuffle(filenames_train)
+        #filenames_train = shuffle(filenames_train)
+        train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True)
+
+        #for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
+        for batch in train_gen:
             inputs, targets = batch
             err, acc = train_fn(inputs, targets)
             train_err += err
@@ -230,7 +273,10 @@ if __name__ == "__main__":
         val_err = 0
         val_acc = 0
         val_batches = 0
-        for batch in iterate_minibatches(X_val, y_val, 2, shuffle=False):
+
+        val_gen = ParallelBatchIterator(load_slice, filenames_val, ordered=True)
+
+        for batch in val_gen:
             inputs, targets = batch
             err, acc = val_fn(inputs, targets)
             val_err += err
@@ -240,8 +286,11 @@ if __name__ == "__main__":
         # Then we print the results for this epoch:
         print("Epoch {} of {} took {:.3f}s".format(
             epoch + 1, num_epochs, time.time() - start_time))
+
         print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
-        print("  training accuracy:\t\t{:.2f} %".format(train_acc / train_batches))
+        print("  training accuracy:\t\t{:.2f} %".format(
+            train_acc / train_batches * 100))
+
         print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
         print("  validation accuracy:\t\t{:.2f} %".format(
             val_acc / val_batches * 100))
@@ -250,7 +299,9 @@ if __name__ == "__main__":
     test_err = 0
     test_acc = 0
     test_batches = 0
-    for batch in iterate_minibatches(X_test, y_test, 1, shuffle=False):
+    test_gen = ParallelBatchIterator(load_slice, filenames_test, ordered=True)
+    #for batch in iterate_minibatches(X_test, y_test, 3, shuffle=False):
+    for batch in test_gen:
         inputs, targets = batch
         err, acc = val_fn(inputs, targets)
         test_err += err
