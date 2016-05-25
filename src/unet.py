@@ -9,7 +9,7 @@ if __name__ == "__main__":
     import lasagne
 
     from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer, NonlinearityLayer
-    from lasagne.init import GlorotUniform
+    from lasagne.init import GlorotUniform, HeUniform
     from lasagne import nonlinearities
     from lasagne.layers import ConcatLayer
     from lasagne.regularization import regularize_layer_params_weighted, l2, l1
@@ -43,131 +43,119 @@ def define_network(input_var, target_var):
     #First step
     net['conv1_1'] = Conv2DLayer(net['input'],
                                 num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['conv1_2'] = Conv2DLayer(net['conv1_1'],
                                 num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['pool1'] = MaxPool2DLayer(net['conv1_2'], pool_size=2, stride=2)
 
     # Second step
     net['conv2_1'] = Conv2DLayer(net['pool1'],
                                 num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['conv2_2'] = Conv2DLayer(net['conv2_1'],
                                 num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['pool2'] = MaxPool2DLayer(net['conv2_2'], pool_size=2, stride=2)
 
     # Third step
     net['conv3_1'] = Conv2DLayer(net['pool2'],
                                 num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['conv3_2'] = Conv2DLayer(net['conv3_1'],
                                 num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['pool3'] = MaxPool2DLayer(net['conv3_2'], pool_size=2, stride=2)
 
     # Fourth step
     net['conv4_1'] = Conv2DLayer(net['pool3'],
                                 num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['conv4_2'] = Conv2DLayer(net['conv4_1'],
                                 num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['pool4'] = MaxPool2DLayer(net['conv4_2'], pool_size=2, stride=2)
 
     # Last step
     net['conv5_1'] = Conv2DLayer(net['pool4'],
                                 num_filters=FILTER_STEP5, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
     net['conv5_2'] = Conv2DLayer(net['conv5_1'],
                                 num_filters=FILTER_STEP5, filter_size=3, pad=0,
-                                W=GlorotUniform(),
+                                W=HeUniform(gain='relu'),
                                 nonlinearity=nonlinearities.rectify)
 
     # Fourth unstep
     #net['unpool5'] = InverseLayer(net['conv5_2'], net['pool4'])
     net['upconv4'] = TransposedConv2DLayer(net['conv5_2'],
                                     num_filters=FILTER_STEP4, filter_size=2, stride=2,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge4'] = ConcatLayer([net['upconv4']], axis=1, cropping=[None, None, 'center', 'center'])
     net['_conv4_2'] = Conv2DLayer(net['bridge4'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['_conv4_1'] = Conv2DLayer(net['_conv4_2'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
 
     # Third unstep
     net['upconv3'] = TransposedConv2DLayer(net['_conv4_1'],
                                     num_filters=FILTER_STEP3, filter_size=2, stride=2,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge3'] = ConcatLayer([net['upconv3']], axis=1, cropping=[None, None, 'center', 'center'])
     net['_conv3_2'] = Conv2DLayer(net['bridge3'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['_conv3_1'] = Conv2DLayer(net['_conv3_2'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
 
     # Second unstep
     net['upconv2'] = TransposedConv2DLayer(net['_conv3_1'],
                                     num_filters=FILTER_STEP2, filter_size=2, stride=2,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge2'] = ConcatLayer([net['upconv2']], axis=1, cropping=[None, None, 'center', 'center'])
     net['_conv2_2'] = Conv2DLayer(net['bridge2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['_conv2_1'] = Conv2DLayer(net['_conv2_2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
 
     # First unstep
     net['upconv1'] = TransposedConv2DLayer(net['_conv2_1'],
                                     num_filters=64, filter_size=2, stride=2,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['bridge1'] = ConcatLayer([net['upconv1']], axis=1, cropping=[None, None, 'center', 'center'])
     net['_conv1_2'] = Conv2DLayer(net['bridge1'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
     net['_conv1_1'] = Conv2DLayer(net['_conv1_2'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                    W=GlorotUniform(),
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
 
     # Output layer
-    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=1, filter_size=(1,1), pad=0,
-                                    W=GlorotUniform(),
+    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=2, filter_size=(1,1), pad=0,
+                                    W=HeUniform(gain='relu'),
                                     nonlinearity=nonlinearities.rectify)
 
     #net['out'] = NonlinearityLayer(net['flap'], nonlinearity=lasagne.nonlinearities.softmax)
     #print lasagne.layers.get_output_shape(net['out'])
     #print lasagne.layers.get_output_shape(net['out'])
     return net
-
-def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
-    assert len(inputs) == len(targets)
-    if shuffle:
-        indices = np.arange(len(inputs))
-        np.random.shuffle(indices)
-    for start_idx in range(0, len(inputs) - batchsize + 1, batchsize):
-        if shuffle:
-            excerpt = indices[start_idx:start_idx + batchsize]
-        else:
-            excerpt = slice(start_idx, start_idx + batchsize)
-        yield inputs[excerpt], targets[excerpt]
 
 x_folder = '../data/1_1_1mm_512_x_512_lung_slices/subset0/'
 
@@ -189,68 +177,56 @@ def load_slice(filename):
     truth = truth[offset:offset+crop_size,offset:offset+crop_size]
 
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
-    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.float32)
+    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
     return lung, truth
 
 def load_slice_multiple(filenames):
     slices = map(load_slice, filenames)
     lungs, truths = zip(*slices)
-
-    #print np.concatenate(lungs,axis=0).shape
-
     return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0)
+
+LOSS_WEIGHING = 2000
 
 
 if __name__ == "__main__":
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
-    target_var = T.tensor4('targets')#T.ivector('targets')
+    target_var = T.tensor4('targets', dtype='int64')
 
     print "Defining network"
     net_dict = define_network(input_var, target_var)
     network = net_dict['out']
 
     params = lasagne.layers.get_all_params(network, trainable=True)
-    loss_weighing = target_var*1750+1
-
+    target_prediction = target_var.dimshuffle(1,0,2,3).flatten(ndim=1)
+    loss_weighing = target_prediction*(LOSS_WEIGHING-1)+1
 
     prediction = lasagne.layers.get_output(network)
-    #loss = lasagne.objectives.binary_crossentropy(T.clip(prediction,0.001,0.999), target_var)
-    #e = T.exp(prediction)
-    #softmax = e[:,0,:,:]
-    #softmax = (e / T.stack([e.sum(axis=1),e.sum(axis=1)], axis=1))[:,0,:,:]
-    #print softmax.shape
+    prediction_flat = prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
+    softmax = lasagne.nonlinearities.softmax(prediction_flat)
 
-    #loss = lasagne.objectives.binary_crossentropy(softmax, target_var)
-    loss = lasagne.objectives.squared_error(prediction, target_var)
+    loss = lasagne.objectives.categorical_crossentropy(softmax, target_prediction)
     loss = loss * loss_weighing
     loss = loss.mean()
 
 
-    #acc = T.mean(T.eq(T.argmax(prediction, axis=1), target_var),
-    #                  dtype=theano.config.floatX)
-    acc = T.mean(T.eq(T.gt(prediction, 0.5), target_var),
+    acc = T.mean(T.eq(T.argmax(softmax, axis=1), target_prediction),
                       dtype=theano.config.floatX)
 
     updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=0.01, momentum=0.99)
+            loss, params, learning_rate=0.01, momentum=0.96)
 
 
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
+    test_prediction_flat = test_prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
+    test_softmax = lasagne.nonlinearities.softmax(prediction_flat)
 
-
-    #e_test = T.exp(test_prediction)
-    #softmax_test = (e_test / T.stack([e_test.sum(axis=1),e_test.sum(axis=1)], axis=1))
-
-    #test_loss = lasagne.objectives.binary_crossentropy(softmax_test, target_var)
-    test_loss = lasagne.objectives.squared_error(test_prediction, target_var)
-    #test_loss = lasagne.objectives.binary_crossentropy(T.clip(test_prediction,0.001,0.999), target_var)
+    test_loss = lasagne.objectives.categorical_crossentropy(test_softmax, target_prediction)
     test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
-    #test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
-    #                  dtype=theano.config.floatX)
-    test_acc = T.mean(T.eq(T.gt(test_prediction, 0.5), target_var),
+
+    test_acc = T.mean(T.eq(T.argmax(test_softmax, axis=1), target_prediction),
                       dtype=theano.config.floatX)
 
 
@@ -267,7 +243,7 @@ if __name__ == "__main__":
     filenames_val = filenames[600:]
     filenames_test = filenames_val
 
-    filenames_train = filenames_train[:4]
+    filenames_train = filenames_train[:1]*4
     filenames_val = filenames_val[:6]
     filenames_test = filenames_test[100:200]
 
@@ -305,7 +281,7 @@ if __name__ == "__main__":
         val_batches = 0
 
         #val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=2)
-        val_gen = ParallelBatchIterator(load_slice, filenames_val, ordered=True, batch_size=1)
+        val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=6)
 
         for batch in tqdm(val_gen):
             inputs, targets = batch
