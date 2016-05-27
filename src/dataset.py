@@ -24,7 +24,7 @@ def get_image(filename):
     truth = truth[offset:offset+crop_size,offset:offset+crop_size]
 
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
-    lung = lung-0.5
+    lung = lung-0.66200809792889126
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
