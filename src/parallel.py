@@ -63,7 +63,7 @@ class ParallelBatchIterator(object):
 		# Flag used for keeping values in queue in order
 		last_queued_job = Value('i', -1)
 
-		chunks = util.chunks(self.X,self.batch_size) if self.batch_size > 1 else self.X
+		chunks = util.chunks(self.X,self.batch_size)
 
 
 		# Add jobs to queue
