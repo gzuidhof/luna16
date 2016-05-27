@@ -1,20 +1,24 @@
 from __future__ import division
 import time
 import numpy as np
-import normalize
+import matplotlib.pyplot as plt
+import os
+import cv2
+import scipy.misc
+
 
 if __name__ == "__main__":
+    from dataset import load_images
     import theano
     import theano.tensor as T
     import lasagne
 
-    from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer, NonlinearityLayer
-    from lasagne.init import GlorotUniform, HeUniform
-    from lasagne import nonlinearities
-    from lasagne.layers import ConcatLayer
-    from lasagne.regularization import regularize_layer_params_weighted, l2, l1
+    from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, InverseLayer
 
-    from lasagne.layers import autocrop
+    from lasagne.init import GlorotUniform, HeNormal
+    from lasagne import nonlinearities
+    from lasagne.layers import ConcatLayer, Upscale2DLayer
+    from lasagne.regularization import l2, l1, regularize_network_params
 
 from tqdm import tqdm
 from glob import glob
@@ -23,173 +27,107 @@ import gzip
 import cPickle as pickle
 from parallel import ParallelBatchIterator
 
+#INPUT_SIZE = 572
+INPUT_SIZE = 512
+NET_DEPTH = 5
+
+SIZE_DICT = {
+    2:556,
+    3:532,
+    4:484,
+    5:388
+}
+
+SIZE_DICT_512 = {
+    5:324
+}
 
 
-INPUT_SIZE = 572
-OUTPUT_SIZE = 388
+OUTPUT_SIZE = SIZE_DICT_512[NET_DEPTH]
 
-FILTER_STEP1 = 16
-FILTER_STEP2 = 32
-FILTER_STEP3 = 64
-FILTER_STEP4 = 128
-FILTER_STEP5 = 256
+def filter_for_depth(depth):
+    return 2**(5+depth)
+
+folder = '../data/train_resized/'
 
 def define_network(input_var, target_var):
     batch_size = None
     net = {}
-
     net['input'] = InputLayer(shape=(batch_size,1,INPUT_SIZE,INPUT_SIZE), input_var=input_var)
 
-    #First step
-    net['conv1_1'] = Conv2DLayer(net['input'],
-                                num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['conv1_2'] = Conv2DLayer(net['conv1_1'],
-                                num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['pool1'] = MaxPool2DLayer(net['conv1_2'], pool_size=2, stride=2)
+    nonlinearity = nonlinearities.rectify
 
-    # Second step
-    net['conv2_1'] = Conv2DLayer(net['pool1'],
-                                num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['conv2_2'] = Conv2DLayer(net['conv2_1'],
-                                num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['pool2'] = MaxPool2DLayer(net['conv2_2'], pool_size=2, stride=2)
 
-    # Third step
-    net['conv3_1'] = Conv2DLayer(net['pool2'],
-                                num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['conv3_2'] = Conv2DLayer(net['conv3_1'],
-                                num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['pool3'] = MaxPool2DLayer(net['conv3_2'], pool_size=2, stride=2)
 
-    # Fourth step
-    net['conv4_1'] = Conv2DLayer(net['pool3'],
-                                num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['conv4_2'] = Conv2DLayer(net['conv4_1'],
-                                num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['pool4'] = MaxPool2DLayer(net['conv4_2'], pool_size=2, stride=2)
+    def contraction(depth, pool=True):
+        n_filters = filter_for_depth(depth)
+        incoming = net['input'] if depth == 0 else net['pool{}'.format(depth-1)]
 
-    # Last step
-    net['conv5_1'] = Conv2DLayer(net['pool4'],
-                                num_filters=FILTER_STEP5, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
-    net['conv5_2'] = Conv2DLayer(net['conv5_1'],
-                                num_filters=FILTER_STEP5, filter_size=3, pad=0,
-                                W=HeUniform(gain='relu'),
-                                nonlinearity=nonlinearities.rectify)
+        net['conv{}_1'.format(depth)] = Conv2DLayer(incoming,
+                                    num_filters=n_filters, filter_size=3, pad='valid',
+                                    W=HeNormal(gain='relu'),
+                                    nonlinearity=nonlinearity)
+        net['conv{}_2'.format(depth)] = Conv2DLayer(net['conv{}_1'.format(depth)],
+                                    num_filters=n_filters, filter_size=3, pad='valid',
+                                    W=HeNormal(gain='relu'),
+                                    nonlinearity=nonlinearity)
 
-    # Fourth unstep
-    #net['unpool5'] = InverseLayer(net['conv5_2'], net['pool4'])
-    net['upconv4'] = TransposedConv2DLayer(net['conv5_2'],
-                                    num_filters=FILTER_STEP4, filter_size=2, stride=2,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['bridge4'] = ConcatLayer([net['upconv4']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv4_2'] = Conv2DLayer(net['bridge4'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['_conv4_1'] = Conv2DLayer(net['_conv4_2'], num_filters=FILTER_STEP4, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
+        if pool:
+            net['pool{}'.format(depth)] = MaxPool2DLayer(net['conv{}_2'.format(depth)], pool_size=2, stride=2)
 
-    # Third unstep
-    net['upconv3'] = TransposedConv2DLayer(net['_conv4_1'],
-                                    num_filters=FILTER_STEP3, filter_size=2, stride=2,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['bridge3'] = ConcatLayer([net['upconv3']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv3_2'] = Conv2DLayer(net['bridge3'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['_conv3_1'] = Conv2DLayer(net['_conv3_2'], num_filters=FILTER_STEP3, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
+    def expansion(depth):
+        n_filters = filter_for_depth(depth)
 
-    # Second unstep
-    net['upconv2'] = TransposedConv2DLayer(net['_conv3_1'],
-                                    num_filters=FILTER_STEP2, filter_size=2, stride=2,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['bridge2'] = ConcatLayer([net['upconv2']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv2_2'] = Conv2DLayer(net['bridge2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['_conv2_1'] = Conv2DLayer(net['_conv2_2'], num_filters=FILTER_STEP2, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
+        deepest = 'pool{}'.format(depth+1) not in net
+        incoming = net['conv{}_2'.format(depth+1)] if deepest else net['_conv{}_2'.format(depth+1)]
 
-    # First unstep
-    net['upconv1'] = TransposedConv2DLayer(net['_conv2_1'],
-                                    num_filters=64, filter_size=2, stride=2,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['bridge1'] = ConcatLayer([net['upconv1']], axis=1, cropping=[None, None, 'center', 'center'])
-    net['_conv1_2'] = Conv2DLayer(net['bridge1'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
-    net['_conv1_1'] = Conv2DLayer(net['_conv1_2'], num_filters=FILTER_STEP1, filter_size=3, pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
+        #net['upconv{}'.format(depth)] = TransposedConv2DLayer(incoming,
+        #                                num_filters=n_filters, filter_size=2, stride=2,
+        #                                W=HeNormal(gain='relu'),
+        #                                nonlinearity=nonlinearities.rectify)
+        upsc = Upscale2DLayer(incoming,4)
+        net['upconv{}'.format(depth)] = Conv2DLayer(upsc,
+                                        num_filters=n_filters, filter_size=2, stride=2,
+                                        W=HeNormal(gain='relu'),
+                                        nonlinearity=nonlinearity)
+
+
+        net['bridge{}'.format(depth)] = ConcatLayer([net['upconv{}'.format(depth)],net['conv{}_2'.format(depth)]], axis=1, cropping=[None, None, 'center', 'center'])
+        net['_conv{}_1'.format(depth)] = Conv2DLayer(net['bridge{}'.format(depth)],
+                                        num_filters=n_filters, filter_size=3, pad='valid',
+                                        W=HeNormal(gain='relu'),
+                                        nonlinearity=nonlinearity)
+        net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
+                                        num_filters=n_filters, filter_size=3, pad='valid',
+                                        W=HeNormal(gain='relu'),
+                                        nonlinearity=nonlinearity)
+
+
+    for d in range(NET_DEPTH):
+        is_not_deepest = d!=NET_DEPTH-1
+        contraction(d, pool=is_not_deepest)
+
+    for d in reversed(range(NET_DEPTH-1)):
+        expansion(d)
 
     # Output layer
-    net['out'] = Conv2DLayer(net['_conv1_1'], num_filters=2, filter_size=(1,1), pad=0,
-                                    W=HeUniform(gain='relu'),
-                                    nonlinearity=nonlinearities.rectify)
+    net['out'] = Conv2DLayer(net['_conv0_2'], num_filters=2, filter_size=(1,1), pad='valid',
+                                    nonlinearity=None)
 
-    #net['out'] = NonlinearityLayer(net['flap'], nonlinearity=lasagne.nonlinearities.softmax)
-    #print lasagne.layers.get_output_shape(net['out'])
-    #print lasagne.layers.get_output_shape(net['out'])
+    #import network_repr
+    #print network_repr.get_network_str(net['out'])
+    print lasagne.layers.get_output_shape(net['out'])
+
     return net
 
-x_folder = '../data/1_1_1mm_512_x_512_lung_slices/subset0/'
-
-def load_slice(filename):
-    #print "----------------"+str(filename)+"----------------"
-    with gzip.open(filename,'rb') as f:
-        lung = pickle.load(f)
-
-    with gzip.open(filename.replace('lung','nodule'),'rb') as f:
-        truth = pickle.load(f)
-
-    lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
-
-    lung = np.array(normalize.normalize(lung),dtype=np.float32)
-
-    # Crop truth
-    crop_size = OUTPUT_SIZE
-    offset = (truth.shape[0]-crop_size)//2
-    truth = truth[offset:offset+crop_size,offset:offset+crop_size]
-
-    lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
-    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
-
-    return lung, truth
-
-def load_slice_multiple(filenames):
-    slices = map(load_slice, filenames)
-    lungs, truths = zip(*slices)
-    return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0)
-
-LOSS_WEIGHING = 2000
+def dice(train,truth):
+    score = np.sum(train[truth>0])*2.0 / (np.sum(train) + np.sum(truth))
+    return score
 
 
 if __name__ == "__main__":
+    l2_lambda = 1e-6
+
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
     target_var = T.tensor4('targets', dtype='int64')
@@ -200,52 +138,70 @@ if __name__ == "__main__":
 
     params = lasagne.layers.get_all_params(network, trainable=True)
     target_prediction = target_var.dimshuffle(1,0,2,3).flatten(ndim=1)
-    loss_weighing = target_prediction*(LOSS_WEIGHING-1)+1
+
+    _EPSILON=1e-8
+    true_case_weight = (1/(T.mean(target_prediction)+_EPSILON))#*0.8
+    #true_case_weight=1.5
+    loss_weighing = (true_case_weight-1)*target_prediction + 1
 
     prediction = lasagne.layers.get_output(network)
     prediction_flat = prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
-    softmax = lasagne.nonlinearities.softmax(prediction_flat)
 
-    loss = lasagne.objectives.categorical_crossentropy(softmax, target_prediction)
+    #theano.printing.debugprint(prediction)
+
+    softmax = lasagne.nonlinearities.softmax(prediction_flat)
+    prediction_binary = T.argmax(softmax, axis=1)
+
+    dice_score = T.sum(T.eq(2, prediction_binary+target_prediction))*2.0 / (T.sum(prediction_binary) + T.sum(target_prediction))
+    l2_loss = l2_lambda * regularize_network_params(network, l2)
+
+    loss = lasagne.objectives.categorical_crossentropy(T.clip(softmax,_EPSILON,1-_EPSILON), target_prediction)
     loss = loss * loss_weighing
     loss = loss.mean()
+    #loss += (1-dice_score)**2
+    loss += l2_loss
 
 
-    acc = T.mean(T.eq(T.argmax(softmax, axis=1), target_prediction),
+    acc = T.mean(T.eq(prediction_binary, target_prediction),
                       dtype=theano.config.floatX)
 
     updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=0.01, momentum=0.96)
+            #loss, params, learning_rate=0.00001, momentum=0.9)
+            loss, params, learning_rate=0.00002, momentum=0.99)
 
 
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
     test_prediction_flat = test_prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
     test_softmax = lasagne.nonlinearities.softmax(prediction_flat)
 
-    test_loss = lasagne.objectives.categorical_crossentropy(test_softmax, target_prediction)
-    test_loss = test_loss * loss_weighing
+    test_loss = lasagne.objectives.categorical_crossentropy(T.clip(test_softmax,_EPSILON,1-_EPSILON), target_prediction)
+    #test_loss = test_loss * loss_weighing
     test_loss = test_loss.mean()
+    test_loss += l2_loss
 
     test_acc = T.mean(T.eq(T.argmax(test_softmax, axis=1), target_prediction),
                       dtype=theano.config.floatX)
 
-
     print "Defining train function"
-    train_fn = theano.function([input_var, target_var],[loss, acc], updates=updates)
+    train_fn = theano.function([input_var, target_var],[loss, acc, l2_loss, prediction_binary, target_prediction, softmax[:,1], dice_score], updates=updates)
 
     print "Defining validation function"
     val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
-
-    filenames = glob(x_folder+ '*.pkl.gz')
+    #filenames = [f for f in glob(folder+ '*.tif') if 'mask' not in f]
+    folder = './../data/1_1_1mm_512_x_512_lung_slices/subset0/'
+    filenames = glob(folder+ '*.pkl.gz')
+    #print filenames
+    np.random.seed(1)
     np.random.shuffle(filenames)
-    filenames_train = filenames[:600]
-    filenames_val = filenames[600:]
+    filenames_train = filenames[:150]
+    filenames_val = filenames[600:700]
     filenames_test = filenames_val
 
-    filenames_train = filenames_train[:1]*4
-    filenames_val = filenames_val[:6]
-    filenames_test = filenames_test[100:200]
+    #filenames_train = filenames_train[2:3]
+    #print filenames_train
+    filenames_val = filenames_val[:200]
+    filenames_test = filenames_val[:200]
 
     num_epochs = 400
 
@@ -257,22 +213,31 @@ if __name__ == "__main__":
         train_err = 0
         train_acc = 0
         train_batches = 0
+        train_l2 = 0
+        train_dice = 0
         start_time = time.time()
 
         np.random.shuffle(filenames_train)
-        #filenames_train = shuffle(filenames_train)
-        #train_gen = ParallelBatchIterator(load_slice, filenames_train, ordered=True, batch_size=1)
-        train_gen = ParallelBatchIterator(load_slice_multiple, filenames_train, ordered=True, batch_size=4)
+        train_gen = ParallelBatchIterator(load_images, filenames_train, ordered=True, batch_size=1, multiprocess=False)
 
         #for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
-        for batch in tqdm(train_gen):
+        for i, batch in enumerate(tqdm(train_gen)):
             inputs, targets = batch
-            #print inputs.shape
-            #print targets.shape
-            err, acc = train_fn(inputs, targets)
+            err, acc, l2_loss, pred, true, prob, d = train_fn(inputs, targets)
+
+
+            if i % 10 == 0:
+                im = np.hstack((
+                    true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
+                    prob[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
+
+                plt.imsave('../images/plot/epoch{}.png'.format(epoch),im)
+            #plt.show()
             train_err += err
             train_acc += acc
             train_batches += 1
+            train_l2 += l2_loss
+            train_dice += d
             #print "batcheroo"
 
         # And a full pass over the validation data:
@@ -280,8 +245,7 @@ if __name__ == "__main__":
         val_acc = 0
         val_batches = 0
 
-        #val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=2)
-        val_gen = ParallelBatchIterator(load_slice_multiple, filenames_val, ordered=True, batch_size=6)
+        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=True, batch_size=2,multiprocess=False)
 
         for batch in tqdm(val_gen):
             inputs, targets = batch
@@ -295,8 +259,12 @@ if __name__ == "__main__":
             epoch + 1, num_epochs, time.time() - start_time))
 
         print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
+        print("  l2 loss:\t\t\t{:.6f}".format(l2_loss/train_batches))
         print("  training accuracy:\t\t{:.2f} %".format(
             train_acc / train_batches * 100))
+        print("  training dice:\t\t{:.5f}".format(
+            train_dice / train_batches))
+
 
         print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
         print("  validation accuracy:\t\t{:.2f} %".format(
@@ -306,7 +274,7 @@ if __name__ == "__main__":
     test_err = 0
     test_acc = 0
     test_batches = 0
-    test_gen = ParallelBatchIterator(load_slice, filenames_test, ordered=True, batch_size=2)
+    test_gen = ParallelBatchIterator(load_images, filenames_test, ordered=True, batch_size=2)
     #for batch in iterate_minibatches(X_test, y_test, 3, shuffle=False):
     for batch in test_gen:
         inputs, targets = batch

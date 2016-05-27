@@ -63,3 +63,4 @@ target/
 
 data
 src/*.csv
+images/plot
