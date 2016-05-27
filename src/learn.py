@@ -29,8 +29,6 @@ def make_dir_if_not_present(directory):
         os.makedirs(directory)
 
 if __name__ == "__main__":
-
-
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
     target_var = T.tensor4('targets', dtype='int64')
@@ -59,13 +57,16 @@ if __name__ == "__main__":
     np.random.shuffle(filenames_train)
     np.random.shuffle(filenames_val)
 
-    filenames_train = filenames_train[:1]
-    filenames_val = filenames_train[:10]
-
     train_batch_size = 1
     val_batch_size = 2
 
+    train_subset = 1000
+    val_subset = 1000
+
     num_epochs = 400
+
+    filenames_train = filenames_train[:train_subset]
+    filenames_val = filenames_val[:val_subset]
 
     metric_names = ['loss  ','accuracy','l2    ','dice  ','precision','recall']
     train_metrics_all = []

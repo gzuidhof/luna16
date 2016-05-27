@@ -101,8 +101,7 @@ def define_network(input_var):
 
 def define_updates(network, input_var, target_var):
     l2_lambda = 1e-5 #Weight decay
-    #learning_rate = learning_rate=0.00002
-    learning_rate = learning_rate=0.0002
+    learning_rate = learning_rate=0.00002
     momentum = 0.99
 
     params = lasagne.layers.get_all_params(network, trainable=True)
