@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import scipy.misc
+import metrics
 
 if __name__ == "__main__":
     from dataset import load_images
@@ -88,7 +89,7 @@ if __name__ == "__main__":
             inputs, targets, weights = batch
 
             err, l2_loss, acc, dice, true, prob, prob_b = train_fn(inputs, targets, weights)
-            tp=tn=fp=fn=1
+            tp,tn,fp,fn = metrics.calc_errors(true, prob_b)
 
             train_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             train_batches += 1
@@ -108,11 +109,13 @@ if __name__ == "__main__":
 
         for i, batch in enumerate(tqdm(val_gen)):
             inputs, targets, weights = batch
+
             err, l2_loss, acc, dice, true, prob, prob_b = val_fn(inputs, targets, weights)
-            tp=tn=fp=fn=1
+            tp,tn,fp,fn = metrics.calc_errors(true, prob_b)
 
             val_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             val_batches += 1
+            
             if np.ceil(i/val_batch_size) % 10 == 0: #Create image every 10th image
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
