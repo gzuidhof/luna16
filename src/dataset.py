@@ -1,3 +1,4 @@
+from __future__ import division
 import os.path
 import numpy as np
 from unet import INPUT_SIZE, OUTPUT_SIZE
@@ -5,6 +6,8 @@ import normalize
 import gzip
 #import cPickle as pickle
 import pickle
+
+_EPSILON = 1e-8
 
 def get_image(filename):
     #print "----------------"+str(filename)+"----------------"
@@ -28,7 +31,8 @@ def get_image(filename):
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
-    weights = np.ones_like(truth, dtype=np.float32)
+    true_case_weight = (1/(np.mean(truth)+_EPSILON)) * 1.1
+    weights = np.array((true_case_weight-1)*truth + 1, dtype=np.float32)
 
     return lung, truth, weights
 
