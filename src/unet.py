@@ -123,9 +123,6 @@ def define_updates(network, input_var, target_var, weight_var):
 
     params = lasagne.layers.get_all_params(network, trainable=True)
 
-    #true_case_weight = (1/(T.mean(target_prediction)+_EPSILON))#*0.8
-    #loss_weighing = (true_case_weight-1)*target_prediction + 1
-
     out = lasagne.layers.get_output(network)
     test_out = lasagne.layers.get_output(network, deterministic=True)
 
