@@ -1,6 +1,8 @@
 from __future__ import division
 import time
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import scipy.misc
@@ -115,7 +117,7 @@ if __name__ == "__main__":
 
             val_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             val_batches += 1
-            
+
             if np.ceil(i/val_batch_size) % 10 == 0: #Create image every 10th image
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
