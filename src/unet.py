@@ -7,28 +7,22 @@ from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
 from lasagne.regularization import l2, regularize_network_params
 
-#INPUT_SIZE = 572 # The standard size
-INPUT_SIZE = 512 #Reduced size, also fits lungs easily in output map
+def output_size_for_input(in_size, depth):
+    in_size -= 4
+    for _ in range(depth-1):
+        in_size = in_size//2
+        in_size -= 4
+    for _ in range(depth-1):
+        in_size = in_size*2
+        in_size -= 4
+    return in_size
+
 NET_DEPTH = 5
-
-SIZE_DICT = {
-    2:556,
-    3:532,
-    4:484,
-    5:388
-}
-
-SIZE_DICT_512 = {
-    5:324
-}
-
-
-OUTPUT_SIZE = SIZE_DICT_512[NET_DEPTH]
+INPUT_SIZE = 512 #Reduced size, also fits lungs easily in output map
+OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 def filter_for_depth(depth):
     return 2**(5+depth)
-
-folder = '../data/train_resized/'
 
 def define_network(input_var):
     batch_size = None
@@ -39,7 +33,7 @@ def define_network(input_var):
 
 
 
-    def contraction(depth, pool=True):
+    def contraction(depth, deepest):
         n_filters = filter_for_depth(depth)
         incoming = net['input'] if depth == 0 else net['pool{}'.format(depth-1)]
 
@@ -52,27 +46,25 @@ def define_network(input_var):
                                     W=HeNormal(gain='relu'),
                                     nonlinearity=nonlinearity)
 
-        if pool:
+        if not deepest:
             net['pool{}'.format(depth)] = MaxPool2DLayer(net['conv{}_2'.format(depth)], pool_size=2, stride=2)
 
-    def expansion(depth):
+    def expansion(depth, deepest):
         n_filters = filter_for_depth(depth)
 
-        deepest = 'pool{}'.format(depth+1) not in net
         incoming = net['conv{}_2'.format(depth+1)] if deepest else net['_conv{}_2'.format(depth+1)]
 
-        #net['upconv{}'.format(depth)] = TransposedConv2DLayer(incoming,
-        #                                num_filters=n_filters, filter_size=2, stride=2,
-        #                                W=HeNormal(gain='relu'),
-        #                                nonlinearity=nonlinearities.rectify)
-        upsc = Upscale2DLayer(incoming,4)
-        net['upconv{}'.format(depth)] = Conv2DLayer(upsc,
+        upscaling = Upscale2DLayer(incoming,4)
+        net['upconv{}'.format(depth)] = Conv2DLayer(upscaling,
                                         num_filters=n_filters, filter_size=2, stride=2,
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
+        net['bridge{}'.format(depth)] = ConcatLayer([
+                                        net['upconv{}'.format(depth)],
+                                        net['conv{}_2'.format(depth)]],
+                                        axis=1, cropping=[None, None, 'center', 'center'])
 
-        net['bridge{}'.format(depth)] = ConcatLayer([net['upconv{}'.format(depth)],net['conv{}_2'.format(depth)]], axis=1, cropping=[None, None, 'center', 'center'])
         net['_conv{}_1'.format(depth)] = Conv2DLayer(net['bridge{}'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
                                         W=HeNormal(gain='relu'),
@@ -82,13 +74,14 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-
     for d in range(NET_DEPTH):
-        is_not_deepest = d!=NET_DEPTH-1
-        contraction(d, pool=is_not_deepest)
+        #There is no pooling at the last layer
+        deepest = d == NET_DEPTH-1
+        contraction(d, deepest)
 
     for d in reversed(range(NET_DEPTH-1)):
-        expansion(d)
+        deepest = d == NET_DEPTH-2
+        expansion(d, deepest)
 
     # Output layer
     net['out'] = Conv2DLayer(net['_conv0_2'], num_filters=2, filter_size=(1,1), pad='valid',
@@ -99,75 +92,62 @@ def define_network(input_var):
     print 'Network output shape', lasagne.layers.get_output_shape(net['out'])
     return net
 
-def define_updates(network, input_var, target_var):
+def score_metrics(out, target_var, weight_map, l2_loss=0):
+    _EPSILON=1e-8
+
+    out_flat = out.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
+    target_flat = target_var.dimshuffle(1,0,2,3).flatten(ndim=1)
+    weight_flat = weight_map.dimshuffle(1,0,2,3).flatten(ndim=1)
+
+    prediction = lasagne.nonlinearities.softmax(out_flat)
+    prediction_binary = T.argmax(prediction, axis=1)
+
+    dice_score = (T.sum(T.eq(2, prediction_binary+target_flat))*2.0 /
+                    (T.sum(prediction_binary) + T.sum(target_flat)))
+
+    loss = lasagne.objectives.categorical_crossentropy(T.clip(prediction,_EPSILON,1-_EPSILON), target_flat)
+    loss = loss * weight_flat
+    loss = loss.mean()
+    loss += l2_loss
+
+    accuracy = T.mean(T.eq(prediction_binary, target_flat),
+                      dtype=theano.config.floatX)
+
+    return loss, accuracy, dice_score, target_flat, prediction, prediction_binary
+
+
+def define_updates(network, input_var, target_var, weight_var):
     l2_lambda = 1e-5 #Weight decay
-    learning_rate = learning_rate=0.00002
+    learning_rate = learning_rate=0.00001
     momentum = 0.99
 
     params = lasagne.layers.get_all_params(network, trainable=True)
-    target_prediction = target_var.dimshuffle(1,0,2,3).flatten(ndim=1)
 
-    _EPSILON=1e-8
-    true_case_weight = (1/(T.mean(target_prediction)+_EPSILON))#*0.8
-    loss_weighing = (true_case_weight-1)*target_prediction + 1
+    #true_case_weight = (1/(T.mean(target_prediction)+_EPSILON))#*0.8
+    #loss_weighing = (true_case_weight-1)*target_prediction + 1
 
-    prediction = lasagne.layers.get_output(network)
-    prediction_flat = prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
+    out = lasagne.layers.get_output(network)
+    test_out = lasagne.layers.get_output(network, deterministic=True)
 
-    softmax = lasagne.nonlinearities.softmax(prediction_flat)
-    prediction_binary = T.argmax(softmax, axis=1)
-
-    dice_score = T.sum(T.eq(2, prediction_binary+target_prediction))*2.0 / (T.sum(prediction_binary) + T.sum(target_prediction))
     l2_loss = l2_lambda * regularize_network_params(network, l2)
 
-    loss = lasagne.objectives.categorical_crossentropy(T.clip(softmax,_EPSILON,1-_EPSILON), target_prediction)
-    loss = loss * loss_weighing
-    loss = loss.mean()
-    #loss += (1-dice_score)**2
-    loss += l2_loss
+    train_metrics = score_metrics(out, target_var, weight_var, l2_loss)
+    loss, acc, dice_score, target_prediction, prediction, prediction_binary = train_metrics
 
-    acc = T.mean(T.eq(prediction_binary, target_prediction),
-                      dtype=theano.config.floatX)
-
-    # Can be used for precision/recall
-    tp = (T.eq(target_prediction,1) * T.eq(prediction_binary,1)).sum()
-    tn = (T.neq(target_prediction,1) * T.neq(prediction_binary,1)).sum()
-    fp = (T.neq(target_prediction,1) * T.eq(prediction_binary,1)).sum()
-    fn = (T.eq(target_prediction,1) * T.neq(prediction_binary,1)).sum()
+    val_metrics = score_metrics(test_out, target_var, weight_var, l2_loss)
+    t_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary = train_metrics
 
     updates = lasagne.updates.nesterov_momentum(
             loss, params, learning_rate=learning_rate, momentum=momentum)
 
-    test_prediction = lasagne.layers.get_output(network, deterministic=True)
-    test_prediction_flat = test_prediction.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
-    test_softmax = lasagne.nonlinearities.softmax(prediction_flat)
-
-    test_loss = lasagne.objectives.categorical_crossentropy(T.clip(test_softmax,_EPSILON,1-_EPSILON), target_prediction)
-    test_loss = test_loss * loss_weighing
-    test_loss = test_loss.mean()
-    test_loss += l2_loss
-
-    test_prediction_binary = T.argmax(softmax, axis=1)
-    test_dice_score = T.sum(T.eq(2, test_prediction_binary+target_prediction))*2.0 / (T.sum(test_prediction_binary) + T.sum(target_prediction))
-
-    test_acc = T.mean(T.eq(test_prediction_binary, target_prediction),
-                      dtype=theano.config.floatX)
-
-    # Can be used for precision/recall
-    t_tp = (T.eq(target_prediction,1) * T.eq(test_prediction_binary,1)).sum()
-    t_tn = (T.neq(target_prediction,1) * T.neq(test_prediction_binary,1)).sum()
-    t_fp = (T.neq(target_prediction,1) * T.eq(test_prediction_binary,1)).sum()
-    t_fn = (T.eq(target_prediction,1) * T.neq(test_prediction_binary,1)).sum()
-
     print "Defining train function"
-    train_fn = theano.function([input_var, target_var],[
-                                loss, acc, l2_loss, target_prediction, softmax[:,1],
-                                dice_score, tp,tn,fp,fn],
+    train_fn = theano.function([input_var, target_var, weight_var],[
+                                loss, l2_loss, acc, dice_score, target_prediction, prediction, prediction_binary],
                                 updates=updates)
 
     print "Defining validation function"
-    val_fn = theano.function([input_var, target_var], [
-                                test_loss, test_acc, l2_loss, target_prediction, test_softmax[:,1],
-                                test_dice_score, t_tp, t_tn, t_fp, t_fn])
+    val_fn = theano.function([input_var, target_var, weight_var], [
+                                t_loss, l2_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary])
+
 
     return train_fn, val_fn

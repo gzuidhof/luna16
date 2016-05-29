@@ -3,7 +3,6 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import cv2
 import scipy.misc
 
 if __name__ == "__main__":
@@ -32,12 +31,13 @@ if __name__ == "__main__":
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
     target_var = T.tensor4('targets', dtype='int64')
+    weight_var = T.tensor4('weights')
 
     print "Defining network"
     net_dict = unet.define_network(input_var)
     network = net_dict['out']
 
-    train_fn, val_fn = unet.define_updates(network, input_var, target_var)
+    train_fn, val_fn = unet.define_updates(network, input_var, target_var, weight_var)
 
     model_name = 'unet'+str(int(time.time()))
     model_folder = os.path.join('../data/models',model_name)
@@ -60,21 +60,19 @@ if __name__ == "__main__":
     train_batch_size = 1
     val_batch_size = 2
 
-    train_subset = 1000
-    val_subset = 1000
+    train_subset = 20
+    val_subset = 20
 
     num_epochs = 400
 
     filenames_train = filenames_train[:train_subset]
     filenames_val = filenames_val[:val_subset]
 
-    metric_names = ['loss  ','accuracy','l2    ','dice  ','precision','recall']
+    metric_names = ['Loss  ','L2    ','Accuracy','Dice  ','Precision','Recall']
     train_metrics_all = []
     val_metrics_all = []
 
-    # Finally, launch the training loop.
     print("Starting training...")
-    # We iterate over epochs:
     for epoch in range(num_epochs):
         # In each epoch, we do a full pass over the training data:
         train_batches = 0
@@ -86,18 +84,19 @@ if __name__ == "__main__":
         train_metrics = []
         val_metrics = []
 
-        #for batch in iterate_minibatches(X_train, y_train, 1, shuffle=True):
         for i, batch in enumerate(tqdm(train_gen)):
-            inputs, targets = batch
-            err, acc, l2_loss, true, prob, dice, tp,tn,fp,fn= train_fn(inputs, targets)
+            inputs, targets, weights = batch
 
-            train_metrics.append([err, acc, l2_loss, dice, tp, tn, fp, fn])
+            err, l2_loss, acc, dice, true, prob, prob_b = train_fn(inputs, targets, weights)
+            tp=tn=fp=fn=1
+
+            train_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             train_batches += 1
 
-            if np.ceil(i//train_batch_size) == 0:
+            if np.ceil(i/train_batch_size) % 10 == 0:
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
-                    prob[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
+                    prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
                 plt.imsave(os.path.join(plot_folder,'train_{}_epoch{}.png'.format(model_name, epoch)),im)
 
@@ -108,18 +107,19 @@ if __name__ == "__main__":
         val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=True, batch_size=val_batch_size,multiprocess=False)
 
         for i, batch in enumerate(tqdm(val_gen)):
-            inputs, targets = batch
-            err, acc, l2_loss, true, prob, dice,tp,tn,fp,fn = val_fn(inputs, targets)
+            inputs, targets, weights = batch
+            err, l2_loss, acc, dice, true, prob, prob_b = val_fn(inputs, targets, weights)
+            tp=tn=fp=fn=1
 
-            val_metrics.append([err, acc, l2_loss, dice, tp, tn, fp, fn])
+            val_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             val_batches += 1
-
-            if np.ceil(i//val_batch_size) % 10 == 0: #Create image every 10th image
+            if np.ceil(i/val_batch_size) % 10 == 0: #Create image every 10th image
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
-                    prob[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
+                    prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
                 plt.imsave(os.path.join(plot_folder,'val_{}_epoch{}.png'.format(model_name, epoch)),im)
+                plt.close()
 
         train_metrics = np.sum(np.array(train_metrics),axis=0)/train_batches
         val_metrics = np.sum(np.array(val_metrics),axis=0)/val_batches
@@ -130,8 +130,8 @@ if __name__ == "__main__":
         precision_val = val_metrics[4] / (val_metrics[4]+val_metrics[6])
         recall_val = val_metrics[4] / (val_metrics[4]+val_metrics[7])
 
-        train_metrics = list(train_metrics[:5]) + [precision_train,recall_train] #Strip off false positives et al
-        val_metrics = list(val_metrics[:5]) + [precision_val,recall_val]
+        train_metrics = list(train_metrics[:4]) + [precision_train,recall_train] #Strip off false positives et al
+        val_metrics = list(val_metrics[:4]) + [precision_val,recall_val]
 
         # Then we print the results for this epoch:
         print("\nEpoch {} of {} took {:.3f}s".format(
@@ -153,9 +153,10 @@ if __name__ == "__main__":
             plt.plot(train_vals)
             plt.plot(val_vals)
             plt.ylabel(name)
-            plt.xlabel(epoch)
+            plt.xlabel("Epoch")
 
             plt.savefig(os.path.join(plot_folder, '{}.png'.format(name)))
+            plt.close()
 
 
     # Optionally, you could now dump the network weights to a file like this:

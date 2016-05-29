@@ -28,10 +28,12 @@ def get_image(filename):
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
-    return lung, truth
+    weights = np.ones_like(truth, dtype=np.float32)
+
+    return lung, truth, weights
 
 def load_images(filenames):
     filenames = filter(lambda x: x!='.', filenames)
     slices = map(get_image, filenames)
-    lungs, truths = zip(*slices)
-    return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0)
+    lungs, truths, weights = zip(*slices)
+    return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0), np.concatenate(weights,axis=0)
