@@ -6,10 +6,42 @@ import pandas as pd
 from tqdm import tqdm
 import blob
 import pickle
+import glob
+import os
 
 from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
+
+
+def candidates_to_image(cands,radius):
+    image_names = []
+    for subset in xrange(0,10):
+        subset_names = glob.glob("../data/subset{0}/*.mhd".format(subset))
+        names = [os.path.split(x)[1].replace('.mhd','') for x in subset_names]
+        image_names.append(names)
+    previous_candidate = ""
+    images = []
+    image = []
+    origin = []
+    spacing = []
+    for candidate in cands.values:
+        if candidate[0] != previous_candidate:
+            previous_candidate = candidate[0]
+            for image_subset in xrange(0,10):
+                if candidate[0] in image_names[image_subset]:
+                    image,origin,spacing = load_itk_image("../data/subset{0}/{1}.mhd".format(image_subset,candidate[0]))
+                    break
+        coords = world_2_voxel([candidate[3],candidate[2],candidate[1]],origin,spacing)
+        images.append(image_part_from_candidate(image,coords,radius))
+    return images
+
+def image_part_from_candidate(image,coords,radius):
+    im = np.zeros((radius*2,radius*2))
+    for x in xrange(-radius,radius):
+        for y in xrange(-radius,radius):
+                im[x+radius,y+radius]=image[coords[0],coords[1]+x,coords[2]+y]
+    return im
 
 
 #Merge candidates of a single scan
@@ -98,7 +130,8 @@ def coords_to_candidates(coords, seriesuid):
 
 if __name__ == "__main__":
 
-    #df = load_candidates('../data/candidates.csv')
+    df = load_candidates('../data/candidates.csv')
+    images = candidates_to_image(df,10)
     #new_candidates = merge_candidates(df)
     #save_candidates('test.csv', new_candidates)
 
