@@ -27,8 +27,10 @@ def candidates_to_image(cands,radius):
     image = []
     origin = []
     spacing = []
+    number = 0
     for candidate in tqdm(cands.values):
         if candidate[0] != previous_candidate:
+            number = 0
             previous_candidate = candidate[0]
             for image_subset in xrange(0,10):
                 if candidate[0] in image_names[image_subset]:
@@ -41,15 +43,18 @@ def candidates_to_image(cands,radius):
             label = "true"
         else:
             label = "false"
-        scipy.misc.imsave('../data/samples/{0}_{1}.jpg'.format(candidate[0],label), im)
+        scipy.misc.imsave('../data/samples/{0}_{1}_{2}.jpg'.format(candidate[0],number,label), im)
+        number += 1
     return images
 
 def image_part_from_candidate(image,coords,radius):
     im = np.zeros((radius*2,radius*2))
     for x in xrange(-radius,radius):
         for y in xrange(-radius,radius):
-                im[x+radius,y+radius]=image[coords[0],coords[1]+x,coords[2]+y]
-
+                try:
+                    im[x+radius,y+radius]=image[coords[0],coords[1]+x,coords[2]+y]
+                except:
+                    im[x+radius,y+radius]=-1000
     return im
 
 
