@@ -8,6 +8,8 @@ import blob
 import pickle
 import glob
 import os
+import scipy.misc
+
 
 from image_read_write import load_itk_image
 
@@ -25,7 +27,7 @@ def candidates_to_image(cands,radius):
     image = []
     origin = []
     spacing = []
-    for candidate in cands.values:
+    for candidate in tqdm(cands.values):
         if candidate[0] != previous_candidate:
             previous_candidate = candidate[0]
             for image_subset in xrange(0,10):
@@ -33,7 +35,13 @@ def candidates_to_image(cands,radius):
                     image,origin,spacing = load_itk_image("../data/subset{0}/{1}.mhd".format(image_subset,candidate[0]))
                     break
         coords = world_2_voxel([candidate[3],candidate[2],candidate[1]],origin,spacing)
-        images.append(image_part_from_candidate(image,coords,radius))
+        im = image_part_from_candidate(image,coords,radius)
+        #images.append(im)
+        if candidate[4]:
+            label = "true"
+        else:
+            label = "false"
+        scipy.misc.imsave('../data/samples/{0}_{1}.jpg'.format(candidate[0],label), im)
     return images
 
 def image_part_from_candidate(image,coords,radius):
@@ -41,6 +49,7 @@ def image_part_from_candidate(image,coords,radius):
     for x in xrange(-radius,radius):
         for y in xrange(-radius,radius):
                 im[x+radius,y+radius]=image[coords[0],coords[1]+x,coords[2]+y]
+
     return im
 
 
@@ -131,7 +140,7 @@ def coords_to_candidates(coords, seriesuid):
 if __name__ == "__main__":
 
     df = load_candidates('../data/candidates.csv')
-    images = candidates_to_image(df,10)
+    images = candidates_to_image(df,15)
     #new_candidates = merge_candidates(df)
     #save_candidates('test.csv', new_candidates)
 
