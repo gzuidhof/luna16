@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 import lasagne
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer
+from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer
 from lasagne.init import HeNormal
 from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
@@ -60,6 +60,11 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
+        #net['upconv{}'.format(depth)] = TransposedConv2DLayer(incoming,
+        #                                num_filters=n_filters, filter_size=2, stride=2,
+        #                                W=HeNormal(gain='relu'),
+        #                                nonlinearity=nonlinearity)
+
         net['bridge{}'.format(depth)] = ConcatLayer([
                                         net['upconv{}'.format(depth)],
                                         net['conv{}_2'.format(depth)]],
@@ -117,8 +122,8 @@ def score_metrics(out, target_var, weight_map, l2_loss=0):
 
 
 def define_updates(network, input_var, target_var, weight_var):
-    l2_lambda = 4e-5 #Weight decay
-    learning_rate = learning_rate=0.00001
+    l2_lambda = 1e-5 #Weight decay
+    learning_rate = learning_rate=0.000001
     momentum = 0.99
 
     params = lasagne.layers.get_all_params(network, trainable=True)

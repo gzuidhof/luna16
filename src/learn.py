@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import scipy.misc
 import metrics
+import util
 
 if __name__ == "__main__":
     from dataset import load_images
@@ -21,14 +22,6 @@ from glob import glob
 
 import cPickle as pickle
 from parallel import ParallelBatchIterator
-
-def calc_dice(train,truth):
-    score = np.sum(train[truth>0])*2.0 / (np.sum(train) + np.sum(truth))
-    return score
-
-def make_dir_if_not_present(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
 if __name__ == "__main__":
     # create Theano variables for input and target minibatch
@@ -47,7 +40,7 @@ if __name__ == "__main__":
     plot_folder = os.path.join('../images/plot',model_name)
 
     folders = ['../images','../images/plot','../data','../data/models', model_folder, plot_folder]
-    map(make_dir_if_not_present, folders)
+    map(util.make_dir_if_not_present, folders)
 
 
     np.random.seed(1)
@@ -63,8 +56,8 @@ if __name__ == "__main__":
     train_batch_size = 1
     val_batch_size = 2
 
-    train_subset = 20
-    val_subset = 20
+    train_subset = 1000
+    val_subset = 1000
 
     num_epochs = 400
 
@@ -96,7 +89,7 @@ if __name__ == "__main__":
             train_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             train_batches += 1
 
-            if np.ceil(i/train_batch_size) % 10 == 0:
+            if i % 10 == 0:
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
@@ -118,7 +111,7 @@ if __name__ == "__main__":
             val_metrics.append([err, l2_loss, acc, dice, tp, tn, fp, fn])
             val_batches += 1
 
-            if np.ceil(i/val_batch_size) % 10 == 0: #Create image every 10th image
+            if i % 30 == 0: #Create image every 10th image
                 im = np.hstack((
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))

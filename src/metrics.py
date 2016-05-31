@@ -7,3 +7,7 @@ def calc_errors(truth, prediction):
     fn = np.sum(np.equal(truth,1)*np.equal(prediction,0))
 
     return tp, tn, fp, fn
+
+def dice(prediction,truth):
+    score = np.sum(train[prediction>0])*2.0 / (np.sum(prediction) + np.sum(truth))
+    return score

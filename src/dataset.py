@@ -4,13 +4,13 @@ import numpy as np
 from unet import INPUT_SIZE, OUTPUT_SIZE
 import normalize
 import gzip
-#import cPickle as pickle
-import pickle
+import cPickle as pickle
+#import pickle
+import loss_weighting
 
 _EPSILON = 1e-8
 
 def get_image(filename):
-    #print "----------------"+str(filename)+"----------------"
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
@@ -31,13 +31,15 @@ def get_image(filename):
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
-    true_case_weight = (1/(np.mean(truth)+_EPSILON))*1.05
-    weights = np.array((true_case_weight-1)*truth + 1, dtype=np.float32)
-
-    return lung, truth, weights
+    return lung, truth
 
 def load_images(filenames):
     filenames = filter(lambda x: x!='.', filenames)
     slices = map(get_image, filenames)
-    lungs, truths, weights = zip(*slices)
-    return np.concatenate(lungs,axis=0), np.concatenate(truths,axis=0), np.concatenate(weights,axis=0)
+    lungs, truths = zip(*slices)
+
+    l = np.concatenate(lungs,axis=0)
+    t = np.concatenate(truths,axis=0)
+    w = loss_weighting.weight_by_class_balance(t)
+
+    return l, t, w
