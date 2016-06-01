@@ -123,7 +123,7 @@ def score_metrics(out, target_var, weight_map, l2_loss=0):
 
 def define_updates(network, input_var, target_var, weight_var):
     l2_lambda = 1e-5 #Weight decay
-    learning_rate = learning_rate=0.0001
+    learning_rate = learning_rate=0.00005
     momentum = 0.99
 
     params = lasagne.layers.get_all_params(network, trainable=True)

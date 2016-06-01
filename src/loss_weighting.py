@@ -16,7 +16,7 @@ def weight_by_class_balance(truth, classes=None):
 
     for c in classes:
         class_mask = np.where(truth==c,1,0)
-        class_weight = 1/(np.sum(class_mask)/total_amount)
+        class_weight = 1/((np.sum(class_mask)+1e-8)/total_amount)
 
         weight_map += (class_mask*class_weight)#/total_amount
 
