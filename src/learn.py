@@ -56,8 +56,8 @@ if __name__ == "__main__":
     train_batch_size = 1
     val_batch_size = 2
 
-    train_subset = 10
-    val_subset = 10
+    train_subset = None
+    val_subset = None
 
     num_epochs = 400
 
