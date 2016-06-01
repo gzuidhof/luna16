@@ -1,3 +1,4 @@
+import os
 def chunks(l, n):
     """ Yield successive n-sized chunks from l.
         from http://goo.gl/DZNhk

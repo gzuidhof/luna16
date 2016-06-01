@@ -5,8 +5,10 @@ from unet import INPUT_SIZE, OUTPUT_SIZE
 import normalize
 import gzip
 import cPickle as pickle
-#import pickle
 import loss_weighting
+import skimage.morphology
+
+import matplotlib.pyplot as plt
 
 _EPSILON = 1e-8
 
@@ -17,8 +19,15 @@ def get_image(filename):
     with gzip.open(filename.replace('lung','nodule'),'rb') as f:
         truth = pickle.load(f)
 
-    lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
+    #We do not care about the outside
+    outside = np.where(lung==0,True,False)
+    kernel = skimage.morphology.disk(3)
+    outside = skimage.morphology.binary_erosion(outside, kernel)
 
+    #Set label of outside pixels to -1
+    truth = truth - outside
+
+    lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
     lung = np.array(normalize.normalize(lung),dtype=np.float32)
 
     # Crop truth
@@ -40,6 +49,8 @@ def load_images(filenames):
 
     l = np.concatenate(lungs,axis=0)
     t = np.concatenate(truths,axis=0)
-    w = loss_weighting.weight_by_class_balance(t)
+    w = loss_weighting.weight_by_class_balance(t, classes=[0,1])
 
+    #Set -1 labels to label 0, they have a weight of 0
+    t = np.clip(t, 0, 100000)
     return l, t, w
