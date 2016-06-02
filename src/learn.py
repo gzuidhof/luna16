@@ -26,7 +26,6 @@ import cPickle as pickle
 from parallel import ParallelBatchIterator
 
 if __name__ == "__main__":
-
     model_name = str(int(time.time()))+'unet'
     model_folder = os.path.join('../data/models',model_name)
     plot_folder = os.path.join(model_folder, 'plots')
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     filenames_train = filenames_train[:train_subset]
     filenames_val = filenames_val[:val_subset]
 
-    metric_names = ['Loss  ','L2    ','Accuracy','Dice  ','Precision','Recall']
+    metric_names = ['Loss','L2','Accuracy','Dice','Precision','Recall']
     train_metrics_all = []
     val_metrics_all = []
 
@@ -138,21 +137,23 @@ if __name__ == "__main__":
         val_metrics = list(val_metrics[:4]) + [precision_val,recall_val]
 
         # Then we print the results for this epoch:
-        logging.info("\nEpoch {} of {} took {:.3f}s".format(
+        logging.info("Epoch {} of {} took {:.3f}s\n".format(
             epoch + 1, num_epochs, time.time() - start_time))
 
         #print "Metrics"
         for name, train_metric, val_metric in zip(metric_names, train_metrics, val_metrics):
-            logging.info(" {}:\t\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric))
+            name = name.rjust(10," ") #Pad the name until 10 characters long
+            logging.info("{}:\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric))
 
         if epoch % 4 == 0:
             logging.info("Saving model")
-            np.savez(os.path.join(model_folder,'{}_epoch{}.npz'.format(model_name, epoch)), *lasagne.layers.get_all_param_values(network))
+            np.savez_compressed(os.path.join(model_folder,'{}_epoch{}.npz'.format(model_name, epoch)), *lasagne.layers.get_all_param_values(network))
 
         train_metrics_all.append(train_metrics)
         val_metrics_all.append(val_metrics)
 
         for name, train_vals, val_vals in zip(metric_names, zip(*train_metrics_all),zip(*val_metrics_all)):
+
             plt.figure()
             plt.plot(train_vals)
             plt.plot(val_vals)
