@@ -1,11 +1,18 @@
 import theano
+print "h"
 import theano.tensor as T
 import lasagne
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, TransposedConv2DLayer
+print "i"
+from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer
+print "j"
 from lasagne.init import HeNormal
+print "k"
 from lasagne import nonlinearities
+print "l"
 from lasagne.layers import ConcatLayer, Upscale2DLayer
+print "m"
 from lasagne.regularization import l2, regularize_network_params
+print "r"
 
 def output_size_for_input(in_size, depth):
     in_size -= 4

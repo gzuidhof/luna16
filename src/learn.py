@@ -1,27 +1,38 @@
 from __future__ import division
+print "1"
 import time
 import numpy as np
+print "2"
 import matplotlib
 matplotlib.use('Agg')
+print "3"
 import matplotlib.pyplot as plt
 import os
 import scipy.misc
 import metrics
 import util
+import logging
 
 if __name__ == "__main__":
+    print "4"
     from dataset import load_images
     import theano
     import theano.tensor as T
+    print "5"
     import lasagne
+    print "6"
     import unet
+    print "7"
     from unet import INPUT_SIZE, OUTPUT_SIZE
+
 
 from tqdm import tqdm
 from glob import glob
+print "8"
 
 import cPickle as pickle
 from parallel import ParallelBatchIterator
+print "9"
 
 if __name__ == "__main__":
     # create Theano variables for input and target minibatch
@@ -29,7 +40,7 @@ if __name__ == "__main__":
     target_var = T.tensor4('targets', dtype='int64')
     weight_var = T.tensor4('weights')
 
-    print "Defining network"
+    logging.info("Defining network")
     net_dict = unet.define_network(input_var)
     network = net_dict['out']
 
@@ -41,7 +52,7 @@ if __name__ == "__main__":
 
     folders = ['../images','../images/plot','../data','../data/models', model_folder, plot_folder]
     map(util.make_dir_if_not_present, folders)
-
+    logging.basicConfig(filename="../data/log{0}.txt".format(model_name),level=logging.DEBUG,format='%(asctime)s %(message)s')
 
     np.random.seed(1)
     folder_train = './../data/1_1_1mm_512_x_512_lung_slices/subset[0-2]/'
@@ -68,7 +79,7 @@ if __name__ == "__main__":
     train_metrics_all = []
     val_metrics_all = []
 
-    print("Starting training...")
+    logging.info("Starting training...")
     for epoch in range(num_epochs):
         # In each epoch, we do a full pass over the training data:
         train_batches = 0
@@ -132,15 +143,15 @@ if __name__ == "__main__":
         val_metrics = list(val_metrics[:4]) + [precision_val,recall_val]
 
         # Then we print the results for this epoch:
-        print("\nEpoch {} of {} took {:.3f}s".format(
+        logging.info("\nEpoch {} of {} took {:.3f}s".format(
             epoch + 1, num_epochs, time.time() - start_time))
 
         #print "Metrics"
         for name, train_metric, val_metric in zip(metric_names, train_metrics, val_metrics):
-            print " {}:\t\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric)
+            logging.info(" {}:\t\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric))
 
         if epoch % 4 == 0:
-            print "Saving model"
+            logging.info("Saving model")
             np.savez(os.path.join(model_folder,'{}_epoch{}.npz'.format(model_name, epoch)), *lasagne.layers.get_all_param_values(network))
 
         train_metrics_all.append(train_metrics)
