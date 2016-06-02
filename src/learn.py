@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
-                plt.imsave(os.path.join(image_folder,'train_{}_epoch{}.png'.format(model_name, epoch)),im)
+                plt.imsave(os.path.join(image_folder,'train_epoch{}.png'.format(epoch)),im)
 
         # And a full pass over the validation data:
         val_batches = 0
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
-                plt.imsave(os.path.join(image_folder,'val_{}_epoch{}.png'.format(model_name, epoch)),im)
+                plt.imsave(os.path.join(image_folder,'val_epoch{}.png'.format(epoch)),im)
                 plt.close()
 
         train_metrics = np.sum(np.array(train_metrics),axis=0)/train_batches
@@ -140,7 +140,6 @@ if __name__ == "__main__":
         logging.info("Epoch {} of {} took {:.3f}s\n".format(
             epoch + 1, num_epochs, time.time() - start_time))
 
-        #print "Metrics"
         for name, train_metric, val_metric in zip(metric_names, train_metrics, val_metrics):
             name = name.rjust(10," ") #Pad the name until 10 characters long
             logging.info("{}:\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric))
@@ -153,7 +152,6 @@ if __name__ == "__main__":
         val_metrics_all.append(val_metrics)
 
         for name, train_vals, val_vals in zip(metric_names, zip(*train_metrics_all),zip(*val_metrics_all)):
-
             plt.figure()
             plt.plot(train_vals)
             plt.plot(val_vals)
