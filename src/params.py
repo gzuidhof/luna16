@@ -4,9 +4,11 @@ from ConfigParser import ConfigParser
 import StringIO
 
 class Params():
-    def __init__(self, config_file_path="../config/default.ini"):
+    def __init__(self, config_file_path):
         cf = ConfigParser()
-        cf.read(config_file_path)
+        read_from = cf.read(config_file_path)
+
+        print "Loaded configuration from (in order)", read_from
 
         self.CONFIG = cf
         cf.set('info','config_file', config_file_path)
@@ -45,9 +47,16 @@ class Params():
         self.BATCH_SIZE_VALIDATION = cf.getint('updates', 'batch_size_validation')
         self.N_EPOCHS = cf.getint('updates', 'n_epochs')
 
+        # Preprocessing
+        self.ERODE_SEGMENTATION = cf.getint('preprocessing', 'erode_segmentation')
+
         # Normalization
         self.ZERO_CENTER = cf.getboolean('normalization', 'zero_center')
         self.MEAN_PIXEL = cf.getfloat('normalization', 'mean_pixel')
+
+        # Misc
+        self.MULTIPROCESS_LOAD_AUGMENTATION = cf.getboolean('misc', 'multiprocess_load_augmentation')
+        self.SAVE_EVERY_N_EPOCH = cf.getint('misc', 'save_every_n_epoch')
 
     def to_string(self):
         output = StringIO.StringIO()
@@ -60,4 +69,4 @@ class Params():
         with open(filepath, 'w') as f:
             self.CONFIG.write(f)
 
-params = Params()
+params = Params(['../config/default.ini']+sys.argv[1:])

@@ -8,6 +8,8 @@ import cPickle as pickle
 import loss_weighting
 import skimage.morphology
 
+from params import params as P
+
 _EPSILON = 1e-8
 
 def get_image(filename):
@@ -17,7 +19,7 @@ def get_image(filename):
     with gzip.open(filename.replace('lung','nodule'),'rb') as f:
         truth = pickle.load(f)
 
-    #Random transpose
+    #Random flips
     #if np.random.randint(2)==0:
     #    lung = lung.transpose(1,0)
     #    truth = truth.transpose(1,0)
@@ -26,11 +28,12 @@ def get_image(filename):
     #    lung = lung.transpose(1,0)
     #    truth = truth.transpose(1,0)
 
-
     #We do not care about the outside
     outside = np.where(lung==0,True,False)
-    kernel = skimage.morphology.disk(3)
-    outside = skimage.morphology.binary_erosion(outside, kernel)
+
+    if P.ERODE_SEGMENTATION > 0:
+        kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
+        outside = skimage.morphology.binary_erosion(outside, kernel)
 
     #Set label of outside pixels to -1
     truth = truth - outside
@@ -44,7 +47,9 @@ def get_image(filename):
     truth = truth[offset:offset+crop_size,offset:offset+crop_size]
 
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
-    lung = lung-0.66200809792889126
+
+    if P.ZERO_CENTER:
+        lung = lung - P.MEAN_PIXEL
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 

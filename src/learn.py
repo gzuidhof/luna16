@@ -77,7 +77,9 @@ if __name__ == "__main__":
         start_time = time.time()
 
         np.random.shuffle(filenames_train)
-        train_gen = ParallelBatchIterator(load_images, filenames_train, ordered=True, batch_size=P.BATCH_SIZE_TRAIN, multiprocess=False)
+        train_gen = ParallelBatchIterator(load_images, filenames_train, ordered=False,
+                                            batch_size=P.BATCH_SIZE_TRAIN,
+                                            multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION)
 
         train_metrics = []
         val_metrics = []
@@ -102,7 +104,9 @@ if __name__ == "__main__":
         val_batches = 0
 
         np.random.shuffle(filenames_val)
-        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=True, batch_size=P.BATCH_SIZE_VALIDATION,multiprocess=False)
+        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=False,
+                                            batch_size=P.BATCH_SIZE_VALIDATION,
+                                            multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION)
 
         for i, batch in enumerate(tqdm(val_gen)):
             inputs, targets, weights = batch
@@ -141,7 +145,7 @@ if __name__ == "__main__":
             name = name.rjust(10," ") #Pad the name until 10 characters long
             logging.info("{}:\t {:.6f}\t{:.6f}".format(name,train_metric,val_metric))
 
-        if epoch % 4 == 0:
+        if epoch % P.SAVE_EVERY_N_EPOCH == 0:
             logging.info("Saving model")
             np.savez_compressed(os.path.join(model_folder,'{}_epoch{}.npz'.format(model_name, epoch)), *lasagne.layers.get_all_param_values(network))
 

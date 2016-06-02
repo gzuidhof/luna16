@@ -7,6 +7,7 @@ from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
 from lasagne.regularization import l2, regularize_network_params
 import logging
+from params import params as P
 
 def output_size_for_input(in_size, depth):
     in_size -= 4
@@ -18,17 +19,17 @@ def output_size_for_input(in_size, depth):
         in_size -= 4
     return in_size
 
-NET_DEPTH = 5
-INPUT_SIZE = 512 #Reduced size, also fits lungs easily in output map
+NET_DEPTH = P.DEPTH #Default 5
+INPUT_SIZE = P.INPUT_SIZE #Default 512
 OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 def filter_for_depth(depth):
-    return 2**(5+depth)
+    return 2**(P.BRANCHING_FACTOR+depth)
 
 def define_network(input_var):
     batch_size = None
     net = {}
-    net['input'] = InputLayer(shape=(batch_size,1,INPUT_SIZE,INPUT_SIZE), input_var=input_var)
+    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,P.INPUT_SIZE,P.INPUT_SIZE), input_var=input_var)
 
     nonlinearity = nonlinearities.rectify
 
@@ -90,7 +91,7 @@ def define_network(input_var):
         expansion(d, deepest)
 
     # Output layer
-    net['out'] = Conv2DLayer(net['_conv0_2'], num_filters=2, filter_size=(1,1), pad='valid',
+    net['out'] = Conv2DLayer(net['_conv0_2'], num_filters=P.N_CLASSES, filter_size=(1,1), pad='valid',
                                     nonlinearity=None)
 
     #import network_repr
@@ -123,16 +124,12 @@ def score_metrics(out, target_var, weight_map, l2_loss=0):
 
 
 def define_updates(network, input_var, target_var, weight_var):
-    l2_lambda = 1e-5 #Weight decay
-    learning_rate = learning_rate=0.00005
-    momentum = 0.99
-
     params = lasagne.layers.get_all_params(network, trainable=True)
 
     out = lasagne.layers.get_output(network)
     test_out = lasagne.layers.get_output(network, deterministic=True)
 
-    l2_loss = l2_lambda * regularize_network_params(network, l2)
+    l2_loss = P.L2_LAMBDA * regularize_network_params(network, l2)
 
     train_metrics = score_metrics(out, target_var, weight_var, l2_loss)
     loss, acc, dice_score, target_prediction, prediction, prediction_binary = train_metrics
@@ -141,7 +138,7 @@ def define_updates(network, input_var, target_var, weight_var):
     t_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary = train_metrics
 
     updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=learning_rate, momentum=momentum)
+            loss, params, learning_rate=P.LEARNING_RATE, momentum=P.MOMENTUM)
 
     logging.info("Defining train function")
     train_fn = theano.function([input_var, target_var, weight_var],[
