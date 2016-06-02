@@ -1,18 +1,12 @@
 import theano
-print "h"
 import theano.tensor as T
 import lasagne
-print "i"
 from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer
-print "j"
 from lasagne.init import HeNormal
-print "k"
 from lasagne import nonlinearities
-print "l"
 from lasagne.layers import ConcatLayer, Upscale2DLayer
-print "m"
 from lasagne.regularization import l2, regularize_network_params
-print "r"
+import logging
 
 def output_size_for_input(in_size, depth):
     in_size -= 4
@@ -101,7 +95,7 @@ def define_network(input_var):
 
     #import network_repr
     #print network_repr.get_network_str(net['out'])
-    print 'Network output shape', lasagne.layers.get_output_shape(net['out'])
+    logging.info('Network output shape '+ str(lasagne.layers.get_output_shape(net['out'])))
     return net
 
 def score_metrics(out, target_var, weight_map, l2_loss=0):
@@ -149,12 +143,12 @@ def define_updates(network, input_var, target_var, weight_var):
     updates = lasagne.updates.nesterov_momentum(
             loss, params, learning_rate=learning_rate, momentum=momentum)
 
-    print "Defining train function"
+    logging.info("Defining train function")
     train_fn = theano.function([input_var, target_var, weight_var],[
                                 loss, l2_loss, acc, dice_score, target_prediction, prediction, prediction_binary],
                                 updates=updates)
 
-    print "Defining validation function"
+    logging.info("Defining validation function")
     val_fn = theano.function([input_var, target_var, weight_var], [
                                 t_loss, l2_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary])
 

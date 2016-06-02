@@ -1,40 +1,43 @@
 from __future__ import division
-print "1"
 import time
 import numpy as np
-print "2"
 import matplotlib
 matplotlib.use('Agg')
-print "3"
 import matplotlib.pyplot as plt
 import os
 import scipy.misc
 import metrics
 import util
 import logging
+from logger import initialize_logger
 
 if __name__ == "__main__":
-    print "4"
     from dataset import load_images
     import theano
     import theano.tensor as T
-    print "5"
     import lasagne
-    print "6"
     import unet
-    print "7"
     from unet import INPUT_SIZE, OUTPUT_SIZE
-
 
 from tqdm import tqdm
 from glob import glob
-print "8"
 
 import cPickle as pickle
 from parallel import ParallelBatchIterator
-print "9"
 
 if __name__ == "__main__":
+
+    model_name = str(int(time.time()))+'unet'
+    model_folder = os.path.join('../data/models',model_name)
+    plot_folder = os.path.join(model_folder, 'plots')
+    image_folder = os.path.join(model_folder, 'images')
+
+    folders = ['../data','../data/models', model_folder, plot_folder, image_folder]
+    map(util.make_dir_if_not_present, folders)
+
+    initialize_logger(os.path.join(model_folder, 'log.txt').format(model_name))
+    logging.info("MODEL NAME {}".format(model_name))
+
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
     target_var = T.tensor4('targets', dtype='int64')
@@ -45,14 +48,6 @@ if __name__ == "__main__":
     network = net_dict['out']
 
     train_fn, val_fn = unet.define_updates(network, input_var, target_var, weight_var)
-
-    model_name = 'unet'+str(int(time.time()))
-    model_folder = os.path.join('../data/models',model_name)
-    plot_folder = os.path.join('../images/plot',model_name)
-
-    folders = ['../images','../images/plot','../data','../data/models', model_folder, plot_folder]
-    map(util.make_dir_if_not_present, folders)
-    logging.basicConfig(filename="../data/log{0}.txt".format(model_name),level=logging.DEBUG,format='%(asctime)s %(message)s')
 
     np.random.seed(1)
     folder_train = './../data/1_1_1mm_512_x_512_lung_slices/subset[0-2]/'
@@ -67,8 +62,8 @@ if __name__ == "__main__":
     train_batch_size = 1
     val_batch_size = 2
 
-    train_subset = None
-    val_subset = None
+    train_subset = 10
+    val_subset = 20
 
     num_epochs = 400
 
@@ -105,7 +100,7 @@ if __name__ == "__main__":
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
-                plt.imsave(os.path.join(plot_folder,'train_{}_epoch{}.png'.format(model_name, epoch)),im)
+                plt.imsave(os.path.join(image_folder,'train_{}_epoch{}.png'.format(model_name, epoch)),im)
 
         # And a full pass over the validation data:
         val_batches = 0
@@ -127,7 +122,7 @@ if __name__ == "__main__":
                     true[:OUTPUT_SIZE**2].reshape(OUTPUT_SIZE,OUTPUT_SIZE),
                     prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
 
-                plt.imsave(os.path.join(plot_folder,'val_{}_epoch{}.png'.format(model_name, epoch)),im)
+                plt.imsave(os.path.join(image_folder,'val_{}_epoch{}.png'.format(model_name, epoch)),im)
                 plt.close()
 
         train_metrics = np.sum(np.array(train_metrics),axis=0)/train_batches

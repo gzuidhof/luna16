@@ -1,18 +1,12 @@
 from __future__ import division
+import os.path
 import numpy as np
-print "a"
 from unet import INPUT_SIZE, OUTPUT_SIZE
-print "b"
 import normalize
-print "c"
 import gzip
-print "d"
 import cPickle as pickle
-print "e"
 import loss_weighting
-print "f"
 import skimage.morphology
-print "g"
 
 _EPSILON = 1e-8
 
