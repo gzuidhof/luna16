@@ -10,6 +10,7 @@ import metrics
 import util
 import logging
 from logger import initialize_logger
+from params import params as P
 
 if __name__ == "__main__":
     from dataset import load_images
@@ -26,16 +27,20 @@ import cPickle as pickle
 from parallel import ParallelBatchIterator
 
 if __name__ == "__main__":
-    model_name = str(int(time.time()))+'unet'
-    model_folder = os.path.join('../data/models',model_name)
+    model_name = P.MODEL_ID
+
+    model_folder = os.path.join('../models',model_name)
     plot_folder = os.path.join(model_folder, 'plots')
     image_folder = os.path.join(model_folder, 'images')
 
-    folders = ['../data','../data/models', model_folder, plot_folder, image_folder]
+    folders = ['../models', model_folder, plot_folder, image_folder]
     map(util.make_dir_if_not_present, folders)
-
     initialize_logger(os.path.join(model_folder, 'log.txt').format(model_name))
+
+    P.write_to_file(os.path.join(model_folder, 'config.ini'))
     logging.info("MODEL NAME {}".format(model_name))
+    logging.info(P.to_string())
+
 
     # create Theano variables for input and target minibatch
     input_var = T.tensor4('inputs')
@@ -58,29 +63,21 @@ if __name__ == "__main__":
     np.random.shuffle(filenames_train)
     np.random.shuffle(filenames_val)
 
-    train_batch_size = 1
-    val_batch_size = 2
-
-    train_subset = 10
-    val_subset = 20
-
-    num_epochs = 400
-
-    filenames_train = filenames_train[:train_subset]
-    filenames_val = filenames_val[:val_subset]
+    filenames_train = filenames_train[:P.SUBSET]
+    filenames_val = filenames_val[:P.SUBSET]
 
     metric_names = ['Loss','L2','Accuracy','Dice','Precision','Recall']
     train_metrics_all = []
     val_metrics_all = []
 
     logging.info("Starting training...")
-    for epoch in range(num_epochs):
+    for epoch in range(P.N_EPOCHS):
         # In each epoch, we do a full pass over the training data:
         train_batches = 0
         start_time = time.time()
 
         np.random.shuffle(filenames_train)
-        train_gen = ParallelBatchIterator(load_images, filenames_train, ordered=True, batch_size=train_batch_size, multiprocess=False)
+        train_gen = ParallelBatchIterator(load_images, filenames_train, ordered=True, batch_size=P.BATCH_SIZE_TRAIN, multiprocess=False)
 
         train_metrics = []
         val_metrics = []
@@ -105,7 +102,7 @@ if __name__ == "__main__":
         val_batches = 0
 
         np.random.shuffle(filenames_val)
-        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=True, batch_size=val_batch_size,multiprocess=False)
+        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=True, batch_size=P.BATCH_SIZE_VALIDATION,multiprocess=False)
 
         for i, batch in enumerate(tqdm(val_gen)):
             inputs, targets, weights = batch
@@ -137,7 +134,7 @@ if __name__ == "__main__":
         val_metrics = list(val_metrics[:4]) + [precision_val,recall_val]
 
         # Then we print the results for this epoch:
-        logging.info("Epoch {} of {} took {:.3f}s\n".format(
+        logging.info("Epoch {} of {} took {:.3f}s".format(
             epoch + 1, num_epochs, time.time() - start_time))
 
         for name, train_metric, val_metric in zip(metric_names, train_metrics, val_metrics):
@@ -160,6 +157,8 @@ if __name__ == "__main__":
 
             plt.savefig(os.path.join(plot_folder, '{}.png'.format(name)))
             plt.close()
+
+        logging.info("\n")
 
 
     # Optionally, you could now dump the network weights to a file like this:
