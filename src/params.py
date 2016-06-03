@@ -8,7 +8,7 @@ class Params():
         cf = ConfigParser()
         read_from = cf.read(config_file_path)
 
-        print "Loaded configuration from (in order)", read_from
+        print "Loaded configurations from (in order)", read_from
 
         self.CONFIG = cf
         cf.set('info','config_file', config_file_path)
@@ -53,6 +53,16 @@ class Params():
         # Normalization
         self.ZERO_CENTER = cf.getboolean('normalization', 'zero_center')
         self.MEAN_PIXEL = cf.getfloat('normalization', 'mean_pixel')
+
+
+        # Augmentation
+        self.AUGMENT = cf.getboolean('augmentation', 'augment')
+        self.AUGMENTATION_PARAMS = {
+            'flip': cf.getboolean('augmentation', 'flip'),
+            'zoom_range': (1.-cf.getfloat('augmentation', 'zoom'),1.+cf.getfloat('augmentation', 'zoom')),
+            'rotation_range': (-cf.getfloat('augmentation', 'rotation'),cf.getfloat('augmentation', 'rotation')),
+            'translation_range': (-cf.getfloat('augmentation', 'translation'),cf.getfloat('augmentation', 'translation'))
+        }
 
         # Misc
         self.MULTIPROCESS_LOAD_AUGMENTATION = cf.getboolean('misc', 'multiprocess_load_augmentation')

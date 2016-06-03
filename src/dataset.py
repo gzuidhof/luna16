@@ -7,6 +7,7 @@ import gzip
 import cPickle as pickle
 import loss_weighting
 import skimage.morphology
+from augment import augment
 
 from params import params as P
 
@@ -19,14 +20,8 @@ def get_image(filename):
     with gzip.open(filename.replace('lung','nodule'),'rb') as f:
         truth = pickle.load(f)
 
-    #Random flips
-    #if np.random.randint(2)==0:
-    #    lung = lung.transpose(1,0)
-    #    truth = truth.transpose(1,0)
-    #    lung[:,:] = lung[::-1,:]
-    #    truth[:,:] = truth[::-1,:]
-    #    lung = lung.transpose(1,0)
-    #    truth = truth.transpose(1,0)
+    if P.AUGMENT:
+        lung, truth = augment([lung,truth])
 
     #We do not care about the outside
     outside = np.where(lung==0,True,False)

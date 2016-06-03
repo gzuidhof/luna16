@@ -38,7 +38,6 @@ if __name__ == "__main__":
     initialize_logger(os.path.join(model_folder, 'log.txt').format(model_name))
 
     P.write_to_file(os.path.join(model_folder, 'config.ini'))
-    logging.info("MODEL NAME {}".format(model_name))
     logging.info(P.to_string())
 
 
@@ -139,7 +138,7 @@ if __name__ == "__main__":
 
         # Then we print the results for this epoch:
         logging.info("Epoch {} of {} took {:.3f}s".format(
-            epoch + 1, num_epochs, time.time() - start_time))
+            epoch + 1, P.N_EPOCHS, time.time() - start_time))
 
         for name, train_metric, val_metric in zip(metric_names, train_metrics, val_metrics):
             name = name.rjust(10," ") #Pad the name until 10 characters long
