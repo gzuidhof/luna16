@@ -13,14 +13,14 @@ from params import params as P
 
 _EPSILON = 1e-8
 
-def get_image(filename):
+def get_image(filename, deterministic):
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
     with gzip.open(filename.replace('lung','nodule'),'rb') as f:
         truth = np.array(pickle.load(f),dtype=np.float32)
 
-    if P.AUGMENT:
+    if P.AUGMENT and not deterministic:
         lung, truth = augment([lung,truth])
 
     truth = np.array(np.round(truth),dtype=np.int64)
@@ -52,9 +52,8 @@ def get_image(filename):
 
     return lung, truth
 
-def load_images(filenames):
-    filenames = filter(lambda x: x!='.', filenames)
-    slices = map(get_image, filenames)
+def load_images(filenames, deterministic=False):
+    slices = [get_image(filename, deterministic) for filename in filenames]
     lungs, truths = zip(*slices)
 
     l = np.concatenate(lungs,axis=0)
@@ -64,7 +63,7 @@ def load_images(filenames):
     # get set to 0 (the background is -1)
     w = loss_weighting.weight_by_class_balance(t, classes=[0,1])
 
-    #Set -1 labels back to label 0
+    #Set -10 labels back to label 0
     t = np.clip(t, 0, 100000)
 
     return l, t, w

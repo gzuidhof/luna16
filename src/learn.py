@@ -103,7 +103,7 @@ if __name__ == "__main__":
         val_batches = 0
 
         np.random.shuffle(filenames_val)
-        val_gen = ParallelBatchIterator(load_images, filenames_val, ordered=False,
+        val_gen = ParallelBatchIterator(partial(load_images,deterministic=True), filenames_val, ordered=False,
                                             batch_size=P.BATCH_SIZE_VALIDATION,
                                             multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION)
 
