@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 import lasagne
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer
+from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, batch_norm
 from lasagne.init import HeNormal
 from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
@@ -48,6 +48,9 @@ def define_network(input_var):
                                     W=HeNormal(gain='relu'),
                                     nonlinearity=nonlinearity)
 
+        if P.BATCH_NORMALIZATION:
+            net['conv{}_2'.format(depth)] = batch_norm(net['conv{}_2'.format(depth)])
+
         if not deepest:
             net['pool{}'.format(depth)] = MaxPool2DLayer(net['conv{}_2'.format(depth)], pool_size=2, stride=2)
 
@@ -76,6 +79,10 @@ def define_network(input_var):
                                         num_filters=n_filters, filter_size=3, pad='valid',
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
+
+        if P.BATCH_NORMALIZATION:
+            net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
+            
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
                                         W=HeNormal(gain='relu'),

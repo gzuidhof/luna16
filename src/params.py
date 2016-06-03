@@ -36,6 +36,7 @@ class Params():
         self.INPUT_SIZE = cf.getint('network', 'input_size')
         self.DEPTH = cf.getint('network', 'depth')
         self.BRANCHING_FACTOR = cf.getint('network', 'branching_factor')
+        self.BATCH_NORMALIZATION = cf.getboolean('network', 'batch_normalization')
 
         # Updates
         self.OPTIMIZATION = cf.get('updates', 'optimization')
