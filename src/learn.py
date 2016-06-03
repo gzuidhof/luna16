@@ -11,6 +11,7 @@ import util
 import logging
 from logger import initialize_logger
 from params import params as P
+from functools import partial
 
 if __name__ == "__main__":
     from dataset import load_images
