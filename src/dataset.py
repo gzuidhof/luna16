@@ -18,10 +18,12 @@ def get_image(filename):
         lung = pickle.load(f)
 
     with gzip.open(filename.replace('lung','nodule'),'rb') as f:
-        truth = pickle.load(f)
+        truth = np.array(pickle.load(f),dtype=np.float32)
 
     if P.AUGMENT:
         lung, truth = augment([lung,truth])
+
+    truth = np.array(np.round(truth),dtype=np.int64)
 
     #We do not care about the outside
     outside = np.where(lung==0,True,False)
@@ -30,8 +32,8 @@ def get_image(filename):
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
         outside = skimage.morphology.binary_erosion(outside, kernel)
 
-    #Set label of outside pixels to -1
-    truth = truth - outside
+    #Set label of outside pixels to -10
+    truth = truth - (outside*10)
 
     lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
     lung = np.array(normalize.normalize(lung),dtype=np.float32)
