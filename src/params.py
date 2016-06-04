@@ -12,7 +12,9 @@ class Params():
 
         self.CONFIG = cf
         cf.set('info','config_file', config_file_path)
-        cf.set('info','model_id', str(int(time.time()))+"_"+cf.get('info','name'))
+
+        if not cf.has_option('info','model_id'):
+            cf.set('info','model_id', str(int(time.time()))+"_"+cf.get('info','name'))
 
         # Info
         self.EXPERIMENT = cf.get('info', 'experiment')
