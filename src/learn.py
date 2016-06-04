@@ -54,11 +54,8 @@ if __name__ == "__main__":
     train_fn, val_fn = unet.define_updates(network, input_var, target_var, weight_var)
 
     np.random.seed(1)
-    folder_train = './../data/1_1_1mm_512_x_512_lung_slices/subset[0-2]/'
-    filenames_train = glob(folder_train+ '*.pkl.gz')
-    #print filenames
-    folder_val = './../data/1_1_1mm_512_x_512_lung_slices/subset[3]/'
-    filenames_val = glob(folder_val+ '*.pkl.gz')
+    filenames_train = glob(P.FILENAMES_TRAIN)
+    filenames_val= glob(P.FILENAMES_VALIDATION)
 
     np.random.shuffle(filenames_train)
     np.random.shuffle(filenames_val)
