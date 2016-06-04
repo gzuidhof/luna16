@@ -82,7 +82,7 @@ def define_network(input_var):
 
         if P.BATCH_NORMALIZATION:
             net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
-            
+
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
                                         W=HeNormal(gain='relu'),
@@ -158,3 +158,14 @@ def define_updates(network, input_var, target_var, weight_var):
 
 
     return train_fn, val_fn
+
+def define_predict(network, input_var):
+    params = lasagne.layers.get_all_params(network, trainable=True)
+    out = lasagne.layers.get_output(network, deterministic=True)
+    out_flat = out.dimshuffle(1,0,2,3).flatten(ndim=2).dimshuffle(1,0)
+    prediction = lasagne.nonlinearities.softmax(out_flat)
+
+    print "Defining predict"
+    predict_fn = theano.function([input_var],[prediction])
+
+    return predict_fn
