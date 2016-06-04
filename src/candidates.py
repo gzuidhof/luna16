@@ -9,11 +9,87 @@ import pickle
 import glob
 import os
 import scipy.misc
+from skimage.io import imread
+from skimage import morphology
+from scipy import ndimage
+import cv2
+import pickle
+import matplotlib.pyplot as plt
+
 
 
 from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
+THRESHOLD = 140
+
+
+
+def unet_candidates():
+    cands = glob.glob("../data/predictions_epoch16/*.png")
+    df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
+    imname = ""
+    index = 0
+    origin = []
+    spacing = []
+    for name in tqdm(cands):
+
+        #image = imread(name)
+        image_t = imread(name)
+        #Thresholding
+        image_t[image_t<THRESHOLD] = 0
+        image_t[image_t>0] = 1
+        #erosion
+        selem = morphology.disk(1)
+        image_eroded = morphology.binary_erosion(image_t,selem=selem)
+        label_im, nb_labels = ndimage.label(image_eroded)
+        # if nb_labels > 10:
+        #     plt.subplot(211)
+        #     plt.imshow(image)
+        #     plt.subplot(212)
+        #     plt.imshow(label_im)
+        #     plt.show()
+
+        label_im[label_im>0]=1
+        contours= cv2.findContours(label_im.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        centers = []
+        for cnt in contours[0]:
+            if len(cnt) > 1:
+                M = cv2.moments(cnt)
+                try:
+                    cX = int(M["m10"] / M["m00"])
+                    cY = int(M["m01"] / M["m00"])
+                    centers.append([cX,cY])
+                except:
+                    pass
+            else:
+                centers.append([cnt[0][0][0],cnt[0][0][1]])
+        imname2 = os.path.split(name)[1].replace('.png','')
+        splitted = imname2.split("slice")
+        slice = splitted[1]
+        imname2 = splitted[0][:-1]
+
+        if imname2 != imname:
+            if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
+                with open("../data/subset9_unet/spacings/{0}.pickle".format(imname2), 'rb') as handle:
+                    dic = pickle.load(handle)
+                    origin = dic["origin"]
+                    spacing = dic["spacing"]
+            else:
+                _,origin,spacing=load_itk_image("../data/subset9_unet/subset9/{0}.mhd".format(imname2))
+                dic = {"origin":origin,"spacing":spacing}
+                with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
+                    pickle.dump(dic, handle)
+            imname = imname2
+
+        for center in centers:
+            coords = voxel_2_world([center[0]+(512-324)*0.5,center[1]+(512-324)*0.5,int(slice)],origin,spacing)
+            df.loc[index] = [imname2,coords[0],coords[1],coords[2],0]
+        index+=1
+    save_candidates("../data/candidates_unet.csv",df)
+
+
+
 
 
 def candidates_to_image(cands,radius):
@@ -144,6 +220,8 @@ def coords_to_candidates(coords, seriesuid):
 
 if __name__ == "__main__":
 
+    unet_candidates()
+    quit()
     df = load_candidates('../data/candidates.csv')
     images = candidates_to_image(df,15)
     #new_candidates = merge_candidates(df)

@@ -2,7 +2,7 @@ import candidates as ca
 import numpy as np
 
 
-annotations = ca.load_candidates("../../CSVFILES/CSVFILES/annotations.csv")
+annotations = ca.load_candidates("../data/annotations.csv")
 found_candidates = np.zeros((len(annotations),1))
 nr_candidates = 0
 nr_annotations = 0
@@ -68,11 +68,19 @@ def run(candidates):
     #candidates = candidates.load_candidates("../data/annotations/candidates.csv")
     #candidates = candidates.load_candidates("../data/hoi_candidates.csv")
     train_candidates = []
-
+    name = candidates.values[0][0]
+    all_cands = []
     #print candidates
     for object in candidates.values:
-        train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
-    evaluate(train_candidates)
+        if object[0] == name:
+            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+        else:
+            name = object[0]
+            all_cands.append(train_candidates)
+            train_candidates = []
+            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+    for image in all_cands:
+        evaluate(image)
 
 
 if __name__ == "__main__":
