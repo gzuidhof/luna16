@@ -17,8 +17,13 @@ def get_image(filename, deterministic):
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
-    with gzip.open(filename.replace('lung','nodule'),'rb') as f:
-        truth = np.array(pickle.load(f),dtype=np.float32)
+    truth_filename = filename.replace('lung','nodule')
+
+    if os.path.isfile(truth_filename):
+        with gzip.open(filename.replace('lung','nodule'),'rb') as f:
+            truth = np.array(pickle.load(f),dtype=np.float32)
+    else:
+        truth = np.zeros_like(lung)
 
     if P.AUGMENT and not deterministic:
         lung, truth = augment([lung,truth])
@@ -66,4 +71,4 @@ def load_images(filenames, deterministic=False):
     #Set -10 labels back to label 0
     t = np.clip(t, 0, 100000)
 
-    return l, t, w
+    return l, t, w, filenames

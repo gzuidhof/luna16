@@ -82,7 +82,7 @@ if __name__ == "__main__":
         val_metrics = []
 
         for i, batch in enumerate(tqdm(train_gen)):
-            inputs, targets, weights = batch
+            inputs, targets, weights, _ = batch
 
             err, l2_loss, acc, dice, true, prob, prob_b = train_fn(inputs, targets, weights)
             tp,tn,fp,fn = metrics.calc_errors(true, prob_b)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                                             multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION)
 
         for i, batch in enumerate(tqdm(val_gen)):
-            inputs, targets, weights = batch
+            inputs, targets, weights, _ = batch
 
             err, l2_loss, acc, dice, true, prob, prob_b = val_fn(inputs, targets, weights)
             tp,tn,fp,fn = metrics.calc_errors(true, prob_b)
