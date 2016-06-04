@@ -80,8 +80,8 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-        if P.BATCH_NORMALIZATION:
-            net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
+        #if P.BATCH_NORMALIZATION:
+        #    net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
 
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
