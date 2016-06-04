@@ -52,7 +52,7 @@ if __name__ == "__main__":
     in_pattern = '../data/1_1_1mm_512_x_512_lung_slices/subset9/*.pkl.gz'
     filenames = glob(in_pattern)#[:100]
 
-    batch_size = 18
+    batch_size = 14
     multiprocess = False
 
     gen = ParallelBatchIterator(partial(load_images,deterministic=True),
