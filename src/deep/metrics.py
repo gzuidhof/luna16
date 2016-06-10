@@ -31,7 +31,7 @@ class Metrics(object):
     def append(self, metrics):
         self.batch_values.append(metrics)
 
-    def append_prediction(self, prediction, truth):
+    def append_prediction(self, truth, prediction):
         for c in range(self.n_classes):
             self.batch_errors[c].append(_calc_errors(truth, prediction, c))
 

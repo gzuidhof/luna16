@@ -18,6 +18,7 @@ def get_image(filename, deterministic):
         lung = pickle.load(f)
 
     truth_filename = filename.replace('lung','nodule')
+    segmentation_filename = filename.replace('lung','lung_mask')
 
     if os.path.isfile(truth_filename):
         with gzip.open(filename.replace('lung','nodule'),'rb') as f:
@@ -25,20 +26,24 @@ def get_image(filename, deterministic):
     else:
         truth = np.zeros_like(lung)
 
-    if P.AUGMENT and not deterministic:
-        lung, truth = augment([lung,truth])
-
-    truth = np.array(np.round(truth),dtype=np.int64)
-
-    #We do not care about the outside
-    outside = np.where(lung==0,True,False)
+    if os.path.isfile(segmentation_filename):
+        with gzip.open(segmentation_filename,'rb') as f:
+            outside = np.where(pickle.load(f)>0,1.0,0.0)
+    else:
+        outside = np.where(lung==0,1.0,0.0)
 
     if P.ERODE_SEGMENTATION > 0:
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
         outside = skimage.morphology.binary_erosion(outside, kernel)
 
+    if P.AUGMENT and not deterministic:
+        lung, truth, outside = augment([lung,truth, outside])
+
+    truth = np.array(np.round(truth),dtype=np.int64)
+    outside = np.array(np.round(outside),dtype=np.int8)
+
     #Set label of outside pixels to -10
-    truth = truth - (outside*10)
+    truth = truth - outside
 
     lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
     lung = normalize.normalize(lung)
