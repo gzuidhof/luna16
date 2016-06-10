@@ -82,4 +82,4 @@ class Params():
         with open(filepath, 'w') as f:
             self.CONFIG.write(f)
 
-params = Params(['../config/default.ini']+sys.argv[1:])
+params = Params(['../../config/default.ini']+sys.argv[1:])
