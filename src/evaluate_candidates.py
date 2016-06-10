@@ -55,6 +55,11 @@ def evaluate(train_candidates):
             index = np.where(annotations.values==can.all())[0]
             found_candidates[index] = 1
 
+    for ann in image_annotations.values:
+        index = np.where(annotations.values==ann.all())[0]
+        if found_candidates[index] == 0:
+            print ann
+
     if nr_annotations != 0:
         print "recall",float(np.sum(found_candidates))/nr_annotations
         print "precision",float(np.sum(found_candidates))/nr_candidates

@@ -15,23 +15,25 @@ from scipy import ndimage
 import cv2
 import pickle
 import matplotlib.pyplot as plt
+from scipy.ndimage.measurements import center_of_mass
 
 
 
 from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
-THRESHOLD = 140
+THRESHOLD = 160
 
 
 
 def unet_candidates():
     cands = glob.glob("../data/predictions_epoch16/*.png")
-    df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
+    #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
+    data = []
     imname = ""
-    index = 0
     origin = []
     spacing = []
+    nrimages = 0
     for name in tqdm(cands):
 
         #image = imread(name)
@@ -43,31 +45,55 @@ def unet_candidates():
         selem = morphology.disk(1)
         image_eroded = morphology.binary_erosion(image_t,selem=selem)
         label_im, nb_labels = ndimage.label(image_eroded)
-        # if nb_labels > 10:
-        #     plt.subplot(211)
-        #     plt.imshow(image)
-        #     plt.subplot(212)
-        #     plt.imshow(label_im)
-        #     plt.show()
+        imname3 = os.path.split(name)[1].replace('.png','')
 
-        label_im[label_im>0]=1
-        contours= cv2.findContours(label_im.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-        centers = []
-        for cnt in contours[0]:
-            if len(cnt) > 1:
-                M = cv2.moments(cnt)
-                try:
-                    cX = int(M["m10"] / M["m00"])
-                    cY = int(M["m01"] / M["m00"])
-                    centers.append([cX,cY])
-                except:
-                    pass
-            else:
-                centers.append([cnt[0][0][0],cnt[0][0][1]])
-        imname2 = os.path.split(name)[1].replace('.png','')
-        splitted = imname2.split("slice")
+        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
+            plt.imshow(label_im)
+            plt.show()
+
+        splitted = imname3.split("slice")
         slice = splitted[1]
         imname2 = splitted[0][:-1]
+        centers = []
+        for i in xrange(1,nb_labels+1):
+            blob_i = np.where(label_im==i,1,0)
+            mass = center_of_mass(blob_i)
+            centers.append([mass[1],mass[0]])
+
+        # label_im[label_im>0]=1
+        # contours= cv2.findContours(label_im.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        # centers = []
+        # previous = [0,0]
+        # nrcenters = 0
+        # for cnt in contours[0]:
+        #     if len(cnt) > 1:
+        #         M = cv2.moments(cnt)
+        #         try:
+        #             cX = int(M["m10"] / M["m00"])
+        #             cY = int(M["m01"] / M["m00"])
+        #             if (cX < previous[0] - 1 or cX > previous[0] + 1) and (cY < previous[1] - 1 or cY > previous[1] + 1):
+        #                 centers.append([cX,cY])
+        #                 previous = [cX,cY]
+        #                 nrcenters+=1
+        #         except:
+        #             pass
+        #     else:
+        #         cX = cnt[0][0][0]
+        #         cY = cnt[0][0][1]
+        #         if (cX < previous[0] - 1 or cX > previous[0] + 1) and (cY < previous[1] - 1 or cY > previous[1] + 1):
+        #             centers.append([cX,cY])
+        #             previous = [cX,cY]
+        #             nrcenters+1
+
+        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
+            plt.subplot(211)
+            plt.imshow(label_im)
+            plt.subplot(212)
+            plt.imshow(label_im)
+            scatters = np.array(centers)
+            plt.scatter(x=scatters[:,0],y=scatters[:,1],marker='x',c='y')
+            plt.show()
+
 
         if imname2 != imname:
             if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
@@ -81,15 +107,17 @@ def unet_candidates():
                 with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
                     pickle.dump(dic, handle)
             imname = imname2
+            nrimages +=1
 
         for center in centers:
-            coords = voxel_2_world([center[0]+(512-324)*0.5,center[1]+(512-324)*0.5,int(slice)],origin,spacing)
-            df.loc[index] = [imname2,coords[0],coords[1],coords[2],0]
-        index+=1
+            coords = voxel_2_world([int(slice),center[1]+(512-324)*0.5,center[0]+(512-324)*0.5],origin,spacing)
+            data.append([imname2,coords[0],coords[1],coords[2],0])
+
+        #if nrimages == 5:
+        #    break
+
+    df = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
     save_candidates("../data/candidates_unet.csv",df)
-
-
-
 
 
 def candidates_to_image(cands,radius):

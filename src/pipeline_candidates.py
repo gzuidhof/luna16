@@ -25,6 +25,7 @@ if __name__ == "__main__":
     for subset in xrange(0,1):
 
         candidates = ca.load_candidates("../data/candidates_unet.csv",False)
+        candidates = ca.merge_candidates(candidates,distance=2.)
         evaluate_candidates.run(candidates)
         quit()
         #image_names = glob.glob("../data/subset{}/*.mhd".format(subset,subset))
