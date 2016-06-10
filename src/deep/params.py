@@ -30,6 +30,7 @@ class Params():
 
         self.FILENAMES_TRAIN = cf.get('dataset','filenames_train')
         self.FILENAMES_VALIDATION = cf.get('dataset','filenames_validation')
+        self.DATA_FOLDER = cf.get('dataset','data_folder')
 
         # Network
         self.ARCHITECTURE = cf.get('network', 'architecture')
@@ -50,13 +51,15 @@ class Params():
         self.BATCH_SIZE_VALIDATION = cf.getint('updates', 'batch_size_validation')
         self.N_EPOCHS = cf.getint('updates', 'n_epochs')
 
-        # Preprocessing
-        self.ERODE_SEGMENTATION = cf.getint('preprocessing', 'erode_segmentation')
-
         # Normalization
         self.ZERO_CENTER = cf.getboolean('normalization', 'zero_center')
-        self.MEAN_PIXEL = cf.getfloat('normalization', 'mean_pixel')
+        if self.CHANNELS == 0:
+            self.MEAN_PIXEL = cf.getfloat('normalization', 'mean_pixel')
+        else:
+            self.MEAN_PIXEL = map(float, cf.get('normalization', 'mean_pixel').split())
 
+        # Preprocessing
+        self.ERODE_SEGMENTATION = cf.getint('preprocessing', 'erode_segmentation')
 
         # Augmentation
         self.AUGMENT = cf.getboolean('augmentation', 'augment')
@@ -69,6 +72,7 @@ class Params():
 
         # Misc
         self.MULTIPROCESS_LOAD_AUGMENTATION = cf.getboolean('misc', 'multiprocess_load_augmentation')
+        self.N_WORKERS_LOAD_AUGMENTATION = cf.getint('misc', 'n_workers_load_augmentation')
         self.SAVE_EVERY_N_EPOCH = cf.getint('misc', 'save_every_n_epoch')
 
     def to_string(self):

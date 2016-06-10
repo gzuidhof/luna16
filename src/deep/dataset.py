@@ -41,7 +41,7 @@ def get_image(filename, deterministic):
     truth = truth - (outside*10)
 
     lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
-    lung = np.array(normalize.normalize(lung),dtype=np.float32)
+    lung = normalize.normalize(lung)
 
     # Crop truth
     crop_size = OUTPUT_SIZE
@@ -61,7 +61,7 @@ def load_images(filenames, deterministic=False):
     slices = [get_image(filename, deterministic) for filename in filenames]
     lungs, truths = zip(*slices)
 
-    l = np.concatenate(lungs,axis=0)
+    l = np.array(np.concatenate(lungs,axis=0), dtype=np.float32)
     t = np.concatenate(truths,axis=0)
 
     # Weight the loss by class balancing, classes other than 0 and 1

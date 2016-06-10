@@ -27,11 +27,9 @@ class Trainer(object):
         self.epoch = -1
 
     def setup_folders(self):
-        self.model_folder = os.path.join('../models',self.model_name)
         self.plot_folder = os.path.join(self.model_folder, 'plots')
         self.image_folder = os.path.join(self.model_folder, 'images')
 
-        folders = ['../models', self.model_folder, self.plot_folder, self.image_folder]
         map(util.make_dir_if_not_present, folders)
 
 
