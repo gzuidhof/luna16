@@ -32,6 +32,7 @@ class Params():
         self.FILENAMES_VALIDATION = cf.get('dataset','filenames_validation')
         self.DATA_FOLDER = cf.get('dataset','data_folder')
 
+
         # Network
         self.ARCHITECTURE = cf.get('network', 'architecture')
 
@@ -59,6 +60,7 @@ class Params():
             self.MEAN_PIXEL = map(float, cf.get('normalization', 'mean_pixel').split())
 
         # Preprocessing
+        self.RANDOM_CROP = cf.getint('preprocessing', 'random_crop')
         self.ERODE_SEGMENTATION = cf.getint('preprocessing', 'erode_segmentation')
 
         # Augmentation
