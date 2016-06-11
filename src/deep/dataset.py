@@ -60,9 +60,10 @@ def get_image(filename, deterministic):
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
-        return np.pad(image, np.ceil((desired_size-image.shape[0])//2), 'constant', constant_values=pad_value)
+        offset = int(np.ceil((desired_size-image.shape[0])/2))
+        return np.pad(image, offset, 'constant', constant_values=pad_value)
     else:
-        offset = np.ceil((image.shape[0]-desired_size)//2)
+        offset = int(np.ceil((image.shape[0]-desired_size)/2))
         return image[offset:offset+desired_size,offset:offset+desired_size]
 
 def load_images(filenames, deterministic=False):
