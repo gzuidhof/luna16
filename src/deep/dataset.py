@@ -56,14 +56,13 @@ def get_image(filename, deterministic):
         lung = lung - P.MEAN_PIXEL
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
-    print lung.shape
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
-        return np.pad(image, (desired_size-image.shape[0])//2, 'constant', constant_values=pad_value)
+        return np.pad(image, np.ceil((desired_size-image.shape[0])//2), 'constant', constant_values=pad_value)
     else:
-        offset = (image.shape[0]-desired_size)//2
+        offset = np.ceil((image.shape[0]-desired_size)//2)
         return image[offset:offset+desired_size,offset:offset+desired_size]
 
 def load_images(filenames, deterministic=False):
