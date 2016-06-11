@@ -56,7 +56,7 @@ def get_image(filename, deterministic):
         lung = lung - P.MEAN_PIXEL
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
-
+    print lung.shape
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
