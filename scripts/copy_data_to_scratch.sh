@@ -1,0 +1,1 @@
+rsync -r ~/luna16/data/ /scratch-shared/vdgugten/data
