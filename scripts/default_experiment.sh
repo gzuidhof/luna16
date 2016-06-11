@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH -t 2-00:00:00
 #SBATCH -p gpu
+#SBATCH -n 8
 
 #Prepare python environment
 export PYTHONPATH=$HOME/pythonpackages/lib/python:$PYTHONPATH
@@ -16,4 +17,4 @@ cd $HOME/luna16/src/deep
 
 echo "starting python"
 export THEANO_FLAGS='mode=FAST_RUN,device=gpu,floatX=float32,lib.cnmem=1' 
-srun -u python train.py ../../config/default_cluster.ini
+srun -c 8 -u python train.py ../../config/default_cluster.ini
