@@ -60,6 +60,8 @@ def get_image(filename, deterministic):
     #Set label of outside pixels to -1
     truth = truth - outside
 
+    lung = lung*(1-outside)
+
     lung = crop_or_pad(lung, INPUT_SIZE, -1000)
     truth = crop_or_pad(truth, OUTPUT_SIZE, 0)
     outside = crop_or_pad(outside, OUTPUT_SIZE, 0)
