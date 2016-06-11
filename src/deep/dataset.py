@@ -45,14 +45,11 @@ def get_image(filename, deterministic):
     #Set label of outside pixels to -10
     truth = truth - outside
 
-    lung = np.pad(lung, (INPUT_SIZE-lung.shape[0])//2, 'constant', constant_values=-400)
+    lung = crop_or_pad(lung, INPUT_SIZE, -400)
+    truth = crop_or_pad(truth, OUTPUT_SIZE, 0)
+    outside = crop_or_pad(outside, OUTPUT_SIZE, 0)
+
     lung = normalize.normalize(lung)
-
-    # Crop truth
-    crop_size = OUTPUT_SIZE
-    offset = (truth.shape[0]-crop_size)//2
-    truth = truth[offset:offset+crop_size,offset:offset+crop_size]
-
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
 
     if P.ZERO_CENTER:
@@ -61,6 +58,13 @@ def get_image(filename, deterministic):
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
 
     return lung, truth
+
+def crop_or_pad(image, desired_size, pad_value):
+    if image.shape[0] < desired_size:
+        return np.pad(lung, (desired-size-image.shape[0])//2, 'constant', constant_values=-pad_value)
+    else:
+        offset = (image.shape[0]-desired_size)//2
+        return image[offset:offset+desired_size,offset:offset+desired_size]
 
 def load_images(filenames, deterministic=False):
     slices = [get_image(filename, deterministic) for filename in filenames]
