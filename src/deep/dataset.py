@@ -114,10 +114,12 @@ def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
 
     scan_names = set(map(get_scan_name, filenames))
     resolutions = [resolution_of_scan[resolution_of_scan['filename']==scan].iloc[0]['spacing'] for scan in scan_names]
-
     scan_filenames = []
     for scan in scan_names:
         scan_filenames.append(filter(lambda x: scan in x, filenames))
+
+    split_per_scan = [int(np.round(r/data_resolution)) for r in resolutions] #Amount of splits to divide the filenames over
+    random_offsets = [np.random.permutation(range(x)) for x in split_per_scan]
 
     if n_splits is None:
         n_splits = np.round(max(resolutions)/data_resolution)
@@ -125,8 +127,9 @@ def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
     splits = [ [] for _ in xrange(n_splits)]
 
     for i, s in enumerate(splits):
-        for r, scan, filenames_in_scan in zip(resolutions, scan_names, scan_filenames):
-            n = int(np.round(r/data_resolution)) #Amount of splits to divide the filenames over
-            s += filenames_in_scan[i%n::n]
+        for r, scan, filenames_in_scan, n, offset in zip(resolutions, scan_names, scan_filenames, split_per_scan, random_offsets):
+            #n = int(np.round(r/data_resolution))
+            start = offset[i%n]
+            s += filenames_in_scan[start%n::n]
 
     return splits
