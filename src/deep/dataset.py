@@ -101,3 +101,32 @@ def load_images(filenames, deterministic=False):
     t = np.clip(t, 0, 100000)
 
     return l, t, w, filenames
+
+def get_scan_name(filename):
+    scan_name = filename.replace('\\','/').split('/')[-1].split('_')[0]
+    return scan_name
+
+def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
+    import pandas as pd
+
+    resolution_of_scan = pd.read_csv('../../data/imagename_zspacing.csv',header=None,names=['filename','spacing'],index_col=False)
+
+
+    scan_names = set(map(get_scan_name, filenames))
+    resolutions = [resolution_of_scan[resolution_of_scan['filename']==scan].iloc[0]['spacing'] for scan in scan_names]
+
+    scan_filenames = []
+    for scan in scan_names:
+        scan_filenames.append(filter(lambda x: scan in x, filenames))
+
+    if n_splits is None:
+        n_splits = np.round(max(resolutions)/data_resolution)
+
+    splits = [ [] for _ in xrange(n_splits)]
+
+    for i, s in enumerate(splits):
+        for r, scan, filenames_in_scan in zip(resolutions, scan_names, scan_filenames):
+            n = int(np.round(r/data_resolution)) #Amount of splits to divide the filenames over
+            s += filenames_in_scan[i%n::n]
+
+    return splits

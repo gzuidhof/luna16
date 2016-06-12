@@ -53,11 +53,12 @@ class UNetTrainer(trainer.Trainer):
                 plt.imsave(os.path.join(self.image_folder,'{0}_epoch{1}.png'.format(metrics.name, self.epoch)),im)
 
 
-    def train(self, filenames_train, filenames_val, train_generator, val_generator):
+    def train(self, train_splits, filenames_val, train_generator, val_generator):
         logging.info("Starting training...")
         for epoch in range(P.N_EPOCHS):
             self.pre_epoch()
 
+            filenames_train = train_splits[epoch]
             #Full pass over the training data
             np.random.shuffle(filenames_train)
 

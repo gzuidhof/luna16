@@ -19,5 +19,8 @@ if __name__ == "__main__":
     generator_train = dataset.load_images
     generator_val = partial(dataset.load_images, deterministic=True)
 
+    print "Creating train splits"
+    train_splits = dataset.train_splits_by_z(filenames_train, 0.5, P.N_EPOCHS)
+
     trainer = UNetTrainer()
-    trainer.train(filenames_train, filenames_val, generator_train, generator_val)
+    trainer.train(train_splits, filenames_val, generator_train, generator_val)
