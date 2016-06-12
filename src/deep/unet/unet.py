@@ -144,8 +144,13 @@ def define_updates(network, input_var, target_var, weight_var):
     val_metrics = score_metrics(test_out, target_var, weight_var, l2_loss)
     t_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary = train_metrics
 
-    updates = lasagne.updates.nesterov_momentum(
-            loss, params, learning_rate=P.LEARNING_RATE, momentum=P.MOMENTUM)
+
+    if P.OPTIMIZATION == 'nesterov':
+        updates = lasagne.updates.nesterov_momentum(
+                loss, params, learning_rate=P.LEARNING_RATE, momentum=P.MOMENTUM)
+    if P.OPTIMIZATION == 'adam':
+        updates = lasagne.updates.adam(
+                loss, params, learning_rate=P.LEARNING_RATE)
 
     logging.info("Defining train function")
     train_fn = theano.function([input_var, target_var, weight_var],[
