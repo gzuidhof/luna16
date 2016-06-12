@@ -57,8 +57,8 @@ def get_image(filename, deterministic):
     truth = np.array(np.round(truth),dtype=np.int64)
     outside = np.array(np.round(outside),dtype=np.int64)
 
-    #Set label of outside pixels to -1
-    truth = truth - outside
+    #Set label of outside pixels to -10
+    truth = truth - (outside*10)
 
     lung = lung*(1-outside)
 
@@ -94,7 +94,7 @@ def load_images(filenames, deterministic=False):
     t = np.concatenate(truths,axis=0)
 
     # Weight the loss by class balancing, classes other than 0 and 1
-    # get set to 0 (the background is -1)
+    # get set to 0 (the background is -10)
     w = loss_weighting.weight_by_class_balance(t, classes=[0,1])
 
     #Set -1 labels back to label 0
