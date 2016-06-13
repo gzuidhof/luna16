@@ -5,7 +5,7 @@ import numpy as np
 import os
 import skimage.io
 
-model_folder = '../models/'
+model_folder = '../../models/'
 
 if len(sys.argv) < 2:
     print "Missing arguments, first argument is model name, second is epoch"
@@ -14,14 +14,18 @@ if len(sys.argv) < 2:
 model_folder = os.path.join(model_folder, sys.argv[1])
 
 #Overwrite params, ugly hack for now
-params.params = params.Params(['../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
+params.params = params.Params(['../../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
 from params import params as P
+P.RANDOM_CROP = 0
+P.INPUT_SIZE = 1024
+#P.INPUT_SIZE = 0
 
 
 if __name__ == "__main__":
     import theano
     import theano.tensor as T
     import lasagne
+    sys.path.append('./unet')
     import unet
     import util
     from unet import INPUT_SIZE, OUTPUT_SIZE
@@ -49,10 +53,10 @@ if __name__ == "__main__":
     lasagne.layers.set_all_param_values(network, param_values)
     predict_fn = unet.define_predict(network, input_var)
 
-    in_pattern = '../data/1_1_1mm_512_x_512_lung_slices/subset9/*.pkl.gz'
+    in_pattern = '../../data/0.5_0.5_0.5mm_slices_lung/subset[8-9]/*.pkl.gz'
     filenames = glob(in_pattern)#[:100]
 
-    batch_size = 14
+    batch_size = 4
     multiprocess = False
 
     gen = ParallelBatchIterator(partial(load_images,deterministic=True),
@@ -70,7 +74,7 @@ if __name__ == "__main__":
     for i, batch in enumerate(tqdm(gen)):
         inputs, _, weights, filenames = batch
         predictions = predict_fn(inputs)[0]
-
+        #print inputs.shape, weights.shape
         for n, filename in enumerate(filenames):
             # Whole filepath without extension
             f = os.path.splitext(os.path.splitext(filename)[0])[0]
@@ -78,8 +82,9 @@ if __name__ == "__main__":
             # Filename only
             f = os.path.basename(f)
             f = os.path.join(predictions_folder,f+'.png')
-
-            image = predictions[n*image_size:(n+1)*image_size][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)
+            out_size = unet.output_size_for_input(inputs.shape[3], P.DEPTH)
+            image_size = out_size**2
+            image = predictions[n*image_size:(n+1)*image_size][:,1].reshape(out_size,out_size)
 
             #Remove parts outside a few pixels from the lungs
             image = image * np.where(weights[n,0,:,:]==0,0,1)

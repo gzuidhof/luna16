@@ -1,7 +1,7 @@
 from __future__ import division
 import os.path
 import numpy as np
-from unet import INPUT_SIZE, OUTPUT_SIZE
+from unet import INPUT_SIZE, OUTPUT_SIZE, output_size_for_input
 import normalize
 import gzip
 import cPickle as pickle
@@ -61,10 +61,17 @@ def get_image(filename, deterministic):
     truth = truth - (outside*10)
 
     lung = lung*(1-outside)
+    lung = lung-outside*3000
 
-    lung = crop_or_pad(lung, INPUT_SIZE, -1000)
-    truth = crop_or_pad(truth, OUTPUT_SIZE, 0)
-    outside = crop_or_pad(outside, OUTPUT_SIZE, 0)
+    if P.INPUT_SIZE > 0:
+        lung = crop_or_pad(lung, INPUT_SIZE, -3000)
+        truth = crop_or_pad(truth, OUTPUT_SIZE, 0)
+        outside = crop_or_pad(outside, OUTPUT_SIZE, 1)
+    else:
+        out_size = output_size_for_input(lung.shape[1], P.DEPTH)
+        #lung = crop_or_pad(lung, INPUT_SIZE, -1000)
+        truth = crop_or_pad(truth, out_size, 0)
+        outside = crop_or_pad(outside, out_size, 1)
 
     lung = normalize.normalize(lung)
     lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)

@@ -29,7 +29,12 @@ def filter_for_depth(depth):
 def define_network(input_var):
     batch_size = None
     net = {}
-    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,P.INPUT_SIZE,P.INPUT_SIZE), input_var=input_var)
+    if P.INPUT_SIZE > 0:
+        in_size = P.INPUT_SIZE
+    else:
+        in_size = None
+
+    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,in_size,in_size), input_var=input_var)
 
     nonlinearity = nonlinearities.rectify
 
