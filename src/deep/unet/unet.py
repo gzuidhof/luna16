@@ -8,6 +8,7 @@ from lasagne.layers import ConcatLayer, Upscale2DLayer
 from lasagne.regularization import l2, regularize_network_params
 import logging
 from params import params as P
+import numpy as np
 
 def output_size_for_input(in_size, depth):
     in_size -= 4
@@ -150,12 +151,15 @@ def define_updates(network, input_var, target_var, weight_var):
     t_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary = train_metrics
 
 
+
+    l_r = theano.shared(np.array(P.LEARNING_RATE, dtype=theano.config.floatX))
+
     if P.OPTIMIZATION == 'nesterov':
         updates = lasagne.updates.nesterov_momentum(
-                loss, params, learning_rate=P.LEARNING_RATE, momentum=P.MOMENTUM)
+                loss, params, learning_rate=l_r, momentum=P.MOMENTUM)
     if P.OPTIMIZATION == 'adam':
         updates = lasagne.updates.adam(
-                loss, params, learning_rate=P.LEARNING_RATE)
+                loss, params, learning_rate=l_r)
 
     logging.info("Defining train function")
     train_fn = theano.function([input_var, target_var, weight_var],[
@@ -167,7 +171,7 @@ def define_updates(network, input_var, target_var, weight_var):
                                 t_loss, l2_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary])
 
 
-    return train_fn, val_fn
+    return train_fn, val_fn, l_r
 
 def define_predict(network, input_var):
     params = lasagne.layers.get_all_params(network, trainable=True)

@@ -32,12 +32,17 @@ class UNetTrainer(trainer.Trainer):
         logging.info("Defining network")
         net_dict = unet.define_network(input_var)
         self.network = net_dict['out']
-        train_fn, val_fn = unet.define_updates(self.network, input_var, target_var, weight_var)
+        train_fn, val_fn, l_r = unet.define_updates(self.network, input_var, target_var, weight_var)
 
         self.train_fn = train_fn
         self.val_fn = val_fn
+        self.l_r = l_r
 
     def do_batches(self, fn, batch_generator, metrics):
+
+        loss_total = 0
+        batch_count = 0
+
         for i, batch in enumerate(tqdm(batch_generator)):
             inputs, targets, weights, _ = batch
 
@@ -52,9 +57,20 @@ class UNetTrainer(trainer.Trainer):
                      prob[:OUTPUT_SIZE**2][:,1].reshape(OUTPUT_SIZE,OUTPUT_SIZE)))
                 plt.imsave(os.path.join(self.image_folder,'{0}_epoch{1}.png'.format(metrics.name, self.epoch)),im)
 
+            loss_total += err
+            batch_count += 1
+
+        return loss_total / batch_count
+
+
+
 
     def train(self, train_splits, filenames_val, train_generator, val_generator):
         logging.info("Starting training...")
+
+        #Loss value, epoch
+        last_best = (1000000000000, -1)
+
         for epoch in range(P.N_EPOCHS):
             self.pre_epoch()
 
@@ -67,7 +83,7 @@ class UNetTrainer(trainer.Trainer):
                                                 multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
                                                 n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
 
-            self.do_batches(self.train_fn, train_gen, self.train_metrics)
+            _ = self.do_batches(self.train_fn, train_gen, self.train_metrics)
 
             # And a full pass over the validation data:
             #Shuffling not really necessary..
@@ -78,5 +94,14 @@ class UNetTrainer(trainer.Trainer):
                                                 multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
                                                 n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
 
-            self.do_batches(self.val_fn, val_gen, self.val_metrics)
+            val_loss = self.do_batches(self.val_fn, val_gen, self.val_metrics)
             self.post_epoch()
+
+            if val_loss < last_best[0]:
+                last_best = (val_loss, epoch)
+
+            #No improvement for 5 epoch
+            if epoch - last_best[1] > 4:
+                self.l_r = 0.1*self.l_r
+                last_best = (val_loss, epoch)
+                logging.info("REDUCING LEARNING RATE TO {}\n----\n\n".format(self.l_r.eval()))
