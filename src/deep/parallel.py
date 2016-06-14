@@ -18,7 +18,7 @@ class ParallelBatchIterator(object):
 		multiprocess: boolean (default=True), multiprocess instead of multithread
 
 		n_producers: integer (default=4), amount of producers (threads or processes)
-		max_queue_size: integer (default=4*n_producers)
+		max_queue_size: integer (default=2*n_producers)
 	"""
 
 	def __init__(self, batch_generator, X, batch_size=1, ordered=False, multiprocess=True, n_producers=4, max_queue_size=None):
@@ -30,7 +30,7 @@ class ParallelBatchIterator(object):
 		self.batch_size = batch_size
 
 		if max_queue_size is None:
-			self.max_queue_size = n_producers*4
+			self.max_queue_size = n_producers*2
 		else:
 			self.max_queue_size = max_queue_size
 

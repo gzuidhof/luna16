@@ -42,6 +42,7 @@ class Params():
         self.BRANCHING_FACTOR = cf.getint('network', 'branching_factor')
         self.BATCH_NORMALIZATION = cf.getboolean('network', 'batch_normalization')
         self.DROPOUT = cf.getfloat('network', 'dropout')
+        self.SPATIAL_DROPOUT = cf.getfloat('network', 'spatial_dropout')
         self.GAUSSIAN_NOISE = cf.getfloat('network', 'gaussian_noise')
 
         # Updates

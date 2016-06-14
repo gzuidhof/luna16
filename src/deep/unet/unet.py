@@ -24,7 +24,7 @@ INPUT_SIZE = P.INPUT_SIZE #Default 512
 OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 def filter_for_depth(depth):
-    return 2**(P.BRANCHING_FACTOR+depth)+6
+    return 2**(P.BRANCHING_FACTOR+depth)
 
 def define_network(input_var):
     batch_size = None
@@ -66,8 +66,8 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-        if P.DROPOUT > 0:
-            bridge_from = DropoutLayer(net['conv{}_2'.format(depth)], P.DROPOUT)
+        if P.SPATIAL_DROPOUT > 0:
+            bridge_from = DropoutLayer(net['conv{}_2'.format(depth)], P.SPATIAL_DROPOUT)
         else:
             bridge_from = net['conv{}_2'.format(depth)]
 
@@ -85,7 +85,7 @@ def define_network(input_var):
             net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
 
         if P.DROPOUT > 0:
-            net['_conv{}_1'.format(depth)] = DropoutLayer(net['_conv{}_1'.format(depth)], P.DROPOUT*0.5)
+            net['_conv{}_1'.format(depth)] = DropoutLayer(net['_conv{}_1'.format(depth)], P.DROPOUT)
 
 
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
