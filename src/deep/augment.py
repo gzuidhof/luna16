@@ -36,14 +36,14 @@ def augment(images):
             #image = image.transpose(1,2,0)
             image = cv2.warpAffine(image, M, (pixels, pixels))
             if random_flip:
-                image = cv2.flip(image, 1)
+                image = cv2.flip(image, 0)
             #image = image.transpose(2,0,1)
             images[i] = image
         else:
             if random_flip:
-                image = image.transpose(1,0)
+                #image = image.transpose(1,0)
                 image[:,:] = image[::-1,:]
-                image = image.transpose(1,0)
+                #image = image.transpose(1,0)
 
             rotate(image, rotation_degrees, reshape=False, output=image)
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
