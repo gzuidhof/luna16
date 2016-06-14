@@ -41,6 +41,8 @@ class Params():
         self.DEPTH = cf.getint('network', 'depth')
         self.BRANCHING_FACTOR = cf.getint('network', 'branching_factor')
         self.BATCH_NORMALIZATION = cf.getboolean('network', 'batch_normalization')
+        self.DROPOUT = cf.getfloat('network', 'dropout')
+        self.GAUSSIAN_NOISE = cf.getfloat('network', 'gaussian_noise')
 
         # Updates
         self.OPTIMIZATION = cf.get('updates', 'optimization')

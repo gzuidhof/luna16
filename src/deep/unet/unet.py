@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 import lasagne
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, batch_norm
+from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, batch_norm, DropoutLayer, GaussianNoiseLayer
 from lasagne.init import HeNormal
 from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
@@ -24,21 +24,17 @@ INPUT_SIZE = P.INPUT_SIZE #Default 512
 OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 def filter_for_depth(depth):
-    return 2**(P.BRANCHING_FACTOR+depth)
+    return 2**(P.BRANCHING_FACTOR+depth)+6
 
 def define_network(input_var):
     batch_size = None
     net = {}
-    if P.INPUT_SIZE > 0:
-        in_size = P.INPUT_SIZE
-    else:
-        in_size = None
+    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,P.INPUT_SIZE,P.INPUT_SIZE), input_var=input_var)
 
-    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,in_size,in_size), input_var=input_var)
+    nonlinearity = nonlinearities.leaky_rectify
 
-    nonlinearity = nonlinearities.rectify
-
-
+    if P.GAUSSIAN_NOISE > 0:
+        net['input'] = GaussianNoiseLayer(net['input'], sigma=P.GAUSSIAN_NOISE)
 
     def contraction(depth, deepest):
         n_filters = filter_for_depth(depth)
@@ -70,14 +66,14 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-        #net['upconv{}'.format(depth)] = TransposedConv2DLayer(incoming,
-        #                                num_filters=n_filters, filter_size=2, stride=2,
-        #                                W=HeNormal(gain='relu'),
-        #                                nonlinearity=nonlinearity)
+        if P.DROPOUT > 0:
+            bridge_from = DropoutLayer(net['conv{}_2'.format(depth)], P.DROPOUT)
+        else:
+            bridge_from = net['conv{}_2'.format(depth)]
 
         net['bridge{}'.format(depth)] = ConcatLayer([
                                         net['upconv{}'.format(depth)],
-                                        net['conv{}_2'.format(depth)]],
+                                        bridge_from],
                                         axis=1, cropping=[None, None, 'center', 'center'])
 
         net['_conv{}_1'.format(depth)] = Conv2DLayer(net['bridge{}'.format(depth)],
@@ -87,6 +83,10 @@ def define_network(input_var):
 
         if P.BATCH_NORMALIZATION:
             net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
+
+        if P.DROPOUT > 0:
+            net['_conv{}_1'.format(depth)] = DropoutLayer(net['_conv{}_1'.format(depth)], P.DROPOUT*0.5)
+
 
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
