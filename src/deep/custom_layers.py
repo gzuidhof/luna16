@@ -18,12 +18,11 @@ class SpatialDropoutLayer(Layer):
         is False.
     Notes
     -----
-    The dropout layer is a regularizer that randomly sets input values to
-    zero; see [1]_, [2]_ for why this might improve generalization.
+    The spatial dropout layer is a regularizer that randomly sets whole the
+    values of whole features to zero. This is an adaptation of normal dropout,
+    which is generally useful in fully convolutional settings, such as [1]_.
 
-    This class is an adaption that sets whole features to zero instead of
-    individual activations. This is generally used in fully convolutional neural
-    networks, such as [3]_. It is also called a feature dropout layer.
+    It is also called a feature dropout layer.
 
     During training you should set deterministic to false and during
     testing you should set deterministic to true.
@@ -32,21 +31,13 @@ class SpatialDropoutLayer(Layer):
     this implementation scales the input at training time.
     References
     ----------
-    .. [1] Hinton, G., Srivastava, N., Krizhevsky, A., Sutskever, I.,
-           Salakhutdinov, R. R. (2012):
-           Improving neural networks by preventing co-adaptation of feature
-           detectors. arXiv preprint arXiv:1207.0580.
-    .. [2] Srivastava Nitish, Hinton, G., Krizhevsky, A., Sutskever,
-           I., & Salakhutdinov, R. R. (2014):
-           Dropout: A Simple Way to Prevent Neural Networks from Overfitting.
-           Journal of Machine Learning Research, 5(Jun)(2), 1929-1958.
-    .. [3] Oliveira, G. Valada, A., Bollen, C., Bugard, W., Brox. T. (2016):
+    .. [1] Oliveira, G. Valada, A., Bollen, C., Bugard, W., Brox. T. (2016):
            Deep Learning for Human Part Discovery in Images. IEEE
            International Conference on Robotics and Automation (ICRA), IEEE,
            2016.
     """
     def __init__(self, incoming, p=0.5, rescale=True, **kwargs):
-        super(DropoutLayer, self).__init__(incoming, **kwargs)
+        super(SpatialDropoutLayer, self).__init__(incoming, **kwargs)
         self._srng = RandomStreams(get_rng().randint(1, 2147462579))
         self.p = p
         self.rescale = rescale
