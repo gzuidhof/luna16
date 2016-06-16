@@ -27,7 +27,7 @@ THRESHOLD = 160
 
 
 def unet_candidates():
-    cands = glob.glob("../data/predictions_epoch16/*.png")
+    cands = glob.glob("../data/predictions_epoch25/*.png")
     #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
     data = []
     imname = ""
@@ -38,6 +38,9 @@ def unet_candidates():
 
         #image = imread(name)
         image_t = imread(name)
+
+        image_t = image_t.transpose(1,0)
+
         #Thresholding
         image_t[image_t<THRESHOLD] = 0
         image_t[image_t>0] = 1
@@ -102,7 +105,7 @@ def unet_candidates():
                     origin = dic["origin"]
                     spacing = dic["spacing"]
             else:
-                _,origin,spacing=load_itk_image("../data/subset9_unet/subset9/{0}.mhd".format(imname2))
+                _,origin,spacing=load_itk_image("../data/subset9_unet/subset8/{0}.mhd".format(imname2))
                 dic = {"origin":origin,"spacing":spacing}
                 with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
                     pickle.dump(dic, handle)
