@@ -51,7 +51,7 @@ def define_network(input_var):
                                     nonlinearity=nonlinearity)
 
         if P.BATCH_NORMALIZATION:
-            net['conv{}_2'.format(depth)] = batch_norm(net['conv{}_2'.format(depth)])
+            net['conv{}_2'.format(depth)] = batch_norm(net['conv{}_2'.format(depth)], alpha=P.BATCH_NORMALIZATION_ALPHA)
 
         if not deepest:
             net['pool{}'.format(depth)] = MaxPool2DLayer(net['conv{}_2'.format(depth)], pool_size=2, stride=2)

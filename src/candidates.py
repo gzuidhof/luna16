@@ -120,7 +120,7 @@ def unet_candidates():
         #    break
 
     df = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
-    save_candidates("../data/candidates_unet.csv",df)
+    save_candidates("../data/candidates_unet_final.csv",df)
 
 
 def candidates_to_image(cands,radius):

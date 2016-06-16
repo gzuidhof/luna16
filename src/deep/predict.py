@@ -53,7 +53,7 @@ if __name__ == "__main__":
     lasagne.layers.set_all_param_values(network, param_values)
     predict_fn = unet.define_predict(network, input_var)
 
-    in_pattern = '../../data/1_1_1mm_slices_lung/subset[8]/*.pkl.gz'
+    in_pattern = '../../data/1_1_1mm_slices_lung/subset[8-9]/*.pkl.gz'
     filenames = glob(in_pattern)#[:100]
 
     batch_size = 4
