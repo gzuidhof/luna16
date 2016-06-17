@@ -27,16 +27,15 @@ THRESHOLD = 160
 
 
 def unet_candidates():
-    cands = glob.glob("../data/predictions_epoch25/*.png")
+    cands = sorted(glob.glob("../data/predictions_epoch25/*.png"))
     #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
     data = []
     imname = ""
     origin = []
     spacing = []
     nrimages = 0
-    for name in tqdm(cands):
 
-        #image = imread(name)
+    for name in tqdm(cands):
         image_t = imread(name)
 
         image_t = image_t.transpose(1,0)
@@ -62,31 +61,6 @@ def unet_candidates():
             blob_i = np.where(label_im==i,1,0)
             mass = center_of_mass(blob_i)
             centers.append([mass[1],mass[0]])
-
-        # label_im[label_im>0]=1
-        # contours= cv2.findContours(label_im.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-        # centers = []
-        # previous = [0,0]
-        # nrcenters = 0
-        # for cnt in contours[0]:
-        #     if len(cnt) > 1:
-        #         M = cv2.moments(cnt)
-        #         try:
-        #             cX = int(M["m10"] / M["m00"])
-        #             cY = int(M["m01"] / M["m00"])
-        #             if (cX < previous[0] - 1 or cX > previous[0] + 1) and (cY < previous[1] - 1 or cY > previous[1] + 1):
-        #                 centers.append([cX,cY])
-        #                 previous = [cX,cY]
-        #                 nrcenters+=1
-        #         except:
-        #             pass
-        #     else:
-        #         cX = cnt[0][0][0]
-        #         cY = cnt[0][0][1]
-        #         if (cX < previous[0] - 1 or cX > previous[0] + 1) and (cY < previous[1] - 1 or cY > previous[1] + 1):
-        #             centers.append([cX,cY])
-        #             previous = [cX,cY]
-        #             nrcenters+1
 
         if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
             plt.subplot(211)
@@ -120,7 +94,7 @@ def unet_candidates():
         #    break
 
     df = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
-    save_candidates("../data/candidates_unet.csv",df)
+    save_candidates("../data/candidates_unet_final.csv",df)
 
 
 def candidates_to_image(cands,radius):
