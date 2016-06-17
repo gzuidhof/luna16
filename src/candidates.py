@@ -22,7 +22,7 @@ from scipy.ndimage.measurements import center_of_mass
 from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','label']
-THRESHOLD = 160
+THRESHOLD = 195
 
 def unet_candidates():
     cands = sorted(glob.glob("../data/predictions_epoch34/*.png"))
@@ -71,20 +71,22 @@ def unet_candidates():
 
 
 
-        mhd_filenames = glob.glob("../data/1_1_1mm_512_x_512_annotation_masks/*/{0}.mhd")
+        mhd_filenames = glob.glob("../data/1_1_1mm_512_x_512_annotation_masks/subset*/*.mhd")
 
         if imname2 != imname:
-            if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
-                with open("../data/subset9_unet/spacings/{0}.pickle".format(imname2), 'rb') as handle:
+            if os.path.isfile("../data/1_1_1mm_512_x_512_annotation_masks/spacings/{0}.pickle".format(imname2)):
+                with open("../data/1_1_1mm_512_x_512_annotation_masks/spacings/{0}.pickle".format(imname2), 'rb') as handle:
                     dic = pickle.load(handle)
                     origin = dic["origin"]
                     spacing = dic["spacing"]
             else:
+                #print imname2
+                #print mhd_filenames[:10]
                 mhd = filter(lambda x: imname2 in x, mhd_filenames)[0]
                 #_,origin,spacing=load_itk_image("../data/1_1_1mm_512_x_512_annotation_masks/subset8/{0}.mhd".format(imname2))
                 _,origin,spacing=load_itk_image(mhd)
                 dic = {"origin":origin,"spacing":spacing}
-                with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
+                with open('../data/1_1_1mm_512_x_512_annotation_masks/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
                     pickle.dump(dic, handle)
             imname = imname2
             nrimages +=1
