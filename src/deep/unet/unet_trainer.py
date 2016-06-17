@@ -100,8 +100,8 @@ class UNetTrainer(trainer.Trainer):
             if val_loss < last_best[0]:
                 last_best = (val_loss, epoch)
 
-            #No improvement for 7 epoch
-            if epoch - last_best[1] > 6:
+            #No improvement for 6 epoch
+            if epoch - last_best[1] > 5:
                 self.l_r = 0.1*self.l_r
                 last_best = (val_loss, epoch)
                 logging.info("REDUCING LEARNING RATE TO {}\n----\n\n".format(self.l_r.eval()))
