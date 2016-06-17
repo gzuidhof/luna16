@@ -21,13 +21,11 @@ from scipy.ndimage.measurements import center_of_mass
 
 from image_read_write import load_itk_image
 
-CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
+CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','label']
 THRESHOLD = 160
 
-
-
 def unet_candidates():
-    cands = sorted(glob.glob("../data/predictions_epoch25/*.png"))
+    cands = sorted(glob.glob("../data/predictions_epoch34/*.png"))
     #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
     data = []
     imname = ""
@@ -72,6 +70,9 @@ def unet_candidates():
             plt.show()
 
 
+
+        mhd_filenames = glob.glob("../data/1_1_1mm_512_x_512_annotation_masks/*/{0}.mhd")
+
         if imname2 != imname:
             if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
                 with open("../data/subset9_unet/spacings/{0}.pickle".format(imname2), 'rb') as handle:
@@ -79,7 +80,9 @@ def unet_candidates():
                     origin = dic["origin"]
                     spacing = dic["spacing"]
             else:
-                _,origin,spacing=load_itk_image("../data/subset9_unet/subset8/{0}.mhd".format(imname2))
+                mhd = filter(lambda x: imname2 in x, mhd_filenames)[0]
+                #_,origin,spacing=load_itk_image("../data/1_1_1mm_512_x_512_annotation_masks/subset8/{0}.mhd".format(imname2))
+                _,origin,spacing=load_itk_image(mhd)
                 dic = {"origin":origin,"spacing":spacing}
                 with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
                     pickle.dump(dic, handle)

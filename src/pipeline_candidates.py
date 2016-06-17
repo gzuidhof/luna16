@@ -24,9 +24,10 @@ def load_data(image_names):
 if __name__ == "__main__":
     for subset in xrange(0,1):
 
-        candidates = ca.load_candidates("../data/candidates_unet_final.csv",False)
-        #candidates = ca.merge_candidates(candidates,distance=1.337)
+        candidates = ca.load_candidates("../data/candidates_unet.csv",False)
+        #candidates = ca.merge_candidates(candidates,distance=2.)
         evaluate_candidates.run(candidates)
+        evaluate_candidates.save_mean_candidates()
         quit()
         #image_names = glob.glob("../data/subset{}/*.mhd".format(subset,subset))
         image_names = glob.glob("data/subset0/*.mhd")
