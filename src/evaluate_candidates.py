@@ -70,10 +70,9 @@ def evaluate(train_candidates):
          print "recall",float(found)/nr_annotations
          print "precision",float(found)/nr_candidates
 
-
-    # 1. Alle foute candidates (false postiives) wegschrijven naar nieuw csv bestand
-
-
+    #print nr_annotations
+    #print found
+    #print nr_candidates
 
 #In found_candidates there can be multiple entries that belong to the same annotation, these have to be averaged to find the center of the blob.
 def save_mean_candidates():
@@ -81,9 +80,6 @@ def save_mean_candidates():
         if entry != []:
             coords = np.mean(entry,axis=0)
             print coords
-
-    # 2. Deze berekende means (hebben allemaal label 1) toevoegen aan de CSV die je bij stap 1 hebt gemaakt
-
 
 def run(candidates):
 
@@ -97,13 +93,14 @@ def run(candidates):
     #print candidates
     for object in candidates.values:
         if object[0] == name:
-            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+            train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
         else:
             name = object[0]
             all_cands.append(train_candidates)
             train_candidates = []
-            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+            train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
     for image in all_cands:
+        #print 'Evaluating', image
         evaluate(image)
 
 

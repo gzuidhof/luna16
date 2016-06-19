@@ -22,10 +22,11 @@ from scipy.ndimage.measurements import center_of_mass
 from image_read_write import load_itk_image
 
 CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','label']
-THRESHOLD = 195
+THRESHOLD = 206
 
 def unet_candidates():
-    cands = sorted(glob.glob("../data/predictions_epoch34/*.png"))
+    print "Threshold", THRESHOLD
+    cands = sorted(glob.glob("../data/predictions_epoch27_23_true/*.png"))
     #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
     data = []
     imname = ""
@@ -43,13 +44,16 @@ def unet_candidates():
         image_t[image_t>0] = 1
         #erosion
         selem = morphology.disk(1)
+        image_eroded = image_t
         image_eroded = morphology.binary_erosion(image_t,selem=selem)
+
+
         label_im, nb_labels = ndimage.label(image_eroded)
         imname3 = os.path.split(name)[1].replace('.png','')
 
-        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
-            plt.imshow(label_im)
-            plt.show()
+        #if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
+        #    plt.imshow(label_im)
+        #    plt.show()
 
         splitted = imname3.split("slice")
         slice = splitted[1]
@@ -60,14 +64,14 @@ def unet_candidates():
             mass = center_of_mass(blob_i)
             centers.append([mass[1],mass[0]])
 
-        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
-            plt.subplot(211)
-            plt.imshow(label_im)
-            plt.subplot(212)
-            plt.imshow(label_im)
-            scatters = np.array(centers)
-            plt.scatter(x=scatters[:,0],y=scatters[:,1],marker='x',c='y')
-            plt.show()
+        #if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
+        #    plt.subplot(211)
+        #    plt.imshow(label_im)
+        #    plt.subplot(212)
+        #    plt.imshow(label_im)
+        #    scatters = np.array(centers)
+        #    plt.scatter(x=scatters[:,0],y=scatters[:,1],marker='x',c='y')
+        #    plt.show()
 
 
 
@@ -93,7 +97,7 @@ def unet_candidates():
 
         for center in centers:
             coords = voxel_2_world([int(slice),center[1]+(512-324)*0.5,center[0]+(512-324)*0.5],origin,spacing)
-            data.append([imname2,coords[0],coords[1],coords[2],0])
+            data.append([imname2,coords[2],coords[1],coords[0],0])
 
         #if nrimages == 5:
         #    break

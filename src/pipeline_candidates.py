@@ -25,35 +25,9 @@ if __name__ == "__main__":
     for subset in xrange(0,1):
 
         candidates = ca.load_candidates("../data/candidates_unet_final.csv",False)
-        #candidates = ca.merge_candidates(candidates,distance=2.)
+        #candidates = ca.load_candidates('../data/candidates_unet_TF_merged_FP_removed_if_close_45.csv', False)
+
+        #candidates = ca.merge_candidates(candidates,distance=1.337)
         evaluate_candidates.run(candidates)
         #evaluate_candidates.save_mean_candidates()
         quit()
-        #image_names = glob.glob("../data/subset{}/*.mhd".format(subset,subset))
-        image_names = glob.glob("data/subset0/*.mhd")
-        images,origins,spacings = load_data(image_names)
-
-        blob_images = []
-        for index,image in enumerate(images):
-            blobs = blob.blob_image_multiscale2(image,type=2)
-
-            coords = []
-            #coords = [y for y in [x for x in candidates]]
-
-            #slice, blob, xyz
-
-            for slice in blobs:
-                for s in slice:
-                    coords.append(s)
-            world_coords = np.array([ca.voxel_2_world(y[0:3],origins[index],spacings[index]) for y in coords])
-
-            name = os.path.split(image_names[index])[1].replace('.mhd','')
-
-            candidates = ca.coords_to_candidates(world_coords, name)
-
-            #candidates = ca.merge_candidates(candidates)
-            #print len(candidates)
-            ca.save_candidates("data/blob_candidates/{0}.csv".format(name), candidates)
-            #image_read_write.save_candidates('../data/blob_candidates/', candidates)
-
-            evaluate_candidates.run(candidates)
