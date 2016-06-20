@@ -69,7 +69,7 @@ if __name__ == "__main__":
         trainer.train(train_generator, X_train, validation_generator, X_val)
 
     elif P.ARCHITECTURE == "fr3dnet":
-        df = pd.read_csv("../../data/candidates.csv")
+        df = pd.read_csv("../../data/candidates_v2.csv")
         name_per_subset = subset.get_subset_to_filename_dict()
         train_x = []
         subsets_train = map(int,P.FILENAMES_TRAIN.split(','))
