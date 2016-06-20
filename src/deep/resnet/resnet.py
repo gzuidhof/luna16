@@ -23,6 +23,7 @@ LR_SCHEDULE = {
 PIXELS = 64
 imageSize = PIXELS * PIXELS
 num_classes = 2
+n_channels = 1
 
 he_norm = HeNormal(gain='relu')
 
@@ -245,7 +246,7 @@ def ResNet_FullPre_Wide(input_var=None, n=6, k=4):
         return block
 
     # Building the network
-    l_in = InputLayer(shape=(None, 3, PIXELS, PIXELS), input_var=input_var)
+    l_in = InputLayer(shape=(None, n_channels, PIXELS, PIXELS), input_var=input_var)
 
     # first layer, output is 16 x 64 x 64
     l = batch_norm(ConvLayer(l_in, num_filters=n_filters[0], filter_size=(3,3), stride=(1,1), nonlinearity=rectify, pad='same', W=he_norm))

@@ -74,14 +74,14 @@ class ResNetTrainer(trainer.Trainer):
             np.random.shuffle(val_false)
 
             train_epoch_data = train_true + train_false[:n_train_true]
-            val_epoch_data = val_true + val_false[:n_val_true*20]
+            val_epoch_data = val_true + val_false[:n_val_true]
 
             np.random.shuffle(train_epoch_data)
             #np.random.shuffle(val_epoch_data)
 
             #Full pass over the training data
             train_gen = ParallelBatchIterator(generator_train, train_epoch_data, ordered=False,
-                                                batch_size=P.BATCH_SIZE_TRAIN,
+                                                batch_size=P.BATCH_SIZE_TRAIN//3,
                                                 multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
                                                 n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
 
@@ -89,7 +89,7 @@ class ResNetTrainer(trainer.Trainer):
 
             # And a full pass over the validation data:
             val_gen = ParallelBatchIterator(generator_val, val_epoch_data, ordered=False,
-                                                batch_size=P.BATCH_SIZE_VALIDATION,
+                                                batch_size=P.BATCH_SIZE_VALIDATION//3,
                                                 multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
                                                 n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
 
