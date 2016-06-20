@@ -47,15 +47,23 @@ class Fr3dNetTrainer(trainer.Trainer):
         #generator = partial(patch_sampling.extract_random_patches, patch_size=P.INPUT_SIZE, crop_size=OUTPUT_SIZE)
 
 
+        def combine_tups(tup):
+            names,coords,labels = zip(*tup)
+            d = {n:[] for n in names}
+            for name,coord,label in tup:
+                d[name].append((coord,label))
+            data = []
+            for name,values in d.iteritems():
+                data.append((name,values[0],values[1]))
+
         def load_data(tup):
             size = P.INPUT_SIZE
             data = []
             labels = []
             for t in tup:
-                image = dataset_3D.giveSubImage(t[0],[t[1]],size)
-                image = np.expand_dims(image, axis=0)
-                labels.append(int(t[2]))
-                data.append(image)
+                images = dataset_3D.giveSubImage(t[0],t[1],size)
+                labels += map(int,t[2])
+                data += images[:]
             return np.array(data), labels
 
         train_true = filter(lambda x: x[2]==1, X_train)
@@ -80,7 +88,7 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             np.random.shuffle(train_epoch_data)
             #np.random.shuffle(val_epoch_data)
-
+            train_epoch_data = combine_tups(train_epoch_data)
             #Full pass over the training data
             train_gen = ParallelBatchIterator(load_data, train_epoch_data, ordered=False,
                                                 batch_size=P.BATCH_SIZE_TRAIN,
