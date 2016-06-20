@@ -64,7 +64,10 @@ class Fr3dNetTrainer(trainer.Trainer):
                 images = dataset_3D.giveSubImage(t[0],t[1],size)
                 labels += map(int,t[2])
                 data += images[:]
-            return np.array(data), labels
+
+
+            return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
+
 
         train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
