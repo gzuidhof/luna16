@@ -28,9 +28,13 @@ def load_data(tup):
     labels = []
 
     images = dataset_3D.giveSubImage(tup[0],tup[1],size)
-    images = normalize.normalize(images)
     labels += map(int,tup[2])
     data += images[:]
+
+    data = normalize.normalize(np.array(data, dtype=np.float32))
+    
+    if P.ZERO_CENTER:
+        data -= P.MEAN_PIXEL
 
     return zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
 
@@ -51,7 +55,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
-    print "Epoch {0} n files {}".format(n, len(train_epoch))
+    print "Epoch {0} n files {1}".format(n, len(train_epoch))
     pool = Pool(processes=24)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
