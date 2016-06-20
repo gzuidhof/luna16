@@ -17,7 +17,7 @@ model_folder = os.path.join(model_folder, sys.argv[1])
 params.params = params.Params(['../../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
 from params import params as P
 P.RANDOM_CROP = 0
-P.INPUT_SIZE = 1024
+P.INPUT_SIZE = 512
 #P.INPUT_SIZE = 0
 
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     lasagne.layers.set_all_param_values(network, param_values)
     predict_fn = unet.define_predict(network, input_var)
 
-    in_pattern = '../../data/0.5_0.5_0.5mm_slices_lung/subset[8-9]/*.pkl.gz'
+    in_pattern = '../../data/1_1_1mm_slices_lung/subset[8-9]/*.pkl.gz'
     filenames = glob(in_pattern)#[:100]
 
     batch_size = 4

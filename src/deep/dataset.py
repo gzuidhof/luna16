@@ -21,7 +21,7 @@ def get_image(filename, deterministic):
 
     truth_filename = filename.replace('lung','nodule')
     segmentation_filename = filename.replace('lung','lung_masks')
-    segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
+    #segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
 
     if os.path.isfile(truth_filename):
         with gzip.open(truth_filename,'rb') as f:
@@ -34,6 +34,7 @@ def get_image(filename, deterministic):
             outside = np.where(pickle.load(f)>0,0,1)
     else:
         outside = np.where(lung==0,1,0)
+        print 'lung not found'
 
     if P.ERODE_SEGMENTATION > 0:
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)

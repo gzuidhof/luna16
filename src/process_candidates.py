@@ -44,7 +44,7 @@ def draw_circles(image,cands,origin,spacing):
 
 if __name__ == "__main__":
     for i in xrange(0,2):
-        cads = candidates.load_candidates("../data/annotations.csv")
+        cads = candidates.load_candidates("/data/annotations.csv")
         #index = 2
         image_names = glob.glob("../data/subset{}/*.mhd".format(i))
         for image_name in image_names:

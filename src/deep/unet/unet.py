@@ -1,13 +1,14 @@
 import theano
 import theano.tensor as T
 import lasagne
-from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, batch_norm
+from lasagne.layers import InputLayer, Conv2DLayer, MaxPool2DLayer, batch_norm, DropoutLayer, GaussianNoiseLayer
 from lasagne.init import HeNormal
 from lasagne import nonlinearities
 from lasagne.layers import ConcatLayer, Upscale2DLayer
 from lasagne.regularization import l2, regularize_network_params
 import logging
 from params import params as P
+import numpy as np
 
 def output_size_for_input(in_size, depth):
     in_size -= 4
@@ -29,16 +30,12 @@ def filter_for_depth(depth):
 def define_network(input_var):
     batch_size = None
     net = {}
-    if P.INPUT_SIZE > 0:
-        in_size = P.INPUT_SIZE
-    else:
-        in_size = None
+    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,P.INPUT_SIZE,P.INPUT_SIZE), input_var=input_var)
 
-    net['input'] = InputLayer(shape=(batch_size,P.CHANNELS,in_size,in_size), input_var=input_var)
+    nonlinearity = nonlinearities.leaky_rectify
 
-    nonlinearity = nonlinearities.rectify
-
-
+    if P.GAUSSIAN_NOISE > 0:
+        net['input'] = GaussianNoiseLayer(net['input'], sigma=P.GAUSSIAN_NOISE)
 
     def contraction(depth, deepest):
         n_filters = filter_for_depth(depth)
@@ -54,7 +51,7 @@ def define_network(input_var):
                                     nonlinearity=nonlinearity)
 
         if P.BATCH_NORMALIZATION:
-            net['conv{}_2'.format(depth)] = batch_norm(net['conv{}_2'.format(depth)])
+            net['conv{}_2'.format(depth)] = batch_norm(net['conv{}_2'.format(depth)], alpha=P.BATCH_NORMALIZATION_ALPHA)
 
         if not deepest:
             net['pool{}'.format(depth)] = MaxPool2DLayer(net['conv{}_2'.format(depth)], pool_size=2, stride=2)
@@ -70,14 +67,14 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-        #net['upconv{}'.format(depth)] = TransposedConv2DLayer(incoming,
-        #                                num_filters=n_filters, filter_size=2, stride=2,
-        #                                W=HeNormal(gain='relu'),
-        #                                nonlinearity=nonlinearity)
+        if P.SPATIAL_DROPOUT > 0:
+            bridge_from = DropoutLayer(net['conv{}_2'.format(depth)], P.SPATIAL_DROPOUT)
+        else:
+            bridge_from = net['conv{}_2'.format(depth)]
 
         net['bridge{}'.format(depth)] = ConcatLayer([
                                         net['upconv{}'.format(depth)],
-                                        net['conv{}_2'.format(depth)]],
+                                        bridge_from],
                                         axis=1, cropping=[None, None, 'center', 'center'])
 
         net['_conv{}_1'.format(depth)] = Conv2DLayer(net['bridge{}'.format(depth)],
@@ -85,8 +82,12 @@ def define_network(input_var):
                                         W=HeNormal(gain='relu'),
                                         nonlinearity=nonlinearity)
 
-        if P.BATCH_NORMALIZATION:
-            net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
+        #if P.BATCH_NORMALIZATION:
+        #    net['_conv{}_1'.format(depth)] = batch_norm(net['_conv{}_1'.format(depth)])
+
+        if P.DROPOUT > 0:
+            net['_conv{}_1'.format(depth)] = DropoutLayer(net['_conv{}_1'.format(depth)], P.DROPOUT)
+
 
         net['_conv{}_2'.format(depth)] = Conv2DLayer(net['_conv{}_1'.format(depth)],
                                         num_filters=n_filters, filter_size=3, pad='valid',
@@ -150,12 +151,15 @@ def define_updates(network, input_var, target_var, weight_var):
     t_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary = train_metrics
 
 
+
+    l_r = theano.shared(np.array(P.LEARNING_RATE, dtype=theano.config.floatX))
+
     if P.OPTIMIZATION == 'nesterov':
         updates = lasagne.updates.nesterov_momentum(
-                loss, params, learning_rate=P.LEARNING_RATE, momentum=P.MOMENTUM)
+                loss, params, learning_rate=l_r, momentum=P.MOMENTUM)
     if P.OPTIMIZATION == 'adam':
         updates = lasagne.updates.adam(
-                loss, params, learning_rate=P.LEARNING_RATE)
+                loss, params, learning_rate=l_r)
 
     logging.info("Defining train function")
     train_fn = theano.function([input_var, target_var, weight_var],[
@@ -167,7 +171,7 @@ def define_updates(network, input_var, target_var, weight_var):
                                 t_loss, l2_loss, t_acc, t_dice_score, t_target_prediction, t_prediction, t_prediction_binary])
 
 
-    return train_fn, val_fn
+    return train_fn, val_fn, l_r
 
 def define_predict(network, input_var):
     params = lasagne.layers.get_all_params(network, trainable=True)

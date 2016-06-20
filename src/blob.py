@@ -1,6 +1,6 @@
 import SimpleITK as sitk
 import numpy as np
-import normalize as norm
+#import normalize as norm
 from skimage import filter as filters
 #from joblib import Parallel
 from skimage import exposure
