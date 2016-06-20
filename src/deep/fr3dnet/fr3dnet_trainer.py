@@ -15,7 +15,8 @@ from tqdm import tqdm
 import theano
 import dataset_3D
 import theano.tensor as T
-from multiprocessing import Pool
+#from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool as Pool
 import itertools
 import util
 import functools
@@ -113,7 +114,7 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             return train_epoch_data, val_epoch_data
 
-        make_epoch_helper = partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
+        make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
         epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
