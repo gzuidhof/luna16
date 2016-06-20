@@ -11,7 +11,7 @@ matplotlib.use('Agg')
 import logging
 from parallel import ParallelBatchIterator
 from tqdm import tqdm
-
+import theano
 import dataset_3D
 import theano.tensor as T
 
@@ -21,7 +21,8 @@ class Fr3dNetTrainer(trainer.Trainer):
         metric_names = ['Loss','L2','Accuracy']
         super(Fr3dNetTrainer, self).__init__(metric_names)
 
-        input_var = T.tensor4('inputs')
+        tensor5 = T.TensorType(theano.config.floatX, (False,) * 5)
+        input_var = tensor5('inputs')
         target_var = T.ivector('targets')
 
         logging.info("Defining network")
