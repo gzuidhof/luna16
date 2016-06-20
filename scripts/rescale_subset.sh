@@ -13,3 +13,4 @@ cd $HOME/luna16/src/data_processing
 #Go!!!
 echo "starting python"
 srun -u python equalize_spacings.py 0
+echo "done?"

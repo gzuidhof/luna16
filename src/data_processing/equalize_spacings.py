@@ -44,4 +44,8 @@ if __name__ == "__main__":
     subset = sys.argv[1]
     subsetDir = '/scratch-shared/vdgugten/cad/original/subset{}'.format(subset)
     imageNames = glob.glob("{}/*.mhd".format(subsetDir))
+
+    print "N images: ", len(imageNames)
+    print "First 3", imageNames[:3]
     Parallel(n_jobs=12)(delayed(reshape_image)(imageDir,subsetDir) for imageDir in imageNames)
+    print "Done!"
