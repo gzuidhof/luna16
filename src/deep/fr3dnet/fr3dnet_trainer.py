@@ -71,7 +71,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             np.random.shuffle(val_false)
 
             train_epoch_data = train_true + train_false[:n_train_true]
-            val_epoch_data = val_true + val_false[:n_val_true]
+            val_epoch_data = val_true + val_false
 
             np.random.shuffle(train_epoch_data)
             #np.random.shuffle(val_epoch_data)
