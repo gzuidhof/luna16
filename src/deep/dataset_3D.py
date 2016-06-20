@@ -21,14 +21,14 @@ def giveSubImage(image_path, coordinateList, size):
     output = []
     offset = size//2
     #padd images with values -3000, such that also candidates at the edge will remain in the middel of the image
-    image_padded = np.pad(image,offset,'constant',constant_values=-3000)
+    image_padded = np.pad(image,size,'constant',constant_values=-3000)
     #loop over all candidates and take the subimage and save this in the ouput list.
     for coordinate in coordinateList:
         center_pixel = np.floor(world_2_voxel(coordinate,origin,spacing)) + offset
         center_pixel = map(int, center_pixel)
-        sub_image = image_padded[center_pixel[0]:center_pixel[0]+size,
-                                    center_pixel[1]:center_pixel[1]+size,
-                                    center_pixel[2]:center_pixel[2]+size]
+        sub_image = image_padded[center_pixel[0]:center_pixel[0]+size*2,
+                                    center_pixel[1]:center_pixel[1]+size*2,
+                                    center_pixel[2]:center_pixel[2]+size*2]
         sub_image = np.expand_dims(sub_image, axis=0)
         output.append(sub_image)
     return output

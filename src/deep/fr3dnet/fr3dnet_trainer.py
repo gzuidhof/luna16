@@ -20,7 +20,7 @@ from multiprocessing import Pool
 import itertools
 import util
 import functools
-
+import normalize
 
 def load_data(tup):
     size = P.INPUT_SIZE
@@ -28,6 +28,7 @@ def load_data(tup):
     labels = []
 
     images = dataset_3D.giveSubImage(tup[0],tup[1],size)
+    images = normalize.normalize(images)
     labels += map(int,tup[2])
     data += images[:]
 
@@ -50,6 +51,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
+    print "Epoch {0} n files {}".format(n, len(train_epoch))
     pool = Pool(processes=48)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)

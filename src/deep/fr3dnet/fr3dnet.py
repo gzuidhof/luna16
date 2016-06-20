@@ -64,7 +64,6 @@ def define_network(inputs):
 def define_updates(network, inputs, targets):
     prediction = lasagne.layers.get_output(network)
 
-
     loss = lasagne.objectives.categorical_crossentropy(prediction, targets)
     loss = loss.mean()
 
