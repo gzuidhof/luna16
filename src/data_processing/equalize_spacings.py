@@ -27,7 +27,7 @@ def save_itk(image, origin, spacing, filename):
 def reshape_image(imageDir, subsetDir):
     if os.path.isfile(imageDir.replace('original',SAVE_FOLDER)) == False:
         img, origin, spacing = load_itk(imageDir)
-
+        print 'Processing', imageDir
         resize_factor = spacing / RESIZE_SPACING
         new_real_shape = img.shape * resize_factor
         new_shape = np.round(new_real_shape)
@@ -38,6 +38,7 @@ def reshape_image(imageDir, subsetDir):
 
         origin = origin[::-1]
         new_spacing = new_spacing[::-1]
+        print 'Saving', imageDir
         save_itk(img,origin,new_spacing,imageDir.replace('original',SAVE_FOLDER))
 
 if __name__ == "__main__":
