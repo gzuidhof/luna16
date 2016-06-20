@@ -33,6 +33,10 @@ def load_data(tup):
 
     return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
+
+def _make_epoch(x):
+    return make_epoch(*x)
+
 def make_epoch(n, train_true, train_false, val_true, val_false):
     n = n[0]
     train_false = list(train_false)
@@ -112,10 +116,12 @@ class Fr3dNetTrainer(trainer.Trainer):
         n_train_true = len(train_true)
         n_val_true = len(val_true)
 
-        make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
+        #make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
+
+        inputeroni = zip(range(P.N_EPOCHS), [train_true]*P.N_EPOCHS, [train_false]*P.N_EPOCHS, [val_true]*P.N_EPOCHS, [val_false]*P.N_EPOCHS)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+        epoch_iterator = ParallelBatchIterator(_make_epoch, inputeroni, ordered=False, batch_size=1, multiprocess=True, n_producers=3)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
