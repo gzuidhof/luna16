@@ -50,7 +50,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
-    pool = Pool(processes=16)
+    pool = Pool(processes=36)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
@@ -114,7 +114,7 @@ class Fr3dNetTrainer(trainer.Trainer):
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=2)
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=1)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
