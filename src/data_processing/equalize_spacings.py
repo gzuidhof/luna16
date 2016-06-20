@@ -8,8 +8,8 @@ import scipy.ndimage
 from joblib import Parallel, delayed
 import sys
 
-RESIZE_SPACING = [0.5, 0.5, 0.5]
-SAVE_FOLDER = '0.5_0.5_0.5'
+RESIZE_SPACING = [0.75, 0.75, 0.75]
+SAVE_FOLDER = '0.75_0.75_0.75'
 
 def load_itk(filename):
     itkimage = sitk.ReadImage(filename)
