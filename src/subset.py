@@ -9,7 +9,7 @@ def make_filename_to_subset_dict():
     for subset in range(10):
         files = glob.glob(in_folder+'subset{0}'.format(subset)+'/*.mhd')
         print "Subset", subset, "n files", len(files)
-        files = map(lambda x: x.replace('.mhd',''), files)
+        files = map(lambda x: x.split(x.replace('.mhd',''),'/')[-1], files)
         subset_dict[subset] = files
 
     joblib.dump(subset_dict, '../config/subset_to_filenames.pkl')
