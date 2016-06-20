@@ -51,7 +51,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             size = P.INPUT_SIZE
             data = []
             for t in tup:
-                image = dataset_3D.giveSubImage(t[0],t[1],size)
+                image = dataset_3D.giveSubImage(t[0],[t[1]],size)
                 image = np.expand_dims(image, axis=0)
                 data.append((image,int(t[2])))
             return np.array(data)
