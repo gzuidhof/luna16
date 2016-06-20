@@ -29,6 +29,7 @@ def giveSubImage(image_path, coordinateList, size):
         sub_image = image_padded[center_pixel[0]:center_pixel[0]+size,
                                     center_pixel[1]:center_pixel[1]+size,
                                     center_pixel[2]:center_pixel[2]+size]
+        sub_image = np.expand_dims(sub_image, axis=0)
         output.append(sub_image)
     return output
 
