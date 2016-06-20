@@ -53,14 +53,14 @@ class Fr3dNetTrainer(trainer.Trainer):
             for t in tup:
                 image = dataset_3D.giveSubImage(t[0],t[1],size)
                 image = np.expand_dims(image, axis=0)
-                data.append((image,t[2]))
+                data.append((image,int(t[2])))
             return np.array(data)
 
-        train_true = filter(lambda x: x[3]==1, X_train)
-        train_false = filter(lambda x: x[3]==0, X_train)
+        train_true = filter(lambda x: x[2]==1, X_train)
+        train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[3]==1, X_val)
-        val_false = filter(lambda x: x[3]==0, X_val)
+        val_true = filter(lambda x: x[2]==1, X_val)
+        val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
         n_val_true = len(val_true)
