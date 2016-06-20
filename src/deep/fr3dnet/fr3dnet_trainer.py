@@ -50,11 +50,13 @@ class Fr3dNetTrainer(trainer.Trainer):
         def load_data(tup):
             size = P.INPUT_SIZE
             data = []
+            labels = []
             for t in tup:
                 image = dataset_3D.giveSubImage(t[0],[t[1]],size)
                 image = np.expand_dims(image, axis=0)
-                data.append((image,int(t[2])))
-            return np.array(data)
+                labels.append(int(t[2]))
+                data.append(image)
+            return np.array(data), labels
 
         train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)

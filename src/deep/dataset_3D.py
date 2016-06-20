@@ -25,7 +25,7 @@ def giveSubImage(image_path, coordinateList, size):
     index = 0
     #loop over all candidates and take the subimage and save this in the ouput list.
     for coordinate in coordinateList:
-        coordinate = np.array(list(reversed(coordinate)))
+        #coordinate = np.array(list(reversed(coordinate)))
         center_pixel = np.floor(world_2_voxel(coordinate,origin,spacing)) + offset
         center_pixel = map(int, center_pixel)
         sub_image = image_padded[center_pixel[0]:center_pixel[0]+size,
