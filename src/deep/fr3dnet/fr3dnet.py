@@ -61,7 +61,7 @@ def define_network(inputs):
     return network
 
 
-def define_loss(network, targets):
+def define_updates(network, inputs, targets):
     prediction = lasagne.layers.get_output(network)
 
 
@@ -73,21 +73,16 @@ def define_loss(network, targets):
     test_loss = test_loss.mean()
 
 
-    regularization_penalty = regularize_layer_params(network, l2) * params.L2_LAMBDA
+    l2_loss = regularize_layer_params(network, l2) * params.L2_LAMBDA
+    loss = loss + l2_loss
+    test_loss = test_loss + l2_loss
 
-    loss = loss + regularization_penalty
-    test_loss = test_loss + regularization_penalty
 
-    acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), targets),
+    acc = T.mean(T.eq(T.argmax(prediction, axis=1), targets),
+                dtype=theano.config.floatX)
+    test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), targets),
                 dtype=theano.config.floatX)
 
-    # Compile a second function computing the validation loss and accuracy:
-    val_fn = theano.function([inputs, targets], [test_prediction, test_loss, acc])
-
-    return loss, val_fn
-
-
-def define_learning(network, loss):
     # Create update expressions for training, i.e., how to modify the
     # parameters at each training step. Here, we'll use Stochastic Gradient
     # Descent (SGD), but Lasagne offers plenty more.
@@ -99,10 +94,10 @@ def define_learning(network, loss):
     elif params.OPTIMIZATION == "RMSPROP":
         updates = lasagne.updates.adam(loss, network_params)
 
-
-
     # Compile a function performing a training step on a mini-batch (by giving
     # the updates dictionary) and returning the corresponding training loss:
-    train_fn = theano.function([inputs, targets], loss, updates=updates)
+    train_fn = theano.function([inputs, targets], [loss, l2_loss, acc], updates=updates)
+    # Compile a second function computing the validation loss and accuracy:
+    val_fn = theano.function([inputs, targets], [test_loss, l2_loss, test_acc])
 
-    return train_fn
+    return train_fn, val_fn

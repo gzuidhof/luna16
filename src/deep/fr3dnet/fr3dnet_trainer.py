@@ -13,11 +13,7 @@ from parallel import ParallelBatchIterator
 from tqdm import tqdm
 
 import dataset_3D
-
 import theano.tensor as T
-import resnet
-from resnet import LR_SCHEDULE
-
 
 
 class Fr3dNetTrainer(trainer.Trainer):
@@ -31,8 +27,7 @@ class Fr3dNetTrainer(trainer.Trainer):
         logging.info("Defining network")
         net = fr3dnet.define_network(input_var)
         self.network = net
-        loss,val_fn = fr3dnet.define_loss(net,target_var)
-        train_fn = fr3dnet.define_learning(net,loss)
+        train_fn, val_fn = fr3dnet.define_updates(net, input_var, target_var)
 
         self.train_fn = train_fn
         self.val_fn = val_fn
@@ -97,5 +92,3 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             self.do_batches(self.val_fn, val_gen, self.val_metrics)
             self.post_epoch()
-
-
