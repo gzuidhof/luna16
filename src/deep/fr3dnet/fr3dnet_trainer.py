@@ -102,10 +102,10 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:12]
+        train_true = filter(lambda x: x[2]==1, X_train)[:240]
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)[:12]
+        val_true = filter(lambda x: x[2]==1, X_val)[:120]
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
@@ -114,7 +114,7 @@ class Fr3dNetTrainer(trainer.Trainer):
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=4)
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=6)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
