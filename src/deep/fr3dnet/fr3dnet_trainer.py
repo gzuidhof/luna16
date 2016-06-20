@@ -15,8 +15,8 @@ from tqdm import tqdm
 import theano
 import dataset_3D
 import theano.tensor as T
-#from multiprocessing import Pool
-from multiprocessing.pool import ThreadPool as Pool
+from multiprocessing import Pool
+#from multiprocessing.pool import ThreadPool as Pool
 import itertools
 import util
 import functools
@@ -74,10 +74,10 @@ class Fr3dNetTrainer(trainer.Trainer):
             return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:50]
+        train_true = filter(lambda x: x[2]==1, X_train)[:20]
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)[:20]
+        val_true = filter(lambda x: x[2]==1, X_val)[:10]
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
@@ -99,7 +99,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             train_epoch = combine_tups(train_epoch)
             val_epoch = combine_tups(val_epoch)
 
-            pool = Pool(processes=6)
+            pool = Pool(processes=8)
             train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
             print "Epoch {0} done loading train".format(n)
 
@@ -117,13 +117,11 @@ class Fr3dNetTrainer(trainer.Trainer):
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=4)
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=False, n_producers=3)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
             train_epoch_data, val_epoch_data = epoch_values
-
-
 
             self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
