@@ -15,7 +15,7 @@ from tqdm import tqdm
 from params import params
 import dataset_3D
 import normalize
-
+from lasagne.init import HeNormal
 from lasagne.layers.dnn import Conv3DDNNLayer, MaxPool3DDNNLayer
 
 
@@ -27,7 +27,7 @@ def define_network(inputs):
     network = Conv3DDNNLayer(
             network, num_filters=64, filter_size=(5, 5, 3),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
-            W=lasagne.init.GlorotUniform())
+            W=HeNormal(gain='relu'))
 
     network = MaxPool3DDNNLayer(network, pool_size=(2, 2, 1))
 
@@ -37,12 +37,12 @@ def define_network(inputs):
     network = Conv3DDNNLayer(
             network, num_filters=64, filter_size=(5, 5, 3),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
-            W=lasagne.init.GlorotUniform())
+            W=HeNormal(gain='relu'))
 
     network = Conv3DDNNLayer(
             network, num_filters=64, filter_size=(5, 5, 3),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
-            W=lasagne.init.GlorotUniform())
+            W=HeNormal(gain='relu'))
 
     if params.BATCH_NORMALIZATION:
         network = lasagne.layers.BatchNormLayer(network)
@@ -51,7 +51,7 @@ def define_network(inputs):
             network,
             num_units=250,
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
-            W=lasagne.init.GlorotUniform()
+            W=HeNormal(gain='relu')
     )
 
     network = lasagne.layers.DenseLayer(

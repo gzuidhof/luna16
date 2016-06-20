@@ -11,7 +11,7 @@ matplotlib.use('Agg')
 import logging
 from parallel import ParallelBatchIterator
 from tqdm import tqdm
-
+import theano
 import dataset_3D
 import theano.tensor as T
 
@@ -21,7 +21,8 @@ class Fr3dNetTrainer(trainer.Trainer):
         metric_names = ['Loss','L2','Accuracy']
         super(Fr3dNetTrainer, self).__init__(metric_names)
 
-        input_var = T.tensor4('inputs')
+        tensor5 = T.TensorType(theano.config.floatX, (False,) * 5)
+        input_var = tensor5('inputs')
         target_var = T.ivector('targets')
 
         logging.info("Defining network")
@@ -50,14 +51,16 @@ class Fr3dNetTrainer(trainer.Trainer):
             size = P.INPUT_SIZE
             data = []
             for t in tup:
-                data.append((dataset_3D.giveSubImage(t[0],t[1],size),t[2]))
+                image = dataset_3D.giveSubImage(t[0],t[1],size)
+                image = np.expand_dims(image, axis=0)
+                data.append((image,int(t[2])))
             return np.array(data)
 
-        train_true = filter(lambda x: x[3]==1, X_train)
-        train_false = filter(lambda x: x[3]==0, X_train)
+        train_true = filter(lambda x: x[2]==1, X_train)
+        train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[3]==1, X_val)
-        val_false = filter(lambda x: x[3]==0, X_val)
+        val_true = filter(lambda x: x[2]==1, X_val)
+        val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
         n_val_true = len(val_true)
@@ -71,7 +74,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             np.random.shuffle(val_false)
 
             train_epoch_data = train_true + train_false[:n_train_true]
-            val_epoch_data = val_true + val_false[:n_val_true]
+            val_epoch_data = val_true + val_false
 
             np.random.shuffle(train_epoch_data)
             #np.random.shuffle(val_epoch_data)

@@ -27,12 +27,12 @@ import glob
 
 
 def fr3dnet_dataset(subset_nr,df,name_per_subset):
-    train_x_names = name_per_subset[x]
+    train_x_names = name_per_subset[subset_nr]
     cands = df[df['seriesuid'].isin(train_x_names)]
     coords = zip(cands.values[:,1],cands.values[:,2],cands.values[:,3])
     names = cands.values[:,0]
     labels = cands.values[:,4]
-    path_names = [P.DATA_FOLDER + 'subset{0}/{1}.mhd'.format(x,y) for y in names]
+    path_names = [P.DATA_FOLDER + 'subset{0}/{1}.mhd'.format(subset_nr,y) for y in names]
     return zip(path_names,coords,labels)
 if __name__ == "__main__":
 
@@ -69,13 +69,17 @@ if __name__ == "__main__":
         trainer.train(train_generator, X_train, validation_generator, X_val)
 
     elif P.ARCHITECTURE == "fr3dnet":
-        df = pd.read_csv("../../data/candidates.csv")
+        df = pd.read_csv("../../data/candidates_v2.csv")
         name_per_subset = subset.get_subset_to_filename_dict()
         train_x = []
-        for x in xrange(0,6):
-            train_x += fr3dnet_dataset(x,df,name_per_subset)
+        subsets_train = map(int,P.FILENAMES_TRAIN.split(','))
+        for s in subsets_train:
+            train_x += fr3dnet_dataset(s,df,name_per_subset)
 
-        val_x = fr3dnet_dataset(6,df,name_per_subset)
+        val_x = []
+        subsets_val = map(int,P.FILENAMES_VALIDATION.split(','))
+        for s in subsets_val:
+            val_x += fr3dnet_dataset(s,df,name_per_subset)
         trainer = Fr3dNetTrainer()
         trainer.train(train_x,val_x)
 
