@@ -112,7 +112,7 @@ class Fr3dNetTrainer(trainer.Trainer):
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
