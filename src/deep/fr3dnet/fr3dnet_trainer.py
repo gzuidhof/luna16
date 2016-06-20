@@ -35,7 +35,7 @@ def load_data(tup):
 
 
 def _make_epoch(x):
-    n, train_true, train_false, val_true, val_false = zip(*x[0])
+    n, train_true, train_false, val_true, val_false = x[0]
     return make_epoch([n], train_true, train_false, val_true, val_false)
 
 def make_epoch(n, train_true, train_false, val_true, val_false):
@@ -64,10 +64,10 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
 
     np.random.shuffle(train_epoch_data)
 
-    train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
-    val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
+    #train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
+    #val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
 
-    return train_epoch_data, val_epoch_data
+    return list(train_epoch_data), list(val_epoch_data)
 
 def combine_tups(tup):
     names,coords,labels = zip(*tup)
