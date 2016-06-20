@@ -65,3 +65,7 @@ data
 src/*.csv
 images/plot
 models
+*.name
+.idea/luna16.iml
+*.xml
+src/bla.txt
