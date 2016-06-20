@@ -14,7 +14,7 @@ def make_filename_to_subset_dict():
 
     joblib.dump(subset_dict, '../config/subset_to_filenames.pkl')
 
-def get_filename_to_subset_dict(location='../config/subset_to_filenames.pkl'):
+def get_subset_to_filename_dict(location='../config/subset_to_filenames.pkl'):
     return joblib.load(location)
 
 if __name__ == "__main__":
