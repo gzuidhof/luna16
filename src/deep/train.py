@@ -27,12 +27,12 @@ import glob
 
 
 def fr3dnet_dataset(subset_nr,df,name_per_subset):
-    train_x_names = name_per_subset[x]
+    train_x_names = name_per_subset[subset_nr]
     cands = df[df['seriesuid'].isin(train_x_names)]
     coords = zip(cands.values[:,1],cands.values[:,2],cands.values[:,3])
     names = cands.values[:,0]
     labels = cands.values[:,4]
-    path_names = [P.DATA_FOLDER + 'subset{0}/{1}.mhd'.format(x,y) for y in names]
+    path_names = [P.DATA_FOLDER + 'subset{0}/{1}.mhd'.format(subset_nr,y) for y in names]
     return zip(path_names,coords,labels)
 if __name__ == "__main__":
 
