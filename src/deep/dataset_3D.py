@@ -18,11 +18,10 @@ def world_2_voxel(world_coord, origin, spacing):
 def giveSubImage(image_path, coordinateList, size):
 
     image, origin, spacing = load_itk(image_path)
-    output = np.zeros([len(coordinateList), size,size,size])
+    output = []
     offset = size//2
     #padd images with values -3000, such that also candidates at the edge will remain in the middel of the image
     image_padded = np.pad(image,offset,'constant',constant_values=-3000)
-    index = 0
     #loop over all candidates and take the subimage and save this in the ouput list.
     for coordinate in coordinateList:
         center_pixel = np.floor(world_2_voxel(coordinate,origin,spacing)) + offset
@@ -30,8 +29,7 @@ def giveSubImage(image_path, coordinateList, size):
         sub_image = image_padded[center_pixel[0]:center_pixel[0]+size,
                                     center_pixel[1]:center_pixel[1]+size,
                                     center_pixel[2]:center_pixel[2]+size]
-        output[index,:,:,:] = sub_image
-        index += 1
+        output.append(sub_image)
     return output
 
 
