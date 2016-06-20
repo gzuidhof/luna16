@@ -18,6 +18,7 @@ import theano.tensor as T
 from multiprocessing import Pool
 import itertools
 import util
+import functools
 
 
 class Fr3dNetTrainer(trainer.Trainer):
@@ -81,12 +82,15 @@ class Fr3dNetTrainer(trainer.Trainer):
         n_train_true = len(train_true)
         n_val_true = len(val_true)
 
-        def make_epoch(n):
+        def make_epoch(n, train_true, train_false, val_true, val_false):
             n = n[0]
             train_false = list(train_false)
             val_false = list(val_false)
             np.random.shuffle(train_false)
             np.random.shuffle(val_false)
+
+            n_train_true = len(train_true)
+            n_val_true = len(val_true)
 
             train_epoch = train_true + train_false[:n_train_true]
             val_epoch = val_true + val_false[:n_val_true*10]
@@ -109,10 +113,12 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             return train_epoch_data, val_epoch_data
 
-        logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+        make_epoch_helper = partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
-        for epoch_values in epoch_iterator
+        logging.info("Starting training...")
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+
+        for epoch_values in epoch_iterator:
             self.pre_epoch()
             train_epoch_data, val_epoch_data = epoch_values
 
