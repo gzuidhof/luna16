@@ -50,7 +50,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
-    pool = Pool(processes=36)
+    pool = Pool(processes=48)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
