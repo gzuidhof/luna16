@@ -72,10 +72,14 @@ if __name__ == "__main__":
         df = pd.read_csv("../../data/candidates.csv")
         name_per_subset = subset.get_subset_to_filename_dict()
         train_x = []
-        for x in xrange(0,8):
-            train_x += fr3dnet_dataset(x,df,name_per_subset)
+        subsets_train = map(int,P.FILENAMES_TRAIN.split(','))
+        for s in subsets_train:
+            train_x += fr3dnet_dataset(s,df,name_per_subset)
 
-        val_x = fr3dnet_dataset(8,df,name_per_subset)
+        val_x = []
+        subsets_val = map(int,P.FILENAMES_VALIDATION.split(','))
+        for s in subsets_val:
+            val_x += fr3dnet_dataset(s,df,name_per_subset)
         trainer = Fr3dNetTrainer()
         trainer.train(train_x,val_x)
 
