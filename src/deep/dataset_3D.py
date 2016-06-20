@@ -16,6 +16,7 @@ def world_2_voxel(world_coord, origin, spacing):
 
 #this function creates an a list of 3D sub-image, where the candidate is in the middel of the image
 def giveSubImage(image_path, coordinateList, size):
+
     image, origin, spacing = load_itk(image_path)
     output = np.zeros([len(coordinateList), size,size,size])
     offset = size//2
@@ -24,6 +25,7 @@ def giveSubImage(image_path, coordinateList, size):
     index = 0
     #loop over all candidates and take the subimage and save this in the ouput list.
     for coordinate in coordinateList:
+        coordinate = np.array(list(reversed(coordinate)))
         center_pixel = np.floor(world_2_voxel(coordinate,origin,spacing)) + offset
         center_pixel = map(int, center_pixel)
         sub_image = image_padded[center_pixel[0]:center_pixel[0]+offset*2,
