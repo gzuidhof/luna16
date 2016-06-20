@@ -33,6 +33,37 @@ def load_data(tup):
 
     return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
+def make_epoch(n, train_true, train_false, val_true, val_false):
+    n = n[0]
+    train_false = list(train_false)
+    val_false = list(val_false)
+    np.random.shuffle(train_false)
+    np.random.shuffle(val_false)
+
+    n_train_true = len(train_true)
+    n_val_true = len(val_true)
+
+    train_epoch = train_true + train_false[:n_train_true]
+    val_epoch = val_true + val_false[:n_val_true]
+
+    train_epoch = combine_tups(train_epoch)
+    val_epoch = combine_tups(val_epoch)
+
+    pool = Pool(processes=8)
+    train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
+    print "Epoch {0} done loading train".format(n)
+
+    val_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, val_epoch)))
+    print "Epoch {0} done loading validation".format(n)
+    pool.close()
+
+    np.random.shuffle(train_epoch_data)
+
+    train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
+    val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
+
+    return train_epoch_data, val_epoch_data
+
 
 class Fr3dNetTrainer(trainer.Trainer):
     def __init__(self):
@@ -81,37 +112,6 @@ class Fr3dNetTrainer(trainer.Trainer):
 
         n_train_true = len(train_true)
         n_val_true = len(val_true)
-
-        def make_epoch(n, train_true, train_false, val_true, val_false):
-            n = n[0]
-            train_false = list(train_false)
-            val_false = list(val_false)
-            np.random.shuffle(train_false)
-            np.random.shuffle(val_false)
-
-            n_train_true = len(train_true)
-            n_val_true = len(val_true)
-
-            train_epoch = train_true + train_false[:n_train_true]
-            val_epoch = val_true + val_false[:n_val_true*10]
-
-            train_epoch = combine_tups(train_epoch)
-            val_epoch = combine_tups(val_epoch)
-
-            pool = Pool(processes=8)
-            train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
-            print "Epoch {0} done loading train".format(n)
-
-            val_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, val_epoch)))
-            print "Epoch {0} done loading validation".format(n)
-            pool.close()
-
-            np.random.shuffle(train_epoch_data)
-
-            train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
-            val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
-
-            return train_epoch_data, val_epoch_data
 
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
