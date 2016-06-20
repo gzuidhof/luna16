@@ -35,8 +35,8 @@ def load_data(tup):
 
 
 def _make_epoch(x):
-    n, train_true, train_false, val_true, val_false = x
-    return make_epoch(n, train_true, train_false, val_true, val_false)
+    n, train_true, train_false, val_true, val_false = zip(*x[0])
+    return make_epoch([n], train_true, train_false, val_true, val_false)
 
 def make_epoch(n, train_true, train_false, val_true, val_false):
     n = n[0]
