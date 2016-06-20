@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib
 import sys
 sys.path.append('../')
+sys.path.append('../../')
 import trainer
 from params import params as P
 import fr3dnet
@@ -14,6 +15,9 @@ from tqdm import tqdm
 import theano
 import dataset_3D
 import theano.tensor as T
+from multiprocessing import Pool
+import itertools
+import util
 
 
 class Fr3dNetTrainer(trainer.Trainer):
@@ -43,9 +47,6 @@ class Fr3dNetTrainer(trainer.Trainer):
             #metrics.append_prediction(true, prob_b)
 
     def train(self, X_train, X_val):
-        #filenames_train, filenames_val = patch_sampling.get_filenames()
-        #generator = partial(patch_sampling.extract_random_patches, patch_size=P.INPUT_SIZE, crop_size=OUTPUT_SIZE)
-
 
         def combine_tups(tup):
             names,coords,labels = zip(*tup)
@@ -57,55 +58,66 @@ class Fr3dNetTrainer(trainer.Trainer):
                 c,l = zip(*values)
                 data.append((name,c,l))
             return data
+
         def load_data(tup):
-            tup = combine_tups(tup)
             size = P.INPUT_SIZE
             data = []
             labels = []
-            for t in tup:
-                images = dataset_3D.giveSubImage(t[0],t[1],size)
-                labels += map(int,t[2])
-                data += images[:]
+
+            images = dataset_3D.giveSubImage(t[0],t[1],size)
+            labels += map(int,t[2])
+            data += images[:]
 
 
             return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
 
-        train_true = filter(lambda x: x[2]==1, X_train)
+        train_true = filter(lambda x: x[2]==1, X_train)[:50]
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)
+        val_true = filter(lambda x: x[2]==1, X_val)[:20]
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
         n_val_true = len(val_true)
 
-
-        logging.info("Starting training...")
-        for epoch in range(P.N_EPOCHS):
-            self.pre_epoch()
-
+        def make_epoch(n):
+            n = n[0]
+            train_false = list(train_false)
+            val_false = list(val_false)
             np.random.shuffle(train_false)
             np.random.shuffle(val_false)
 
-            train_epoch_data = train_true + train_false[:n_train_true]
-            val_epoch_data = val_true + val_false
+            train_epoch = train_true + train_false[:n_train_true]
+            val_epoch = val_true + val_false[:n_val_true*10]
+
+            train_epoch = combine_tups(train_epoch)
+            val_epoch = combine_tups(val_epoch)
+
+            pool = Pool(processes=8)
+            train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
+            print "Epoch {0} done loading train".format(n)
+
+            val_epoch_data = list(iteratools.chain.from_iterable(pool.map(load_data, val_epoch)))
+            print "Epoch {0} done loading validation".format(n)
+            pool.close()
 
             np.random.shuffle(train_epoch_data)
-            #np.random.shuffle(val_epoch_data)
-            #Full pass over the training data
-            train_gen = ParallelBatchIterator(load_data, train_epoch_data, ordered=False,
-                                                batch_size=P.BATCH_SIZE_TRAIN,
-                                                multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
-                                                n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
 
-            self.do_batches(self.train_fn, train_gen, self.train_metrics)
+            train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
+            val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
 
-            # And a full pass over the validation data:
-            val_gen = ParallelBatchIterator(load_data, val_epoch_data, ordered=False,
-                                                batch_size=P.BATCH_SIZE_VALIDATION,
-                                                multiprocess=P.MULTIPROCESS_LOAD_AUGMENTATION,
-                                                n_producers=P.N_WORKERS_LOAD_AUGMENTATION)
+            return train_epoch_data, val_epoch_data
 
-            self.do_batches(self.val_fn, val_gen, self.val_metrics)
+        logging.info("Starting training...")
+        epoch_iterator = ParallelBatchIterator(make_epoch, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+
+        for epoch_values in epoch_iterator
+            self.pre_epoch()
+            train_epoch_data, val_epoch_data = epoch_values
+
+
+
+            self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
+            self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
             self.post_epoch()
