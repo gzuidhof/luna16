@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from params import params as P
 import pandas as pd
+sys.path.append('../')
 import subset
 
 
