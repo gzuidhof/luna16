@@ -4,31 +4,31 @@ import numpy as np
 
 # This function checks if a candidate is overlapping with an annotations in the same image
 def overlapping(candidate, annotations):
-	overlap = False
-	canCoords = np.array((candidate.coordX,candidate.coordY,candidate.coordZ))
-	#loop over all annotations and check if the xyz-coordinates are in the annotation
-	for annIndex in range(0,len(annotations)):
-		ann = annotations.iloc[annIndex]
-		annCoords = np.array((ann.coordX,ann.coordY,ann.coordZ))
-		dAnn = ann.diameter_mm
-		#this function calculates the euclidean distance between the candidate and the annotation
-		#so we assume that the annotation is always a perfect circle 
+    overlap = False
+    canCoords = np.array((candidate.coordX,candidate.coordY,candidate.coordZ))
+    # loop over all annotations and check if the xyz-coordinates are in the annotation
+    for annIndex in range(0,len(annotations)):
+        ann = annotations.iloc[annIndex]
+        annCoords = np.array((ann.coordX,ann.coordY,ann.coordZ))
+        dAnn = ann.diameter_mm
+        # this function calculates the euclidean distance between the candidate and the annotation
+        # so we assume that the annotation is always a perfect circle
         if (np.linalg.norm(canCoords-annCoords) < dAnn*0.5):
             overlap = True
-	return overlap
+    return overlap
 
 
 # This function checks if a candidate is too close real nodule the parameter "mm" 
 # determined the range
 def DistanceToTPTooClose(candidate, annotations, mm):
-	tooClose = False
-	canCoords = np.array((candidate.coordX,candidate.coordY,candidate.coordZ))
-	# loop over all annotations in the image and check if the xyz-coordinate are too close 
+    tooClose = False
+    canCoords = np.array((candidate.coordX,candidate.coordY,candidate.coordZ))
+    # loop over all annotations in the image and check if the xyz-coordinate are too close
 	# the the annotaiton
-	for annIndex in range(0,len(annotations)):
-		ann = annotations.iloc[annIndex]
-		annCoords = np.array((ann.coordX,ann.coordY,ann.coordZ))
-		if abs(canCoords[0] - annCoords[0]) < mm or abs(canCoords[1] - annCoords[1]) < mm or abs(canCoords[2] - annCoords[2]) < mm:
+    for annIndex in range(0,len(annotations)):
+        ann = annotations.iloc[annIndex]
+        annCoords = np.array((ann.coordX,ann.coordY,ann.coordZ))
+        if abs(canCoords[0] - annCoords[0]) < mm or abs(canCoords[1] - annCoords[1]) < mm or abs(canCoords[2] - annCoords[2]) < mm:
 			tooClose = True
 	return tooClose
 

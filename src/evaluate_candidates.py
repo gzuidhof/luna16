@@ -2,7 +2,7 @@ import candidates as ca
 import numpy as np
 
 
-annotations = ca.load_candidates("../data/annotations.csv")
+annotations = ca.load_candidates("E:\uni\Medical\Project\CSVFILES\CSVFILES\\annotations.csv")
 #found_candidates = np.zeros((len(annotations),1))
 found_candidates = []
 for i in xrange (0,len(annotations)):
@@ -30,7 +30,7 @@ def is_candidate(image_coord,image_annotations):
     #print annotations['seriesuid']
     #print image_name
 
-    #print "Amount of actual nodules:",len(image_annotations.values)
+    # print "Amount of actual nodules:",len(image_annotations.values)
     #if len(image_annotations.values) > 0:
     #    exit()
 
