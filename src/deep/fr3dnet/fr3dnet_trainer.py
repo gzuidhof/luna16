@@ -53,7 +53,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             labels = []
             for t in tup:
                 image = dataset_3D.giveSubImage(t[0],[t[1]],size)
-                image = np.expand_dims(image, axis=0)
+                #image = np.expand_dims(image, axis=0)
                 labels.append(int(t[2]))
                 data.append(image)
             return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
