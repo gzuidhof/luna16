@@ -66,8 +66,8 @@ class Fr3dNetTrainer(trainer.Trainer):
             data = []
             labels = []
 
-            images = dataset_3D.giveSubImage(t[0],t[1],size)
-            labels += map(int,t[2])
+            images = dataset_3D.giveSubImage(tup[0],tup[1],size)
+            labels += map(int,tup[2])
             data += images[:]
 
 
