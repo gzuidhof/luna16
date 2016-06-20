@@ -21,7 +21,7 @@ from lasagne.layers.dnn import Conv3DDNNLayer, MaxPool3DDNNLayer
 
 def define_network(inputs):
 
-    network = lasagne.layers.InputLayer(shape=(None, params.CHANNELS, params.PIXELS, params.PIXELS),
+    network = lasagne.layers.InputLayer(shape=(None, params.CHANNELS, params.INPUT_SIZE, params.INPUT_SIZE, params.INPUT_SIZE),
                                 input_var=inputs)
 
     network = Conv3DDNNLayer(
