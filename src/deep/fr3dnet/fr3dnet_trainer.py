@@ -34,10 +34,6 @@ def load_data(tup):
     return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
 
-def _make_epoch(x):
-    n, train_true, train_false, val_true, val_false = x[0]
-    return make_epoch([n], train_true, train_false, val_true, val_false)
-
 def make_epoch(n, train_true, train_false, val_true, val_false):
     n = n[0]
     train_false = list(train_false)
@@ -63,10 +59,6 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     pool.close()
 
     np.random.shuffle(train_epoch_data)
-
-    #train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
-    #val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
-
     return list(train_epoch_data), list(val_epoch_data)
 
 def combine_tups(tup):
@@ -117,16 +109,17 @@ class Fr3dNetTrainer(trainer.Trainer):
         n_train_true = len(train_true)
         n_val_true = len(val_true)
 
-        #make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
-
-        inputeroni = zip(range(P.N_EPOCHS), [train_true]*P.N_EPOCHS, [train_false]*P.N_EPOCHS, [val_true]*P.N_EPOCHS, [val_false]*P.N_EPOCHS)
+        make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(_make_epoch, inputeroni, ordered=False, batch_size=1, multiprocess=True, n_producers=3)
+        epoch_iterator = ParallelBatchIterator(make_epoch, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=3)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
             train_epoch_data, val_epoch_data = epoch_values
+
+            train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
+            val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
 
             self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
