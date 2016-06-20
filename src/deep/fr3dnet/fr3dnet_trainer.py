@@ -22,6 +22,18 @@ import util
 import functools
 
 
+def load_data(tup):
+    size = P.INPUT_SIZE
+    data = []
+    labels = []
+
+    images = dataset_3D.giveSubImage(tup[0],tup[1],size)
+    labels += map(int,tup[2])
+    data += images[:]
+
+    return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
+
+
 class Fr3dNetTrainer(trainer.Trainer):
     def __init__(self):
         metric_names = ['Loss','L2','Accuracy']
@@ -60,19 +72,6 @@ class Fr3dNetTrainer(trainer.Trainer):
                 c,l = zip(*values)
                 data.append((name,c,l))
             return data
-
-        def load_data(tup):
-            size = P.INPUT_SIZE
-            data = []
-            labels = []
-
-            images = dataset_3D.giveSubImage(tup[0],tup[1],size)
-            labels += map(int,tup[2])
-            data += images[:]
-
-
-            return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
-
 
         train_true = filter(lambda x: x[2]==1, X_train)[:20]
         train_false = filter(lambda x: x[2]==0, X_train)
