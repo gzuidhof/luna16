@@ -58,6 +58,7 @@ class Fr3dNetTrainer(trainer.Trainer):
                 data.append((name,c,l))
             return data
         def load_data(tup):
+            tup = combine_tups(tup)
             size = P.INPUT_SIZE
             data = []
             labels = []
@@ -92,7 +93,6 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             np.random.shuffle(train_epoch_data)
             #np.random.shuffle(val_epoch_data)
-            train_epoch_data = combine_tups(train_epoch_data)
             #Full pass over the training data
             train_gen = ParallelBatchIterator(load_data, train_epoch_data, ordered=False,
                                                 batch_size=P.BATCH_SIZE_TRAIN,
