@@ -90,8 +90,9 @@ class Fr3dNetTrainer(trainer.Trainer):
         self.val_fn = val_fn
 
     def do_batches(self, fn, batches, metrics):
-        for i, batch in enumerate(tqdm(batch_generator)):
-            inputs, targets, filenames = batch
+        for i, batch in enumerate(tqdm(batches)):
+            
+            filenames, inputs, targets = zip(*batch)
             targets = np.array(targets, dtype=np.int32)
             err, l2_loss, acc = fn(inputs, targets)
 
@@ -119,7 +120,7 @@ class Fr3dNetTrainer(trainer.Trainer):
             train_epoch_data, val_epoch_data = epoch_values
 
             train_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_TRAIN)
-            val_epoch_data = util.chunks(train_epoch_data, P.BATCH_SIZE_VALIDATION)
+            val_epoch_data = util.chunks(val_epoch_data, P.BATCH_SIZE_VALIDATION)
 
             self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
