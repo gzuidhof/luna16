@@ -64,6 +64,16 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
 
     return train_epoch_data, val_epoch_data
 
+def combine_tups(tup):
+    names,coords,labels = zip(*tup)
+    d = {n:[] for n in names}
+    for name,coord,label in tup:
+        d[name].append((coord,label))
+    data = []
+    for name,values in d.iteritems():
+        c,l = zip(*values)
+        data.append((name,c,l))
+    return data
 
 class Fr3dNetTrainer(trainer.Trainer):
     def __init__(self):
@@ -92,17 +102,6 @@ class Fr3dNetTrainer(trainer.Trainer):
             #metrics.append_prediction(true, prob_b)
 
     def train(self, X_train, X_val):
-
-        def combine_tups(tup):
-            names,coords,labels = zip(*tup)
-            d = {n:[] for n in names}
-            for name,coord,label in tup:
-                d[name].append((coord,label))
-            data = []
-            for name,values in d.iteritems():
-                c,l = zip(*values)
-                data.append((name,c,l))
-            return data
 
         train_true = filter(lambda x: x[2]==1, X_train)[:20]
         train_false = filter(lambda x: x[2]==0, X_train)
