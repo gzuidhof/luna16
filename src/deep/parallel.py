@@ -93,7 +93,7 @@ class ParallelBatchIterator(object):
 				p = Thread(target=produce, args=(i,), name=name)
 
 			# Make the process daemon, so the main process can die without these finishing
-			p.daemon = True
+			#p.daemon = True
 			p.start()
 
 		return batch_count, jobs
