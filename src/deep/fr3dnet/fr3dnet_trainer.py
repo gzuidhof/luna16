@@ -56,7 +56,7 @@ class Fr3dNetTrainer(trainer.Trainer):
                 image = np.expand_dims(image, axis=0)
                 labels.append(int(t[2]))
                 data.append(image)
-            return np.array(data), labels
+            return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
 
         train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
