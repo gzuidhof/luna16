@@ -54,8 +54,9 @@ class Fr3dNetTrainer(trainer.Trainer):
                 d[name].append((coord,label))
             data = []
             for name,values in d.iteritems():
-                data.append((name,values[0],values[1]))
-
+                c,l = zip(*values)
+                data.append((name,c,l))
+            return data
         def load_data(tup):
             size = P.INPUT_SIZE
             data = []
