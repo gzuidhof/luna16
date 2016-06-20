@@ -31,7 +31,7 @@ def load_data(tup):
     labels += map(int,tup[2])
     data += images[:]
 
-    return np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32)
+    return zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
 
 
 def make_epoch(n, train_true, train_false, val_true, val_false):
@@ -59,7 +59,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     pool.close()
 
     np.random.shuffle(train_epoch_data)
-    return list(train_epoch_data), list(val_epoch_data)
+    return train_epoch_data, val_epoch_data
 
 def combine_tups(tup):
     names,coords,labels = zip(*tup)
@@ -89,9 +89,9 @@ class Fr3dNetTrainer(trainer.Trainer):
         self.train_fn = train_fn
         self.val_fn = val_fn
 
-    def do_batches(self, fn, batch_generator, metrics):
+    def do_batches(self, fn, batches, metrics):
         for i, batch in enumerate(tqdm(batch_generator)):
-            inputs, targets = batch
+            inputs, targets, filenames = batch
             targets = np.array(targets, dtype=np.int32)
             err, l2_loss, acc = fn(inputs, targets)
 
