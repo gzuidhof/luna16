@@ -4,6 +4,7 @@ import numpy as np
 
 try:
     import cv2
+    import bla
     CV2_AVAILABLE=True
     print "OpenCV 2 available, using that for augmentation"
 except:
@@ -54,23 +55,28 @@ def augment(images):
 
             rotate(image, rotation_degrees, reshape=False, output=image)
             image2 = zoom(image, [zoom_factor,zoom_factor])
-            print image2.shape
-            offset = (len(image2)-len(image))/2
-            if len(image2)>len(image):
-
-                image2 = image2[offset:len(image)+offset,offset:len(image)+offset]
-            else:
-                offset = int(np.ceil((len(image)-len(image2))/2))
-                image2 = np.pad(image2, offset, 'constant', constant_values=-3000)
+            image2 = crop_or_pad(image, pixels, -3000)
             shift(image2, [shift_x,shift_y], output=image)
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
             #z = AffineTransform(scale=(2,2))
             #image = warp(image, z.params)
-            images[i] = image2
+            images[i] = image
 
 
 
     return images
+
+def crop_or_pad(image, desired_size, pad_value):
+    if image.shape[0] < desired_size:
+        offset = int(np.ceil((desired_size-image.shape[0])/2))
+        image = np.pad(image, offset, 'constant', constant_values=pad_value)
+
+    if image.shape[0] > desired_size:
+        offset = (image.shape[0]-desired_size)//2
+        image = image[offset:offset+desired_size,offset:offset+desired_size]
+
+    return image
+
 
 def flip_axis(x, axis):
     x = np.asarray(x).swapaxes(axis, 0)
@@ -84,9 +90,9 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
 
 def testtime_augmentation(image):
     images = []
-    rotations = [45,90,135,225,270,315]
+    rotations = [45,90,-45,-90]
     flips = [[0,0],[1,0],[0,1],[1,1]]
-    shifts = [[0.1,0.1],[-0.1,-0.1],[0.3,0.3],[-0.3,-0.3]]
+    shifts = [[1,1],[-1,-1],[2,2],[-2,-2]]
     zooms = [0.9,0.95,1,1.05,1.1]
 
     for r in rotations:
