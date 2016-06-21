@@ -4,6 +4,7 @@ import numpy as np
 
 try:
     import cv2
+    import bla
     CV2_AVAILABLE=True
     print "OpenCV 2 available, using that for augmentation"
 except:
@@ -23,8 +24,8 @@ def augment(images):
     shift_x = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
     shift_y = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
     rotation_degrees = np.random.uniform(*P.AUGMENTATION_PARAMS['rotation_range'])
-    zoom_factor = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
-
+    zoom_f = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
+    zoom_factor = 1 + (zoom_f/2-zoom_f*np.random.random())
     if CV2_AVAILABLE:
         M = cv2.getRotationMatrix2D((center, center), rotation_degrees, zoom_factor)
         M[0, 2] += shift_x
@@ -53,10 +54,21 @@ def augment(images):
                 image = image.transpose(1,0)
 
             rotate(image, rotation_degrees, reshape=False, output=image)
+            image2 = zoom(image, [zoom_factor,zoom_factor])
+            print image2.shape
+            offset = (len(image2)-len(image))/2
+            if len(image2)>len(image):
+
+                image2 = image2[offset:len(image)+offset,offset:len(image)+offset]
+            else:
+                offset = int(np.ceil((len(image)-len(image2))/2))
+                image2 = np.pad(image2, offset, 'constant', constant_values=-3000)
+            shift(image2, [shift_x,shift_y], output=image)
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
             #z = AffineTransform(scale=(2,2))
             #image = warp(image, z.params)
-            shift(image, [shift_x,shift_y], output=image)
+
+
 
     return images
 
@@ -68,6 +80,40 @@ def flip_axis(x, axis):
 
 OPTS = [[False,False,False], [False, False, True], [False, True, False], [False, True, True],
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
+
+
+def testtime_augmentation(image):
+    images = []
+    rotations = [45,90,135,225,270,315]
+    flips = [[0,0],[1,0],[0,1],[1,1]]
+    shifts = [[0.1,0.1],[-0.1,-0.1],[0.3,0.3],[-0.3,-0.3]]
+    zooms = [0.9,0.95,1,1.05,1.1]
+
+    for r in rotations:
+        for f in flips:
+            for s in shifts:
+                for z in zooms:
+                    image2 = np.array(image)
+                    if f[0]:
+                        image2[:,:] = image2[::-1,:]
+                    if f[1]:
+                        image2 = image2.transpose(1,0)
+                        image2[:,:] = image2[::-1,:]
+                        image2 = image2.transpose(1,0)
+                    rotate(image2, r, reshape=False, output=image2)
+                    image3 = zoom(image2, [z,z])
+                    offset = (len(image3)-len(image2))/2
+                    if len(image3)>len(image2):
+
+                        image3 = image3[offset:len(image2)+offset,offset:len(image2)+offset]
+                    else:
+                        offset = int(np.ceil((len(image2)-len(image3))/2))
+                        image3 = np.pad(image3, offset, 'constant', constant_values=-3000)
+                    image2 = image3
+                    shift(image2, [s[0],s[1]], output=image2)
+                    images.append(image2)
+
+    return images
 
 def flip_given_axes(image, opt):
     offset = 0
