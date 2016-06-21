@@ -22,7 +22,7 @@ import util
 import functools
 import normalize
 
-def load_data(tup):
+def load_data(tup): #filename, coordinates, labels tuple
     size = P.INPUT_SIZE
     data = []
     labels = []
@@ -32,7 +32,7 @@ def load_data(tup):
     data += images[:]
 
     data = normalize.normalize(np.array(data, dtype=np.float32))
-    
+
     if P.ZERO_CENTER:
         data -= P.MEAN_PIXEL
 
@@ -55,7 +55,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
-    print "Epoch {0} n files {1}".format(n, len(train_epoch))
+    print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
     pool = Pool(processes=24)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
@@ -108,10 +108,10 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:240]
+        train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)[:120]
+        val_true = filter(lambda x: x[2]==1, X_val)
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
@@ -120,7 +120,7 @@ class Fr3dNetTrainer(trainer.Trainer):
         make_epoch_helper = functools.partial(make_epoch, train_true=train_true, train_false=train_false, val_true=val_true, val_false=val_false)
 
         logging.info("Starting training...")
-        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=2)
+        epoch_iterator = ParallelBatchIterator(make_epoch_helper, range(P.N_EPOCHS), ordered=False, batch_size=1, multiprocess=True, n_producers=1)
 
         for epoch_values in epoch_iterator:
             self.pre_epoch()
