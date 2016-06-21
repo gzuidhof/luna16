@@ -74,7 +74,7 @@ def get_all_flips_3d(image):
         im = np.copy(image)
         for i in range(3):
             if opt[i]:
-                im.flip_axis(x, i+offset)
+                flip_axis(x, i+offset)
         flippos.append(im)
 
     return flippos

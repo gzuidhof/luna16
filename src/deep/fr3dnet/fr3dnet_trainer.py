@@ -39,7 +39,7 @@ def load_data(tup): #filename, coordinates, labels tuple
 
     result = zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
 
-    if P.AUGMENT && P.AUGMENTATION_PARAMS['flip']:
+    if P.AUGMENT and P.AUGMENTATION_PARAMS['flip']:
         augmentation_extra = []
         for filename, image, label in result:
             if label == 1:
@@ -69,7 +69,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     val_epoch = combine_tups(val_epoch)
 
     print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
-    pool = Pool(processes=22)
+    pool = Pool(processes=1)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
