@@ -20,9 +20,10 @@ def load_images (image_paths, deterministic=False):
 
             offset = (len(x) - P.INPUT_SIZE) / 2
             
-            x = x[offset:-offset,offset:-offset]
-            y = y[offset:-offset,offset:-offset]
-            z = z[offset:-offset,offset:-offset]
+            if offset > 0:
+                x = x[offset:-offset,offset:-offset]
+                y = y[offset:-offset,offset:-offset]
+                z = z[offset:-offset,offset:-offset]
 
             X.append([x])
             X.append([y])
