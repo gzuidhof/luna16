@@ -63,6 +63,10 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
 
 def flip_given_axes(image, opt):
+    offset = 0
+    if image.shape[0] == 1: #Has color channel
+        offset = 1
+        
     for i in range(3):
         if opt[i]:
             flip_axis(image, i+offset)
