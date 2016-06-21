@@ -57,13 +57,13 @@ if __name__ == "__main__":
         trainer.train(train_splits, filenames_val, generator_train, generator_val)
 
     elif P.ARCHITECTURE == 'resnet':
-
+        from functools import partial
 
         X_train = glob.glob(P.FILENAMES_TRAIN)
         X_val = glob.glob(P.FILENAMES_VALIDATION)
 
         train_generator = dataset_2D.load_images
-        validation_generator = dataset_2D.load_images
+        validation_generator = partial(dataset_2D.load_images, deterministic=True)
 
         trainer = ResNetTrainer()
         trainer.train(train_generator, X_train, validation_generator, X_val)
@@ -82,5 +82,3 @@ if __name__ == "__main__":
             val_x += fr3dnet_dataset(s,df,name_per_subset)
         trainer = Fr3dNetTrainer()
         trainer.train(train_x,val_x)
-
-

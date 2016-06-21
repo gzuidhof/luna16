@@ -16,7 +16,8 @@ def augment(images):
     pixels = images[0].shape[1]
     center = pixels/2.-0.5
 
-    random_flip = P.AUGMENTATION_PARAMS['flip'] and np.random.randint(2) == 1
+    random_flip_x = P.AUGMENTATION_PARAMS['flip'] and np.random.randint(2) == 1
+    random_flip_y = P.AUGMENTATION_PARAMS['flip'] and np.random.randint(2) == 1
 
     # Translation shift
     shift_x = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
@@ -35,15 +36,21 @@ def augment(images):
         if CV2_AVAILABLE:
             #image = image.transpose(1,2,0)
             image = cv2.warpAffine(image, M, (pixels, pixels))
-            if random_flip:
+            if random_flip_x:
                 image = cv2.flip(image, 0)
+            if random_flip_y:
+                image = cv2.flip(image, 1)
             #image = image.transpose(2,0,1)
             images[i] = image
         else:
-            if random_flip:
+            if random_flip_x:
                 #image = image.transpose(1,0)
                 image[:,:] = image[::-1,:]
                 #image = image.transpose(1,0)
+            if random_flip_y:
+                image = image.transpose(1,0)
+                image[:,:] = image[::-1,:]
+                image = image.transpose(1,0)
 
             rotate(image, rotation_degrees, reshape=False, output=image)
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
@@ -66,7 +73,7 @@ def flip_given_axes(image, opt):
     offset = 0
     if image.shape[0] == 1: #Has color channel
         offset = 1
-        
+
     for i in range(3):
         if opt[i]:
             flip_axis(image, i+offset)

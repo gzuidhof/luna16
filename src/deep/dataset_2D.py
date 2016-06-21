@@ -4,8 +4,9 @@ import numpy as np
 from normalize import normalize
 
 from params import params as P
+import augment
 
-def load_images (image_paths):
+def load_images (image_paths, deterministic=False):
     X = []
 
     labels = []
@@ -13,9 +14,12 @@ def load_images (image_paths):
     for image_path in image_paths:
         with gzip.open(image_path) as file:
             xy_xz_yz = pickle.load(file)
-            X.append([xy_xz_yz[0]])
-            X.append([xy_xz_yz[1]])
-            X.append([xy_xz_yz[2]])
+            x,y,z = xy_xz_yz
+            if P.AUGMENT and not deterministic:
+                x,y,z = augment.augment(xy_xz_yz)
+            X.append([x])
+            X.append([y])
+            X.append([z])
 
         label = [0,1] if "True" in image_path else [1,0]
         labels.append(label)
@@ -23,7 +27,6 @@ def load_images (image_paths):
         labels.append(label)
 
     X = np.array(X)
-
     X = normalize(X)
 
     if P.ZERO_CENTER:

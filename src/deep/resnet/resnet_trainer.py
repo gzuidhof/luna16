@@ -20,6 +20,7 @@ import theano.tensor as T
 import lasagne
 import resnet
 from resnet import LR_SCHEDULE
+import augment
 
 
 class ResNetTrainer(trainer.Trainer):
