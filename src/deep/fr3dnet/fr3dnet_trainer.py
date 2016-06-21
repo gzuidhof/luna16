@@ -15,8 +15,8 @@ from tqdm import tqdm
 import theano
 import dataset_3D
 import theano.tensor as T
-from multiprocessing import Pool
-#from multiprocessing.pool import ThreadPool as Pool
+#from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool as Pool
 import itertools
 import util
 import functools
