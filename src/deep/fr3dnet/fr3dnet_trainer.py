@@ -48,7 +48,7 @@ def load_data(tup): #filename, coordinates, labels tuple
                 n_new = len(flipped_images)
                 augmentation_extra += zip([filename]*n_new, flipped_images, [label]*n_new)
             else: #For false candidates take one flip combination at random :)
-                flip_option = augment.OPTS[numpy.random.randint(8)]
+                flip_option = augment.OPTS[np.random.randint(8)]
                 augment.flip_given_axes(image, flip_option)
 
         result += augmentation_extra
