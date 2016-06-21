@@ -64,11 +64,11 @@ def define_network(inputs):
 def define_updates(network, inputs, targets):
     prediction = lasagne.layers.get_output(network)
 
-    loss = lasagne.objectives.categorical_crossentropy(T.clip(prediction, 0.0001, 0.9999), targets)
+    loss = lasagne.objectives.categorical_crossentropy(T.clip(prediction, 0.00001, 0.99999), targets)
     loss = loss.mean()
 
     test_prediction = lasagne.layers.get_output(network, deterministic=True)
-    test_loss = lasagne.objectives.categorical_crossentropy(T.clip(test_prediction, 0.0001, 0.9999), targets)
+    test_loss = lasagne.objectives.categorical_crossentropy(T.clip(test_prediction, 0.00001, 0.99999), targets)
     test_loss = test_loss.mean()
 
 
