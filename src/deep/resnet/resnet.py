@@ -283,7 +283,7 @@ def define_updates(output_layer, X, Y):
     output_test = lasagne.layers.get_output(output_layer, deterministic=True)
 
     # set up the loss that we aim to minimize when using cat cross entropy our Y should be ints not one-hot
-    loss = lasagne.objectives.categorical_crossentropy(output_train, Y)
+    loss = lasagne.objectives.categorical_crossentropy(T.clip(output_train,0.000001,0.999999), Y)
     loss = loss.mean()
 
     acc = T.mean(T.eq(T.argmax(output_train, axis=1), Y), dtype=theano.config.floatX)
@@ -294,7 +294,7 @@ def define_updates(output_layer, X, Y):
     loss = loss + l2_penalty
 
     # set up loss functions for validation dataset
-    test_loss = lasagne.objectives.categorical_crossentropy(output_test, Y)
+    test_loss = lasagne.objectives.categorical_crossentropy(T.clip(output_test,0.000001,0.999999), Y)
     test_loss = test_loss.mean()
 
     test_acc = T.mean(T.eq(T.argmax(output_test, axis=1), Y), dtype=theano.config.floatX)
@@ -305,8 +305,11 @@ def define_updates(output_layer, X, Y):
     updates = nesterov_momentum(loss, params, learning_rate=l_r, momentum=0.94)
     #updates = adam(loss, params, learning_rate=l_r)
 
+    prediction_binary = T.argmax(output_train, axis=1)
+    test_prediction_binary = T.argmax(output_test, axis=1)
+
     # set up training and prediction functions
-    train_fn = theano.function(inputs=[X,Y], outputs=[loss, l2_penalty, acc], updates=updates)
-    valid_fn = theano.function(inputs=[X,Y], outputs=[test_loss, l2_penalty, test_acc])
+    train_fn = theano.function(inputs=[X,Y], outputs=[loss, l2_penalty, acc, prediction_binary], updates=updates)
+    valid_fn = theano.function(inputs=[X,Y], outputs=[test_loss, l2_penalty, test_acc, test_prediction_binary])
 
     return train_fn, valid_fn, l_r

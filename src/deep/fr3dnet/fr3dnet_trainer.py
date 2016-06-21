@@ -99,10 +99,10 @@ class Fr3dNetTrainer(trainer.Trainer):
         for i, batch in enumerate(tqdm(batches)):
             filenames, inputs, targets = zip(*batch)
             targets = np.array(targets, dtype=np.int32)
-            err, l2_loss, acc = fn(inputs, targets)
+            err, l2_loss, acc, predictions = fn(inputs, targets)
 
             metrics.append([err, l2_loss, acc])
-            #metrics.append_prediction(true, prob_b)
+            metrics.append_prediction(targets, predictions)
 
     def train(self, X_train, X_val):
 
