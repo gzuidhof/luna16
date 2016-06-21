@@ -50,7 +50,7 @@ def process_image(image_path, candidates, save_dir):
 
         #get row data and nodule voxel coords
         row = candidates.iloc[i]
-        world_coords = np.array([row.x, row.y, row.z])
+        world_coords = np.array([row.coordX, row.coordY, row.coordZ])
         # add offset to voxel coords to cope with padding
         coords = np.floor(world_2_voxel(world_coords,origin,new_spacing)) + offset
         label = row.label
@@ -74,6 +74,9 @@ def process_image(image_path, candidates, save_dir):
         #plt.gray()
         #plt.show()
 
+        assert xy_slice.shape == (OUTPUT_DIM, OUTPUT_DIM)
+        assert xz_slice.shape == (OUTPUT_DIM, OUTPUT_DIM)
+        assert yz_slice.shape == (OUTPUT_DIM, OUTPUT_DIM)
         # Create output
         output = np.zeros([3,OUTPUT_DIM,OUTPUT_DIM])
         output[0,:,:] = xy_slice
