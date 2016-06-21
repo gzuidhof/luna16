@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -t 2-00:00:00
 #SBATCH -p gpu
-#SBATCH -n 24
+#SBATCH -c 12
 
 #Prepare python environment
 export PYTHONPATH=$HOME/pythonpackages/lib/python:$PYTHONPATH

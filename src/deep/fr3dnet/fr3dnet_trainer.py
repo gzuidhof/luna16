@@ -66,14 +66,14 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     n_train_true = len(train_true)
     n_val_true = len(val_true)
 
-    train_epoch = train_true + train_false[:n_train_true*2] #*8 to account for 8 flip directions
-    val_epoch = val_true + val_false[:n_val_true*2]
+    train_epoch = train_true + train_false[:n_train_true*8] #*8 to account for 8 flip directions
+    val_epoch = val_true + val_false[:n_val_true*8]
 
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
 
     print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
-    pool = Pool(processes=12)
+    pool = Pool(processes=24)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
@@ -124,7 +124,7 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:240]
+        train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
 
         val_true = filter(lambda x: x[2]==1, X_val)
