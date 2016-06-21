@@ -4,7 +4,6 @@ import numpy as np
 
 try:
     import cv2
-    import bla
     CV2_AVAILABLE=True
     print "OpenCV 2 available, using that for augmentation"
 except:
@@ -67,6 +66,7 @@ def augment(images):
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
             #z = AffineTransform(scale=(2,2))
             #image = warp(image, z.params)
+            images[i] = image2
 
 
 
