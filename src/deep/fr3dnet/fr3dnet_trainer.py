@@ -76,11 +76,11 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     val_epoch = combine_tups(val_epoch)
 
     print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
-    pool = Pool(processes=11)
-    train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
+    pool = Pool(processes=6)
+    train_epoch_data = list(itertools.chain.from_iterable(pool.imap_unordered(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
-    val_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, val_epoch)))
+    val_epoch_data = list(itertools.chain.from_iterable(pool.imap_unordered(load_data, val_epoch)))
     print "Epoch {0} done loading validation".format(n)
     pool.close()
 

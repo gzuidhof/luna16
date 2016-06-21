@@ -31,6 +31,11 @@ def giveSubImage(image_path, coordinateList, size):
                                     center_pixel[2]:center_pixel[2]+size]
         sub_image = np.expand_dims(sub_image, axis=0)
         output.append(sub_image)
+
+    del image
+    del origin
+    del spacing
+    del image_padded
     return output
 
 
