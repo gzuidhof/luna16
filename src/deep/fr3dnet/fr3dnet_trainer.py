@@ -38,7 +38,6 @@ def load_data(tup): #filename, coordinates, labels tuple
 
     return zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
 
-
 def make_epoch(n, train_true, train_false, val_true, val_false):
     n = n[0]
     train_false = list(train_false)
@@ -56,7 +55,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     val_epoch = combine_tups(val_epoch)
 
     print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
-    pool = Pool(processes=24)
+    pool = Pool(processes=22)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
@@ -99,20 +98,18 @@ class Fr3dNetTrainer(trainer.Trainer):
         batches = list(batches)
         for i, batch in enumerate(tqdm(batches)):
             filenames, inputs, targets = zip(*batch)
-            print np.mean(inputs)
             targets = np.array(targets, dtype=np.int32)
             err, l2_loss, acc = fn(inputs, targets)
-            print "Error", err
 
             metrics.append([err, l2_loss, acc])
             #metrics.append_prediction(true, prob_b)
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:40]
+        train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)[:20]
+        val_true = filter(lambda x: x[2]==1, X_val)
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
