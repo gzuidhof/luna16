@@ -29,17 +29,19 @@ def process_image(image_path, candidates, save_dir):
     new_shape = np.round(new_real_shape)
     real_resize = new_shape / image.shape
     new_spacing = spacing / real_resize
-
+    print 'image', image_path, 'loaded'
     #resize image
     image = scipy.ndimage.interpolation.zoom(image, real_resize)
 
     #Pad image with offset (OUTPUT_DIM/2) to prevent problems with candidates on edge of image
     offset = OUTPUT_DIM/2
     image = np.pad(image,offset,'constant',constant_values=0)
-
+    print 'image', image_path, 'zoomed and padded'
     #Make a indixlist of the candidates of the image
     image_name = os.path.split(image_path)[1].replace('.mhd','')
     indices = candidates[candidates['seriesuid'] == image_name].index
+
+    print 'image', image_path, 'now extracting..'
 
     #loop through the candidates within this image
     for i in indices:
@@ -118,4 +120,3 @@ if __name__ == "__main__":
     image_paths = glob.glob("../../data/original_lungs/subset{}/*.mhd".format(subset))
     Parallel(n_jobs=12)(delayed(process_image)(image_path,candidates,save_dir) for image_path in image_paths)
     print '{} - Processing subset {} took {} seconds'.format(time.strftime("%H:%M:%S"),subset,np.floor(time.time()-start_time))
-    print
