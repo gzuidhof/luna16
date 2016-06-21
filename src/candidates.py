@@ -21,13 +21,13 @@ from scipy.ndimage.measurements import center_of_mass
 
 from image_read_write import load_itk_image
 
-CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','class']
-THRESHOLD = 160
+CANDIDATES_COLUMNS = ['seriesuid','coordX','coordY','coordZ','label']
+THRESHOLD = 225
 
 
 
 def unet_candidates():
-    cands = glob.glob("../models/1465836586_unet/predictions_epoch36/*.png")
+    cands = glob.glob("../data/predictions_epoch9_23_all/*.png")
     #df = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','class'])
     data = []
     imname = ""
@@ -38,18 +38,17 @@ def unet_candidates():
 
         #image = imread(name)
         image_t = imread(name)
+        image_t = image_t.transpose()
         #Thresholding
         image_t[image_t<THRESHOLD] = 0
         image_t[image_t>0] = 1
         #erosion
         selem = morphology.disk(1)
+        image_eroded = image_t
         image_eroded = morphology.binary_erosion(image_t,selem=selem)
+
         label_im, nb_labels = ndimage.label(image_eroded)
         imname3 = os.path.split(name)[1].replace('.png','')
-
-        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.124822907934319930841506266464_slice350":
-            plt.imshow(label_im)
-            plt.show()
 
         splitted = imname3.split("slice")
         slice = splitted[1]
@@ -60,54 +59,26 @@ def unet_candidates():
             mass = center_of_mass(blob_i)
             centers.append([mass[1],mass[0]])
 
-        if imname3 == "1.3.6.1.4.1.14519.5.2.1.6279.6001.112767175295249119452142211437_slice221":
-            plt.subplot(211)
-            plt.imshow(label_im)
-            plt.subplot(212)
-            plt.imshow(label_im)
-            scatters = np.array(centers)
-            plt.scatter(x=scatters[:,0],y=scatters[:,1],marker='x',c='y')
-            plt.show()
-
 
         if imname2 != imname:
-            if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
-                with open("../data/subset9_unet/spacings/{0}.pickle".format(imname2), 'rb') as handle:
+            if os.path.isfile("../data/1_1_1mm_512_x_512_annotation_masks/spacings/{0}.pickle".format(imname2)):
+                with open("../data/1_1_1mm_512_x_512_annotation_masks/spacings/{0}.pickle".format(imname2), 'rb') as handle:
                     dic = pickle.load(handle)
                     origin = dic["origin"]
                     spacing = dic["spacing"]
-            elif os.path.isfile("../data/subset8_unet/spacings/{0}.pickle".format(imname2)):
-                with open("../data/subset8_unet/spacings/{0}.pickle".format(imname2), 'rb') as handle:
-                    dic = pickle.load(handle)
-                    origin = dic["origin"]
-                    spacing = dic["spacing"]
-            else:
-                if os.path.isfile("../data/subset9_unet/subset9/{0}.mhd".format(imname2)):
-                    _,origin,spacing=load_itk_image("../data/subset9_unet/subset9/{0}.mhd".format(imname2))
-                    dic = {"origin":origin,"spacing":spacing}
-                    with open('../data/subset9_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
-                        pickle.dump(dic, handle)
-                else:
-                    _,origin,spacing=load_itk_image("../data/subset8_unet/subset8/{0}.mhd".format(imname2))
-                    dic = {"origin":origin,"spacing":spacing}
-                    with open('../data/subset8_unet/spacings/{0}.pickle'.format(imname2), 'wb') as handle:
-                        pickle.dump(dic, handle)
 
             imname = imname2
             nrimages +=1
 
         for center in centers:
-            coords = voxel_2_world([int(slice),center[1]+(512-420)*0.5,center[0]+(512-420)*0.5],origin,spacing)
-            if os.path.isfile("../data/subset9_unet/spacings/{0}.pickle".format(imname2)):
-                data.append([imname2,coords[0],coords[1],coords[2],9])
-            else:
-                data.append([imname2,coords[0],coords[1],coords[2],8])
+            coords = voxel_2_world([int(slice),center[1]+(512-324)*0.5,center[0]+(512-324)*0.5],origin,spacing)
+            data.append([imname2,coords[2],coords[1],coords[0],'?'])
 
         #if nrimages == 5:
         #    break
 
     df = pd.DataFrame(data,columns=CANDIDATES_COLUMNS)
-    save_candidates("../data/candidates_unet.csv",df)
+    save_candidates("../data/candidates_unet_final_23.csv",df)
 
 
 def candidates_to_image(cands,radius):
