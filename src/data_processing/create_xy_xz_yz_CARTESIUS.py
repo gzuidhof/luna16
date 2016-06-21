@@ -20,7 +20,7 @@ OUTPUT_SPACING = [0.5, 0.5, 0.5]
 OUTPUT_DIM = 96
 
 def process_image(image_path, candidates, save_dir):
-    #load image 
+    #load image
     image, origin, spacing = load_itk(image_path)
 
     #calculate resize factor
@@ -29,7 +29,7 @@ def process_image(image_path, candidates, save_dir):
     new_shape = np.round(new_real_shape)
     real_resize = new_shape / image.shape
     new_spacing = spacing / real_resize
-    
+
     #resize image
     image = scipy.ndimage.interpolation.zoom(image, real_resize)
 
@@ -37,9 +37,9 @@ def process_image(image_path, candidates, save_dir):
     offset = OUTPUT_DIM/2
     image = np.pad(image,offset,'constant',constant_values=0)
 
-    #Make a indixlist of the candidates of the image 
+    #Make a indixlist of the candidates of the image
     image_name = os.path.split(image_path)[1].replace('.mhd','')
-    indices = candidates[candidates['image_name'] == image_name].index
+    indices = candidates[candidates['seriesuid'] == image_name].index
 
     #loop through the candidates within this image
     for i in indices:
