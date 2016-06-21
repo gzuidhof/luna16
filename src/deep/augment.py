@@ -63,7 +63,10 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
 
 def flip_given_axes(image, opt):
-
+    for i in range(3):
+        if opt[i]:
+            flip_axis(image, i+offset)
+    return image
 
 def get_all_flips_3d(image):
     flippos = []
