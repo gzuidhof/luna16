@@ -13,8 +13,7 @@ if len(sys.argv) < 2:
 
 model_folder = os.path.join(model_folder, sys.argv[1])
 
-
-#Run with python predict_resnet.py 1466485849_resnet 194 9
+#Run with: python predict_resnet.py 1466485849_resnet 194 9
 
 #Overwrite params, ugly hack for now
 params.params = params.Params(['../../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
@@ -52,14 +51,19 @@ if __name__ == "__main__":
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
-    filenames = glob(in_pattern)[:100]
+    filenames = glob(in_pattern)
 
-    batch_size = 360
+    batch_size = 512
     multiprocess = False
 
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
-        return inputs, targets, filenames
+        new_filenames = []
+        for fname in filenames:
+        	for i in range(int(len(inputs)/len(filenames))):
+        		new_filenames.append(fname)
+        #print 'inputs:',len(inputs),'filenames:',len(filenames),'new_filenames:',len(new_filenames)
+        return inputs, targets, new_filenames
 
 
     gen = ParallelBatchIterator(get_images_with_filenames,
@@ -69,6 +73,7 @@ if __name__ == "__main__":
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     candidates = pd.read_csv('../../data/candidates_V2.csv')
+    candidates['probability'] = float(1337)
 
     print "Predicting {} patches".format(len(filenames))
 
@@ -86,7 +91,6 @@ if __name__ == "__main__":
         #print len(list(set(filenames)))
         targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
         err, l2_loss, acc, predictions, predictions_raw = val_fn(inputs, targets)
-
         err_total += err
         acc_total += acc
         all_probabilities += list(predictions_raw)
@@ -97,4 +101,20 @@ if __name__ == "__main__":
     print "Loss", err_total / n_batches
     print "Accuracy", acc_total / n_batches
 
-    print zip(all_filenames[:10], all_probabilities[:10])
+    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
+    submission_row = 1;
+    factor = len(all_filenames)/len(np.unique(all_filenames))
+    for fname in np.unique(all_filenames):
+    	prob = 0
+    	for i in range(len(all_filenames)):
+    		if all_filenames[i] == fname:
+    			prob += all_probabilities[i]
+    	prob /= factor
+    	candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
+    	candidates.set_value(candidates_row, 'probability', prob)
+    	submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
+    	submission_row += 1
+
+    #print submission
+    submission_path = os.path.join(model_folder,'{}_{}_submission.csv'.format(epoch,subsets))
+    submission.to_csv(submission_path,columns=['seriesuid','coordX','coordY','coordZ','probability'],index=False)
