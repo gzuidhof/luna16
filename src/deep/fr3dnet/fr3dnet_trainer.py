@@ -46,9 +46,7 @@ def load_data(tup): #filename, coordinates, labels tuple
                 flipped_images = augment.get_all_flips_3d(image)
                 n_new = len(flipped_images)
                 augmentation_extra += zip([filename]*n_new, flipped_images, [label]*n_new)
-        print len(augmentation_extra)
         result += augmentation_extra
-
 
     return result
 
@@ -69,7 +67,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     val_epoch = combine_tups(val_epoch)
 
     print "Epoch {0} n files {1}&{2}".format(n, len(train_epoch), len(val_epoch))
-    pool = Pool(processes=1)
+    pool = Pool(processes=22)
     train_epoch_data = list(itertools.chain.from_iterable(pool.map(load_data, train_epoch)))
     print "Epoch {0} done loading train".format(n)
 
