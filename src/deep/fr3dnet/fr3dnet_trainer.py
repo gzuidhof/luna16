@@ -153,5 +153,5 @@ class Fr3dNetTrainer(trainer.Trainer):
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
 
             self.post_epoch()
-            logging.info("Setting learning rate to {}"format(P.LEARNING_RATE  * ((0.985)**self.epoch)))
+            logging.info("Setting learning rate to {}".format(P.LEARNING_RATE  * ((0.985)**self.epoch)))
             self.l_r.set_value(P.LEARNING_RATE  * ((0.985)**self.epoch))
