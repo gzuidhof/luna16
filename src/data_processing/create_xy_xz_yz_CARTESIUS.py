@@ -115,13 +115,13 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Prepare save_dir
-    save_dir = '../../data/cadOWN_{}mm_{}x{}_xy_xz_yz/subset{}/{}'.format(OUTPUT_SPACING[1],OUTPUT_DIM,OUTPUT_DIM,subset,'{}')
+    save_dir = '/scratch-shared/vdgugten/data/cadOWN_{}mm_{}x{}_xy_xz_yz/subset{}/{}'.format(OUTPUT_SPACING[1],OUTPUT_DIM,OUTPUT_DIM,subset,'{}')
     if not os.path.exists(save_dir.format('True')):
         os.makedirs(save_dir.format('True'))
     if not os.path.exists(save_dir.format('False')):
         os.makedirs(save_dir.format('False'))
 
     print '{} - Processing subset'.format(time.strftime("%H:%M:%S")), subset
-    image_paths = glob.glob("../../data/original_lungs/subset{}/*.mhd".format(subset))
+    image_paths = glob.glob("/scratch-shared/vdgugten/cad/original/subset{}/*.mhd".format(subset))
     Parallel(n_jobs=12)(delayed(process_image)(image_path,candidates,save_dir) for image_path in image_paths)
     print '{} - Processing subset {} took {} seconds'.format(time.strftime("%H:%M:%S"),subset,np.floor(time.time()-start_time))
