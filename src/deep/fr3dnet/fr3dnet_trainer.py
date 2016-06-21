@@ -96,9 +96,10 @@ class Fr3dNetTrainer(trainer.Trainer):
         self.val_fn = val_fn
 
     def do_batches(self, fn, batches, metrics):
+        batches = list(batches)
         for i, batch in enumerate(tqdm(batches)):
-
             filenames, inputs, targets = zip(*batch)
+            print np.mean(inputs)
             targets = np.array(targets, dtype=np.int32)
             err, l2_loss, acc = fn(inputs, targets)
             print "Error", err
@@ -108,10 +109,10 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:120]
+        train_true = filter(lambda x: x[2]==1, X_train)[:40]
         train_false = filter(lambda x: x[2]==0, X_train)
 
-        val_true = filter(lambda x: x[2]==1, X_val)
+        val_true = filter(lambda x: x[2]==1, X_val)[:20]
         val_false = filter(lambda x: x[2]==0, X_val)
 
         n_train_true = len(train_true)
