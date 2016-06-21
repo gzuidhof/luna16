@@ -137,7 +137,7 @@ def computeFROC(FROCGTList, FROCProbList, totalNumberOfImages, excludeList):
     sens = (tpr * numberOfDetectedLesions) / totalNumberOfLesions
     return fps, sens, thresholds
 
-def evaluateCAD(seriesUIDs, results_filename, outputDir, allNodules, CADSystemName, maxNumberOfCADMarks=-1,
+def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNumberOfCADMarks=-1,
                 performBootstrapping=False,numberOfBootstrapSamples=1000,confidence = 0.95):
     '''
     function to evaluate a CAD algorithm
@@ -155,7 +155,7 @@ def evaluateCAD(seriesUIDs, results_filename, outputDir, allNodules, CADSystemNa
     nodOutputfile.write((60 * "*") + "\n")
     nodOutputfile.write("\n")
 
-    results = csvTools.readCSV(results_filename)
+    #results = csvTools.readCSV(results_filename)
 
     allCandsCAD = {}
     
@@ -464,10 +464,27 @@ def collectNoduleAnnotations(annotations, annotations_excluded, seriesUIDs):
     return allNodules
     
     
-def collect(annotations_filename,annotations_excluded_filename,seriesuids_filename):
+def collect(annotations_filename,annotations_excluded_filename,seriesuids_filename,results_filename):
     annotations          = csvTools.readCSV(annotations_filename)
     annotations_excluded = csvTools.readCSV(annotations_excluded_filename)
-    seriesUIDs_csv = csvTools.readCSV(seriesuids_filename)
+    results              = csvTools.readCSV(results_filename)
+    seriesUIDs_csv       = csvTools.readCSV(seriesuids_filename)
+
+    seriesuid_results = []
+    counter = 0;
+    for row in results:
+        if row[1] != 'seriesuid':
+            if counter < 100000:
+                seriesuid_results.append(row[1])
+                counter += 1;
+
+    annotations_new = []
+    for row in annotations:
+        if row[0] == 'seriesuid':
+            annotations_new.append(row)
+        elif row[0] in seriesuid_results:
+            annotations_new.append(row)
+    annotations = annotations_new
     
     seriesUIDs = []
     for seriesUID in seriesUIDs_csv:
@@ -475,10 +492,10 @@ def collect(annotations_filename,annotations_excluded_filename,seriesuids_filena
 
     allNodules = collectNoduleAnnotations(annotations, annotations_excluded, seriesUIDs)
     
-    return (allNodules, seriesUIDs)
+    return (allNodules, seriesUIDs, results)
     
     
-def noduleCADEvaluation(annotations_filename,annotations_excluded_filename,seriesuids_filename,results_filename,outputDir):
+def noduleCADEvaluation(results_filename,outputDir):
     '''
     function to load annotations and evaluate a CAD algorithm
     @param annotations_filename: list of annotations
@@ -487,24 +504,25 @@ def noduleCADEvaluation(annotations_filename,annotations_excluded_filename,serie
     @param results_filename: list of CAD marks with probabilities
     @param outputDir: output directory
     '''
-    
-    print annotations_filename
-    
-    (allNodules, seriesUIDs) = collect(annotations_filename, annotations_excluded_filename, seriesuids_filename)
-    
-    evaluateCAD(seriesUIDs, results_filename, outputDir, allNodules,
-                os.path.splitext(os.path.basename(results_filename))[0],
-                maxNumberOfCADMarks=100, performBootstrapping=bPerformBootstrapping,
-                numberOfBootstrapSamples=bNumberOfBootstrapSamples, confidence=bConfidence)
-
-
-if __name__ == '__main__':
-
     annotations_filename          = 'annotations/annotations.csv'
     annotations_excluded_filename = 'annotations/annotations_excluded.csv'
     seriesuids_filename           = 'annotations/seriesuids.csv'
-    results_filename              = '../submission_.csv'
-    outputDir                     = 'OUTPUT/'
-    # execute only if run as a script
-    noduleCADEvaluation(annotations_filename,annotations_excluded_filename,seriesuids_filename,results_filename,outputDir)
+
+    if not os.path.exists(outputDir):
+        os.makedirs(outputDir)
+    
+    print annotations_filename
+    
+    (allNodules, seriesUIDs, results) = collect(annotations_filename, annotations_excluded_filename, seriesuids_filename,results_filename)
+    
+    evaluateCAD(seriesUIDs, results, outputDir, allNodules, os.path.splitext(os.path.basename(results_filename))[0], maxNumberOfCADMarks=100, performBootstrapping=bPerformBootstrapping, numberOfBootstrapSamples=bNumberOfBootstrapSamples, confidence=bConfidence)
+    
     print "Finished!"
+
+if __name__ == '__main__':
+
+    results_filename              = '../../submissions/submission.csv'
+    outputDir                     = '../../submissions/submission-output/'
+
+    # execute only if run as a script
+    noduleCADEvaluation(results_filename,outputDir)
