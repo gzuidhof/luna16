@@ -12,18 +12,19 @@ from lasagne.updates import nesterov_momentum
 import theano
 import theano.tensor as T
 import numpy as np
+from params import params as P
 
 LR_SCHEDULE = {
-    0: 0.01,
-    8: 0.1,
+    0: 0.02,
+    6: 0.1,
     75: 0.01,
     110: 0.001,
 }
 
-PIXELS = 64
+PIXELS = P.INPUT_SIZE
 imageSize = PIXELS * PIXELS
-num_classes = 2
-n_channels = 1
+num_classes = P.N_CLASSES
+n_channels = P.CHANNELS
 
 he_norm = HeNormal(gain='relu')
 
@@ -290,7 +291,7 @@ def define_updates(output_layer, X, Y):
 
     # if using ResNet use L2 regularization
     all_layers = lasagne.layers.get_all_layers(output_layer)
-    l2_penalty = lasagne.regularization.regularize_layer_params(all_layers, lasagne.regularization.l2) * 0.000035
+    l2_penalty = lasagne.regularization.regularize_layer_params(all_layers, lasagne.regularization.l2) * P.L2_LAMBDA
     loss = loss + l2_penalty
 
     # set up loss functions for validation dataset
@@ -302,7 +303,7 @@ def define_updates(output_layer, X, Y):
     # get parameters from network and set up sgd with nesterov momentum to update parameters, l_r is shared var so it can be changed
     l_r = theano.shared(np.array(LR_SCHEDULE[0], dtype=theano.config.floatX))
     params = lasagne.layers.get_all_params(output_layer, trainable=True)
-    updates = nesterov_momentum(loss, params, learning_rate=l_r, momentum=0.92)
+    updates = nesterov_momentum(loss, params, learning_rate=l_r, momentum=P.MOMENTUM)
     #updates = adam(loss, params, learning_rate=l_r)
 
     prediction_binary = T.argmax(output_train, axis=1)
