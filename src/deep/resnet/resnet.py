@@ -310,7 +310,7 @@ def define_updates(output_layer, X, Y):
     test_prediction_binary = T.argmax(output_test, axis=1)
 
     # set up training and prediction functions
-    train_fn = theano.function(inputs=[X,Y], outputs=[loss, l2_penalty, acc, prediction_binary], updates=updates)
-    valid_fn = theano.function(inputs=[X,Y], outputs=[test_loss, l2_penalty, test_acc, test_prediction_binary])
+    train_fn = theano.function(inputs=[X,Y], outputs=[loss, l2_penalty, acc, prediction_binary, output_train[:,1]], updates=updates)
+    valid_fn = theano.function(inputs=[X,Y], outputs=[test_loss, l2_penalty, test_acc, test_prediction_binary, output_test[:,1]])
 
     return train_fn, valid_fn, l_r

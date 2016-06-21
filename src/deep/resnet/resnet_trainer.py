@@ -44,7 +44,7 @@ class ResNetTrainer(trainer.Trainer):
         for i, batch in enumerate(tqdm(batch_generator)):
             inputs, targets = batch
             targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
-            err, l2_loss, acc, prediction = fn(inputs, targets)
+            err, l2_loss, acc, prediction, _ = fn(inputs, targets)
 
             metrics.append([err, l2_loss, acc])
             metrics.append_prediction(targets, prediction)
@@ -68,6 +68,7 @@ class ResNetTrainer(trainer.Trainer):
             self.pre_epoch()
 
             if epoch in LR_SCHEDULE:
+                logging.info("Setting learning rate to ".format(LR_SCHEDULE[epoch]))
                 self.l_r.set_value(LR_SCHEDULE[epoch])
 
 
