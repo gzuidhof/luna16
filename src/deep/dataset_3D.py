@@ -26,9 +26,9 @@ def giveSubImage(image_path, coordinateList, size):
     for coordinate in coordinateList:
         center_pixel = np.floor(world_2_voxel(coordinate,origin,spacing)) + offset
         center_pixel = map(int, center_pixel)
-        sub_image = image_padded[center_pixel[0]:center_pixel[0]+size*2,
-                                    center_pixel[1]:center_pixel[1]+size*2,
-                                    center_pixel[2]:center_pixel[2]+size*2]
+        sub_image = image_padded[center_pixel[0]:center_pixel[0]+size,
+                                    center_pixel[1]:center_pixel[1]+size,
+                                    center_pixel[2]:center_pixel[2]+size]
         sub_image = np.expand_dims(sub_image, axis=0)
         output.append(sub_image)
     return output
