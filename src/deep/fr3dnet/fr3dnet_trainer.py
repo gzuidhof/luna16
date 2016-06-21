@@ -49,7 +49,7 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     n_val_true = len(val_true)
 
     train_epoch = train_true + train_false[:n_train_true]
-    val_epoch = val_true + val_false[:n_val_true]
+    val_epoch = val_true + val_false[:n_val_true*10]
 
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
@@ -106,7 +106,7 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:20]
+        train_true = filter(lambda x: x[2]==1, X_train)
         train_false = filter(lambda x: x[2]==0, X_train)
 
         val_true = filter(lambda x: x[2]==1, X_val)
