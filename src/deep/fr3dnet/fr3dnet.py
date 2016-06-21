@@ -82,14 +82,17 @@ def define_updates(network, inputs, targets):
     test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), targets),
                 dtype=theano.config.floatX)
 
+
+    l_r = theano.shared(np.array(params.LEARNING_RATE, dtype=theano.config.floatX))
+
     # Create update expressions for training, i.e., how to modify the
     # parameters at each training step. Here, we'll use Stochastic Gradient
     # Descent (SGD), but Lasagne offers plenty more.
     network_params = lasagne.layers.get_all_params(network, trainable=True)
     if params.OPTIMIZATION == "MOMENTUM":
-        updates = lasagne.updates.momentum(loss, network_params, learning_rate=params.LEARNING_RATE, momentum=params.MOMENTUM)
+        updates = lasagne.updates.momentum(loss, network_params, learning_rate=l_r, momentum=params.MOMENTUM)
     elif params.OPTIMIZATION == "ADAM":
-        updates = lasagne.updates.adam(loss, network_params, learning_rate=params.LEARNING_RATE)
+        updates = lasagne.updates.adam(loss, network_params, learning_rate=l_r)
     elif params.OPTIMIZATION == "RMSPROP":
         updates = lasagne.updates.adam(loss, network_params)
 
@@ -102,4 +105,4 @@ def define_updates(network, inputs, targets):
     # Compile a second function computing the validation loss and accuracy:
     val_fn = theano.function([inputs, targets], [test_loss, l2_loss, test_acc, test_prediction_binary])
 
-    return train_fn, val_fn
+    return train_fn, val_fn, l_r

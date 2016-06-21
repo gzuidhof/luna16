@@ -110,10 +110,11 @@ class Fr3dNetTrainer(trainer.Trainer):
         logging.info("Defining network")
         net = fr3dnet.define_network(input_var)
         self.network = net
-        train_fn, val_fn = fr3dnet.define_updates(net, input_var, target_var)
+        train_fn, val_fn, l_r = fr3dnet.define_updates(net, input_var, target_var)
 
         self.train_fn = train_fn
         self.val_fn = val_fn
+        self.l_r = l_r
 
     def do_batches(self, fn, batches, metrics):
         batches = list(batches)
@@ -150,4 +151,5 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
+            self.l_r.set_value(params.LEARNING_RATE  * ((0.995)**self.epoch))
             self.post_epoch()

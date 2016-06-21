@@ -290,6 +290,7 @@ def define_updates(output_layer, X, Y):
 
     # if using ResNet use L2 regularization
     all_layers = lasagne.layers.get_all_layers(output_layer)
+    l2_penalty = lasagne.regularization.regularize_layer_params(all_layers, lasagne.regularization.l2) * 0.000035
     loss = loss + l2_penalty
 
     # set up loss functions for validation dataset
@@ -301,7 +302,7 @@ def define_updates(output_layer, X, Y):
     # get parameters from network and set up sgd with nesterov momentum to update parameters, l_r is shared var so it can be changed
     l_r = theano.shared(np.array(LR_SCHEDULE[0], dtype=theano.config.floatX))
     params = lasagne.layers.get_all_params(output_layer, trainable=True)
-    updates = nesterov_momentum(loss, params, learning_rate=l_r, momentum=0.94)
+    updates = nesterov_momentum(loss, params, learning_rate=l_r, momentum=0.92)
     #updates = adam(loss, params, learning_rate=l_r)
 
     prediction_binary = T.argmax(output_train, axis=1)
