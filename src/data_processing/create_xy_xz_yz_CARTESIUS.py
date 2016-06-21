@@ -33,7 +33,7 @@ def process_image(image_path, candidates, save_dir):
     new_spacing = spacing / real_resize
     print 'image', image_path, 'loaded'
     #resize image
-    #image = scipy.ndimage.interpolation.zoom(image, real_resize)
+    image = scipy.ndimage.interpolation.zoom(image, real_resize)
 
     #Pad image with offset (OUTPUT_DIM/2) to prevent problems with candidates on edge of image
     offset = OUTPUT_DIM/2
