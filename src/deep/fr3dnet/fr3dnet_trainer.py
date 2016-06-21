@@ -46,7 +46,7 @@ def load_data(tup): #filename, coordinates, labels tuple
             if label == 1:
                 flipped_images = augment.get_all_flips_3d(image)
                 np.random.shuffle(flipped_images)
-                flipped_images = flipped_images[:3] #SELECT 2 RANDOM IMAGES OF 7 possible flips
+                flipped_images = flipped_images[:2] #SELECT 2 RANDOM IMAGES OF 7 possible flips
                 n_new = len(flipped_images)
 
                 augmentation_extra += zip([filename]*n_new, flipped_images, [label]*n_new)
@@ -69,8 +69,8 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     n_train_true = len(train_true)
     n_val_true = len(val_true)
 
-    train_epoch = train_true + train_false[:n_train_true*3] #*3 to account for 3 flip directions
-    val_epoch = val_true + val_false[:n_val_true*3]
+    train_epoch = train_true + train_false[:n_train_true*2] #*2 to account for 2 flip directions
+    val_epoch = val_true + val_false[:n_val_true*2]
 
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
