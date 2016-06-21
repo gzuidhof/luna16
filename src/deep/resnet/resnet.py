@@ -290,7 +290,6 @@ def define_updates(output_layer, X, Y):
 
     # if using ResNet use L2 regularization
     all_layers = lasagne.layers.get_all_layers(output_layer)
-    l2_penalty = lasagne.regularization.regularize_layer_params(all_layers, lasagne.regularization.l2) * 0.0001
     loss = loss + l2_penalty
 
     # set up loss functions for validation dataset
