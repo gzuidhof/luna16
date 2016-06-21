@@ -66,8 +66,8 @@ def make_epoch(n, train_true, train_false, val_true, val_false):
     n_train_true = len(train_true)
     n_val_true = len(val_true)
 
-    train_epoch = train_true + train_false[:n_train_true*8] #*8 to account for 8 flip directions
-    val_epoch = val_true + val_false[:n_val_true*8]
+    train_epoch = train_true + train_false[:n_train_true*2] #*8 to account for 8 flip directions
+    val_epoch = val_true + val_false[:n_val_true*2]
 
     train_epoch = combine_tups(train_epoch)
     val_epoch = combine_tups(val_epoch)
