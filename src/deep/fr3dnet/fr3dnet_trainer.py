@@ -21,6 +21,7 @@ import itertools
 import util
 import functools
 import normalize
+import augment
 
 def load_data(tup): #filename, coordinates, labels tuple
     size = P.INPUT_SIZE
@@ -36,7 +37,20 @@ def load_data(tup): #filename, coordinates, labels tuple
     if P.ZERO_CENTER:
         data -= P.MEAN_PIXEL
 
-    return zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
+    result = zip([tup[0]]*len(labels), np.array(data, dtype=np.float32), np.array(labels, dtype=np.int32))
+
+    if P.AUGMENT && P.AUGMENTATION_PARAMS['flip']:
+        augmentation_extra = []
+        for filename, image, label in result:
+            if label == 1:
+                flipped_images = augment.get_all_flips_3d(image)
+                n_new = len(flipped_images)
+                augmentation_extra += zip([filename]*n_new, flipped_images, [label]*n_new)
+        print len(augmentation_extra)
+        result += augmentation_extra
+
+
+    return result
 
 def make_epoch(n, train_true, train_false, val_true, val_false):
     n = n[0]
@@ -106,7 +120,7 @@ class Fr3dNetTrainer(trainer.Trainer):
 
     def train(self, X_train, X_val):
 
-        train_true = filter(lambda x: x[2]==1, X_train)[:360]
+        train_true = filter(lambda x: x[2]==1, X_train)[:240]
         train_false = filter(lambda x: x[2]==0, X_train)
 
         val_true = filter(lambda x: x[2]==1, X_val)

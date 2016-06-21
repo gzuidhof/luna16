@@ -52,3 +52,29 @@ def augment(images):
             shift(image, [shift_x,shift_y], output=image)
 
     return images
+
+def flip_axis(x, axis):
+    x = np.asarray(x).swapaxes(axis, 0)
+    x = x[::-1, ...]
+    x = x.swapaxes(0, axis)
+    return x
+
+OPTS = [[False, False, True], [False, True, False], [False, True, True],
+        [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
+
+
+
+def get_all_flips_3d(image):
+    flippos = []
+    offset = 0
+    if image.shape[0] == 1: #Has color channel
+        offset = 1
+
+    for opt in OPTS:
+        im = np.copy(image)
+        for i in range(3):
+            if opt[i]:
+                im.flip_axis(x, i+offset)
+        flippos.append(im)
+
+    return flippos
