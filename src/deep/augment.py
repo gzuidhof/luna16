@@ -59,9 +59,10 @@ def flip_axis(x, axis):
     x = x.swapaxes(0, axis)
     return x
 
-OPTS = [[False, False, True], [False, True, False], [False, True, True],
+OPTS = [[False,False,False], [False, False, True], [False, True, False], [False, True, True],
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
 
+def flip_given_axes(image, opt):
 
 
 def get_all_flips_3d(image):
@@ -70,7 +71,7 @@ def get_all_flips_3d(image):
     if image.shape[0] == 1: #Has color channel
         offset = 1
 
-    for opt in OPTS:
+    for opt in OPTS[1:]: #All opts except first (no flips)
         im = np.copy(image)
         for i in range(3):
             if opt[i]:
