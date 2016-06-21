@@ -13,6 +13,9 @@ if len(sys.argv) < 2:
 
 model_folder = os.path.join(model_folder, sys.argv[1])
 
+
+#Run with python predict_resnet.py 1466485849_resnet 194 9
+
 #Overwrite params, ugly hack for now
 params.params = params.Params(['../../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
 from params import params as P
@@ -51,7 +54,7 @@ if __name__ == "__main__":
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)[:100]
 
-    batch_size = 128
+    batch_size = 360
     multiprocess = False
 
     def get_images_with_filenames(filenames):
@@ -61,7 +64,7 @@ if __name__ == "__main__":
 
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
-                                        batch_size=batch_size,
+                                        batch_size=batch_size//3,
                                         multiprocess=multiprocess)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
@@ -73,19 +76,25 @@ if __name__ == "__main__":
     all_probabilities = []
     all_filenames = []
 
+    n_batches = 0
+    err_total = 0
+    acc_total = 0
+
     for i, batch in enumerate(tqdm(gen)):
         inputs, targets, filenames = batch
-        print len(inputs)
-        print len(list(set(filenames)))
+        #print len(inputs)
+        #print len(list(set(filenames)))
         targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
         err, l2_loss, acc, predictions, predictions_raw = val_fn(inputs, targets)
 
-        print "Loss", err
-        print "Accuracy", acc
-        print "Average prediction", np.mean(predictions_raw)
+        err_total += err
+        acc_total += acc
+        all_probabilities += list(predictions_raw)
+        all_filenames += list(filenames)
 
-        all_probabilities += predictions_raw
-        all_filenames += filenames
+        n_batches += 1
 
+    print "Loss", err_total / n_batches
+    print "Accuracy", acc_total / n_batches
 
     print zip(all_filenames[:10], all_probabilities[:10])
