@@ -151,5 +151,5 @@ class Fr3dNetTrainer(trainer.Trainer):
 
             self.do_batches(self.train_fn, train_epoch_data, self.train_metrics)
             self.do_batches(self.val_fn, val_epoch_data, self.val_metrics)
-            self.l_r.set_value(params.LEARNING_RATE  * ((0.995)**self.epoch))
+            self.l_r.set_value(params.LEARNING_RATE  * ((0.985)**self.epoch))
             self.post_epoch()
