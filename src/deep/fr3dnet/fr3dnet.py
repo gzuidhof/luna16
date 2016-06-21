@@ -93,10 +93,13 @@ def define_updates(network, inputs, targets):
     elif params.OPTIMIZATION == "RMSPROP":
         updates = lasagne.updates.adam(loss, network_params)
 
+    prediction_binary = T.argmax(prediction, axis=1)
+    test_prediction_binary = T.argmax(test_prediction, axis=1)
+
     # Compile a function performing a training step on a mini-batch (by giving
     # the updates dictionary) and returning the corresponding training loss:
-    train_fn = theano.function([inputs, targets], [loss, l2_loss, acc], updates=updates)
+    train_fn = theano.function([inputs, targets], [loss, l2_loss, acc, prediction_binary], updates=updates)
     # Compile a second function computing the validation loss and accuracy:
-    val_fn = theano.function([inputs, targets], [test_loss, l2_loss, test_acc])
+    val_fn = theano.function([inputs, targets], [test_loss, l2_loss, test_acc, test_prediction_binary])
 
     return train_fn, val_fn

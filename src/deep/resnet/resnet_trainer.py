@@ -43,10 +43,10 @@ class ResNetTrainer(trainer.Trainer):
         for i, batch in enumerate(tqdm(batch_generator)):
             inputs, targets = batch
             targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
-            err, l2_loss, acc = fn(inputs, targets)
+            err, l2_loss, acc, prediction = fn(inputs, targets)
 
             metrics.append([err, l2_loss, acc])
-            #metrics.append_prediction(true, prob_b)
+            metrics.append_prediction(targets, prediction)
 
     def train(self, generator_train, X_train, generator_val, X_val):
         #filenames_train, filenames_val = patch_sampling.get_filenames()
