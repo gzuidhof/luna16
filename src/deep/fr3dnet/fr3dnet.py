@@ -25,31 +25,31 @@ def define_network(inputs):
                                 input_var=inputs)
 
     network = Conv3DDNNLayer(
-            network, num_filters=64, filter_size=(5, 5, 3),
+            network, num_filters=64, filter_size=(5, 5, 5),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
             W=HeNormal(gain='relu'))
 
-    network = MaxPool3DDNNLayer(network, pool_size=(2, 2, 1))
+    network = MaxPool3DDNNLayer(network, pool_size=(2, 2, 2))
 
     if params.BATCH_NORMALIZATION:
-        network = lasagne.layers.BatchNormLayer(network)
+        network = lasagne.layers.batch_norm(network)
 
     network = Conv3DDNNLayer(
-            network, num_filters=64, filter_size=(5, 5, 3),
+            network, num_filters=64, filter_size=(5, 5, 5),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
             W=HeNormal(gain='relu'))
 
     network = Conv3DDNNLayer(
-            network, num_filters=64, filter_size=(5, 5, 3),
+            network, num_filters=96, filter_size=(5, 5, 5),
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
             W=HeNormal(gain='relu'))
 
     if params.BATCH_NORMALIZATION:
-        network = lasagne.layers.BatchNormLayer(network)
+        network = lasagne.layers.batch_norm(network)
 
     network = lasagne.layers.DenseLayer(
             network,
-            num_units=250,
+            num_units=420,
             nonlinearity=lasagne.nonlinearities.leaky_rectify,
             W=HeNormal(gain='relu')
     )
