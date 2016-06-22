@@ -70,8 +70,8 @@ if __name__ == "__main__":
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
 
-        new_inputs = inputs
-        new_targets = targets
+        new_inputs = []
+        new_targets = []
 
         for image, target in zip(inputs, targets):
             ims, trs = augment.testtime_augmentation(image[0], target) #Take color channel of image
