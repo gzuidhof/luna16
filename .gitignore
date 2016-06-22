@@ -69,3 +69,4 @@ models
 .idea/luna16.iml
 *.xml
 src/bla.txt
+src/evaluation/OUTPUT
