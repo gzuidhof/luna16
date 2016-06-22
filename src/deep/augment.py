@@ -93,7 +93,7 @@ def testtime_augmentation(image):
     images = []
     rotations = [14,7,0,-7,-14]
     flips = [[0,0],[1,0],[0,1],[1,1]]
-    shifts = [[2,2],[-2,-2]]
+    shifts = [[2,2],[0,0],[-2,-2]]
     zooms = [0.95,1,1.05]
 
     for r in rotations:
