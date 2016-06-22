@@ -521,8 +521,8 @@ def noduleCADEvaluation(results_filename,outputDir):
 
 if __name__ == '__main__':
 
-    results_filename              = '../../submissions/submission.csv'
-    outputDir                     = '../../submissions/submission-output/'
+    results_filename              = '../../models/1466485849_resnet/submission_194_9.csv'
+    outputDir                     = '../../models/1466485849_resnet/OUTPUT'
 
     # execute only if run as a script
     noduleCADEvaluation(results_filename,outputDir)
