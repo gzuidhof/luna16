@@ -25,6 +25,20 @@ def check_coordinates(image_coord,candidate):
         return True
     return False
 
+def check_coordinates2(image_coord,candidate):
+    diameter = candidate[3]
+    coord_x = candidate[0]
+    coord_y = candidate[1]
+    coord_z = candidate[2]
+    coords = np.array((coord_x,coord_y,coord_z))
+    image_coord = np.array((image_coord[0],image_coord[1],image_coord[2]))
+
+    #print np.linalg.norm(image_coord-coords)
+
+    if np.linalg.norm(image_coord-coords) < diameter*0.5:
+        return True
+    return False
+
 
 def is_candidate(image_coord,image_annotations):
     #print annotations['seriesuid']
@@ -36,6 +50,19 @@ def is_candidate(image_coord,image_annotations):
 
     for candidate in image_annotations.values:
         if check_coordinates(image_coord,candidate):
+            return candidate
+    return False
+
+def is_candidate2(image_coord,image_annotations):
+    #print annotations['seriesuid']
+    #print image_name
+
+    # print "Amount of actual nodules:",len(image_annotations.values)
+    #if len(image_annotations.values) > 0:
+    #    exit()
+
+    for candidate in image_annotations:
+        if check_coordinates2(image_coord,candidate):
             return candidate
     return False
 
@@ -88,7 +115,7 @@ def run(candidates):
     train_candidates = []
     name = candidates.values[0][0]
     all_cands = []
-    #print candidates
+    # print candidates
     for object in candidates.values:
         if object[0] == name:
             train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
