@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
         new_filenames = []
         for fname in filenames:
-            for i in range(int(len(inputs)/len(filenames))):
+            for i in range(int(len(new_inputs)/len(filenames))):
                 new_filenames.append(fname)
         #print 'inputs:',len(inputs),'filenames:',len(filenames),'new_filenames:',len(new_filenames)
         return np.array(new_inputs,dtype=np.float32),np.array(new_targets,dtype=np.int32), new_filenames
