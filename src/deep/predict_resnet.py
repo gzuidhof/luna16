@@ -71,6 +71,7 @@ if __name__ == "__main__":
         new_targets = []
 
         for image, target in zip(inputs, targets):
+            print image.shape
             ims, trs = augment.testtime_augmentation(image, target)
             new_inputs += ims
             new_targets += trs
