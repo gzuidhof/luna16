@@ -17,4 +17,4 @@ cd $HOME/luna16/src/deep
 
 echo "starting python"
 export THEANO_FLAGS='mode=FAST_RUN,device=gpu,floatX=float32,lib.cnmem=1'
-srun -u python predict.py 1466564868_OWN_resnet44_78 epoch 78
+srun -u python predict_resnet_cartesius.py 1466564868_OWN_resnet44_78 epoch 78
