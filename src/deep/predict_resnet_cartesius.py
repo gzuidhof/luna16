@@ -60,7 +60,7 @@ if __name__ == "__main__":
     in_pattern = '/scratch-shared/vdgugten/data/cadOWN_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 6000
+    batch_size = 6200
     multiprocess = True
 
     test_im = np.zeros((64,64))
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     print "Accuracy", acc_total / n_batches
 
     # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
-    submission = pd.DataFrame(columns=['seriesuid','coordZ','coordY','coordX','probability'])
+    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
     submission_row = 1;
 
     d = {f:[] for f in filenames}
@@ -137,19 +137,7 @@ if __name__ == "__main__":
         submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
         submission_row += 1
 
-    #factor = len(all_filenames)/len(np.unique(all_filenames))
-    #for fname in np.unique(all_filenames):
-    #	prob = 0
-    #	for i in range(len(all_filenames)):
-    #		if all_filenames[i] == fname:
-    #			prob += all_probabilities[i]
-    #	prob /= factor
-    #	candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-    #	candidates.set_value(candidates_row, 'probability', prob)
-    #	submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
-    #	submission_row += 1
-
     #print submission
     submission_path = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
-    submission.to_csv(submission_path,columns=['seriesuid','coordZ','coordY','coordX','probability'])
+    submission.to_csv(submission_path,columns=['seriesuid','coordX','coordY','coordZ','probability'])
