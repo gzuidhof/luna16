@@ -58,3 +58,19 @@ if __name__ == "__main__":
 
             evaluate_candidates.run(candidates)
 
+    # os.chdir('E:\uni\Medical\Project\CSVFILES\CSVFILES\\removeLungs')
+    # for file in glob.glob('*.csv'):
+    # file = 'E:\uni\Medical\Project\CSVFILES\CSVFILES\\removeLungs\unet89\LungOnlyMergedUnet89.csv'
+    # candidates = ca.load_candidates(file, False)
+        # print candidates
+    # evaluate_candidates.run(candidates)
+    # for subset in xrange(0,1):
+    file = 'E:\uni\Medical\Project\luna16\src\candidates_unet_TF_merged.csv'
+    candidates = ca.load_candidates(file,False)
+        # candidates = ca.load_candidates("../data/candidates_unet_final.csv",False)
+        # candidates = ca.load_candidates('../data/candidates_unet_TF_merged_FP_removed_if_close_45.csv', False)
+        # print candidates
+        # candidates = ca.merge_candidates(candidates,distance=1.337)
+    evaluate_candidates.run(candidates)
+        # evaluate_candidates.save_mean_candidates()
+        # quit()

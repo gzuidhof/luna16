@@ -93,7 +93,7 @@ if __name__ == "__main__":
     mergedTPCandidatesAndFPCandidates = pd.DataFrame() #is a empty dataFrame
     annotation = pd.read_csv('csv/annotations.csv')
     mergedTPCandidatesAndFPCandidates = fillTPCandidateList(candidates, annotation, mergedTPCandidatesAndFPCandidates)
-    mergedTPCandidatesAndFPCandidates.to_csv('candidates_unet_TF_merged.csv',columns=['seriesuid','coordX','coordY','coordZ','label'])
+    mergedTPCandidatesAndFPCandidates.to_csv('LungOnlyMergedUnet89.csv',columns=['seriesuid','coordX','coordY','coordZ','label'])
 
 
 
