@@ -61,7 +61,6 @@ if __name__ == "__main__":
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-
     batch_size = 600
     multiprocess = False
 
@@ -71,8 +70,8 @@ if __name__ == "__main__":
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
 
-        new_inputs = []
-        new_targets = []
+        new_inputs = inputs
+        new_targets = targets
 
         for image, target in zip(inputs, targets):
             ims, trs = augment.testtime_augmentation(image[0], target) #Take color channel of image
@@ -94,7 +93,7 @@ if __name__ == "__main__":
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     candidates = pd.read_csv('../../data/candidates_V2.csv')
-    candidates['probability'] = float(1337)
+    #candidates['probability'] = float(1337)
 
     print "Predicting {} patches".format(len(filenames))
 
@@ -120,9 +119,6 @@ if __name__ == "__main__":
     print "Loss", err_total / n_batches
     print "Accuracy", acc_total / n_batches
 
-    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
-    submission_row = 1;
-
     d = {f:[] for f in filenames}
 
     print "Grouping probabilities"
@@ -130,13 +126,24 @@ if __name__ == "__main__":
         d[f].append(probability)
 
     print "Filling predictions dataframe"
+
+    data = []
+    # for x in tqdm(d.iteritems()):
+    #     fname, probabilities = x
+    #     prob = np.mean(probabilities)
+    #     candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
+    #     candidates.set_value(candidates_row, 'probability', prob)
+    #     submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
+    #     submission_row += 1
     for x in tqdm(d.iteritems()):
         fname, probabilities = x
         prob = np.mean(probabilities)
         candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-        candidates.set_value(candidates_row, 'probability', prob)
-        submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
-        submission_row += 1
+        #print candidates.iloc[candidates_row].values
+        data.append(list(candidates.iloc[candidates_row].values)[:-1]+[str(prob)])
+
+    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'],data=data)
+
 
     #factor = len(all_filenames)/len(np.unique(all_filenames))
     #for fname in np.unique(all_filenames):

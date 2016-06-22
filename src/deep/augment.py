@@ -113,9 +113,9 @@ def testtime_augmentation(image, label):
                         image2 = image2.transpose(1,0)
                     #rotate(image2, r, reshape=False, output=image2)
                     image3 = zoom(image2, [z,z])
-                    image3 = crop_or_pad(image3, P.INPUT_SIZE, -3000)
+                    image3 = crop_or_pad(image3, P.INPUT_SIZE, 0)
                     image2 = image3
-                    #shift(image2, [s[0],s[1]], output=image2)
+                    # #shift(image2, [s[0],s[1]], output=image2)
                     images.append([image2]) #Adds color channel dimension!
                     labels.append(label)
 
