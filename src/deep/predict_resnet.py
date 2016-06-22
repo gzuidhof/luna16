@@ -62,7 +62,7 @@ if __name__ == "__main__":
     multiprocess = False
 
     test_im = np.zeros((64,64))
-    n_testtime_augmentation = len(augment.testtime_augmentation(test_im)[0])
+    n_testtime_augmentation = len(augment.testtime_augmentation(test_im, 0)[0])
 
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
