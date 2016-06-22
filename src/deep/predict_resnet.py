@@ -58,8 +58,9 @@ if __name__ == "__main__":
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
     #in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
-    in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/True/*.pkl.gz'.format(subsets)
+    in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
+
 
     batch_size = 600
     multiprocess = False
