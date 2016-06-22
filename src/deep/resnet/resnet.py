@@ -17,8 +17,8 @@ from params import params as P
 LR_SCHEDULE = {
     0: 0.02,
     6: 0.1,
-    75: 0.01,
-    110: 0.001,
+    80: 0.01,
+    120: 0.001,
 }
 
 PIXELS = P.INPUT_SIZE
