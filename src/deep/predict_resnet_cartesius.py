@@ -57,7 +57,7 @@ if __name__ == "__main__":
     print "Defining updates.."
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
-    in_pattern = '/scratch-shared/vdgugten/data/cadV2_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
+    in_pattern = '/scratch-shared/vdgugten/data/cadOWN_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
     batch_size = 6000
