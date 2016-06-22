@@ -7,13 +7,17 @@ import skimage.io
 
 model_folder = '../../models/'
 
-if len(sys.argv) < 2:
-    print "Missing arguments, first argument is model name, second is epoch"
+
+
+#Run with: python predict_resnet.py 1466485849_resnet 194 9
+# To predict subset 9 of the 1466485849_resnet model at epoch 194
+# To predict multiple subsets just add them in succession (such as 123 or 09)
+
+if len(sys.argv) < 3:
+    print "Missing arguments, first argument is model name, second is epoch, third is which subsets to predict"
     quit()
 
 model_folder = os.path.join(model_folder, sys.argv[1])
-
-#Run with: python predict_resnet.py 1466485849_resnet 194 9
 
 #Overwrite params, ugly hack for now
 params.params = params.Params(['../../config/default.ini'] + [os.path.join(model_folder, 'config.ini')])
@@ -101,7 +105,8 @@ if __name__ == "__main__":
     print "Loss", err_total / n_batches
     print "Accuracy", acc_total / n_batches
 
-    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
+    # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
+    submission = pd.DataFrame(columns=['seriesuid','coordZ','coordY','coordX','probability'])
     submission_row = 1;
 
     d = {f:[] for f in filenames}
@@ -133,4 +138,5 @@ if __name__ == "__main__":
 
     #print submission
     submission_path = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
-    submission.to_csv(submission_path,columns=['seriesuid','coordX','coordY','coordZ','probability'],index=False)
+    # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
+    submission.to_csv(submission_path,columns=['seriesuid','coordZ','coordY','coordX','probability'])
