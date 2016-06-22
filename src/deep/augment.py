@@ -89,11 +89,12 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
 
 
-def testtime_augmentation(image):
+def testtime_augmentation(image, label):
+    labels = []
     images = []
     rotations = [14,7,0,-7,-14]
     flips = [[0,0],[1,0],[0,1],[1,1]]
-    shifts = [[2,2],[0,0],[-2,-2]]
+    shifts = [[0,0]]
     zooms = [0.95,1,1.05]
 
     for r in rotations:
@@ -117,10 +118,11 @@ def testtime_augmentation(image):
                         offset = int(np.ceil((len(image2)-len(image3))/2))
                         image3 = np.pad(image3, offset, 'constant', constant_values=-3000)
                     image2 = image3
-                    shift(image2, [s[0],s[1]], output=image2)
+                    #shift(image2, [s[0],s[1]], output=image2)
                     images.append(image2)
+                    labels.append(label)
 
-    return images
+    return images, labels
 
 def flip_given_axes(image, opt):
     offset = 0

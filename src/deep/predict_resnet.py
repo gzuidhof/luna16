@@ -4,6 +4,7 @@ import params
 import numpy as np
 import os
 import skimage.io
+import augment
 
 model_folder = '../../models/'
 
@@ -57,11 +58,23 @@ if __name__ == "__main__":
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 600
+    batch_size = 1200
     multiprocess = False
 
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
+
+        new_inputs = []
+        new_targets = []
+
+        for image, target in zip(inputs, targets):
+            ims, trs = augment.testtime_augmentation(image, target)
+            new_inputs += ims
+            new_targets += trs
+
+        inputs = new_inputs
+        targets = new_targets
+
         new_filenames = []
         for fname in filenames:
         	for i in range(int(len(inputs)/len(filenames))):
