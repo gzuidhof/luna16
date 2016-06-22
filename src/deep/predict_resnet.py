@@ -53,7 +53,7 @@ if __name__ == "__main__":
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 512
+    batch_size = 600
     multiprocess = False
 
     def get_images_with_filenames(filenames):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     acc_total = 0
 
     for i, batch in enumerate(tqdm(gen)):
-        inputs, targets, filenames = batch
+        inputs, targets, fnames = batch
         #print len(inputs)
         #print len(list(set(filenames)))
         targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         err_total += err
         acc_total += acc
         all_probabilities += list(predictions_raw)
-        all_filenames += list(filenames)
+        all_filenames += list(fnames)
 
         n_batches += 1
 
@@ -103,18 +103,34 @@ if __name__ == "__main__":
 
     submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
     submission_row = 1;
-    factor = len(all_filenames)/len(np.unique(all_filenames))
-    for fname in np.unique(all_filenames):
-    	prob = 0
-    	for i in range(len(all_filenames)):
-    		if all_filenames[i] == fname:
-    			prob += all_probabilities[i]
-    	prob /= factor
-    	candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-    	candidates.set_value(candidates_row, 'probability', prob)
-    	submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
-    	submission_row += 1
+
+    d = {f:[] for f in filenames}
+
+    print "Grouping probabilities"
+    for probability, f in zip(all_probabilities, all_filenames):
+        d[f].append(probability)
+
+    print "Filling predictions dataframe"
+    for x in tqdm(d.iteritems()):
+        fname, probabilities = x
+        prob = np.mean(probabilities)
+        candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
+        candidates.set_value(candidates_row, 'probability', prob)
+        submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
+        submission_row += 1
+
+    #factor = len(all_filenames)/len(np.unique(all_filenames))
+    #for fname in np.unique(all_filenames):
+    #	prob = 0
+    #	for i in range(len(all_filenames)):
+    #		if all_filenames[i] == fname:
+    #			prob += all_probabilities[i]
+    #	prob /= factor
+    #	candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
+    #	candidates.set_value(candidates_row, 'probability', prob)
+    #	submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
+    #	submission_row += 1
 
     #print submission
-    submission_path = os.path.join(model_folder,'{}_{}_submission.csv'.format(epoch,subsets))
+    submission_path = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     submission.to_csv(submission_path,columns=['seriesuid','coordX','coordY','coordZ','probability'],index=False)
