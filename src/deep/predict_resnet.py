@@ -53,12 +53,14 @@ if __name__ == "__main__":
     with np.load(model_save_file) as f:
          param_values = [f['arr_%d' % i] for i in range(len(f.files))]
     lasagne.layers.set_all_param_values(network, param_values)
+
+    print "Defining updates.."
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 1200
+    batch_size = 600
     multiprocess = False
 
     test_im = np.zeros((64,64))
@@ -71,7 +73,7 @@ if __name__ == "__main__":
         new_targets = []
 
         for image, target in zip(inputs, targets):
-            ims, trs = augment.testtime_augmentation(image, target)
+            ims, trs = augment.testtime_augmentation(image[0], target) #Take color channel of image
             new_inputs += ims
             new_targets += trs
 
@@ -83,13 +85,13 @@ if __name__ == "__main__":
         	for i in range(int(len(inputs)/len(filenames))):
         		new_filenames.append(fname)
         #print 'inputs:',len(inputs),'filenames:',len(filenames),'new_filenames:',len(new_filenames)
-        return inputs, targets, new_filenames
+        return np.array(inputs, dtype=np.float32), targets, new_filenames
 
 
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
                                         batch_size=batch_size//(3*n_testtime_augmentation),
-                                        multiprocess=multiprocess)
+                                        multiprocess=multiprocess, n_producers=4)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     candidates = pd.read_csv('../../data/candidates_V2.csv')
@@ -107,8 +109,6 @@ if __name__ == "__main__":
 
     for i, batch in enumerate(tqdm(gen)):
         inputs, targets, fnames = batch
-        #print len(inputs)
-        #print len(list(set(filenames)))
         targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
         err, l2_loss, acc, predictions, predictions_raw = val_fn(inputs, targets)
         err_total += err

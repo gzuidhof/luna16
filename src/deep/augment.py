@@ -119,7 +119,7 @@ def testtime_augmentation(image, label):
                         image3 = np.pad(image3, offset, 'constant', constant_values=-3000)
                     image2 = image3
                     #shift(image2, [s[0],s[1]], output=image2)
-                    images.append(image2)
+                    images.append([image2]) #Adds color channel dimension!
                     labels.append(label)
 
     return images, labels
