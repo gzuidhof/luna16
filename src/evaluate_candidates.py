@@ -86,17 +86,17 @@ def run(candidates):
     #candidates = candidates.load_candidates("../data/annotations/candidates.csv")
     #candidates = candidates.load_candidates("../data/hoi_candidates.csv")
     train_candidates = []
-    name = candidates.values[0][0]bg
+    name = candidates.values[0][0]
     all_cands = []
     #print candidates
     for object in candidates.values:
         if object[0] == name:
-            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+            train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
         else:
             name = object[0]
             all_cands.append(train_candidates)
             train_candidates = []
-            train_candidates.append({"image_name":object[0],"image_coord":[object[3],object[2],object[1]]})
+            train_candidates.append({"image_name":object[0],"image_coord":[object[1],object[2],object[3]]})
     for image in all_cands:
         evaluate(image)
 
