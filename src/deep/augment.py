@@ -110,13 +110,7 @@ def testtime_augmentation(image, label):
                         image2 = image2.transpose(1,0)
                     rotate(image2, r, reshape=False, output=image2)
                     image3 = zoom(image2, [z,z])
-                    offset = (len(image3)-len(image2))/2
-                    if len(image3)>len(image2):
-
-                        image3 = image3[offset:len(image2)+offset,offset:len(image2)+offset]
-                    else:
-                        offset = int(np.ceil((len(image2)-len(image3))/2))
-                        image3 = np.pad(image3, offset, 'constant', constant_values=-3000)
+                    image3 = crop_or_pad(image3, P.INPUT_SIZE, -3000)
                     image2 = image3
                     #shift(image2, [s[0],s[1]], output=image2)
                     images.append([image2]) #Adds color channel dimension!
