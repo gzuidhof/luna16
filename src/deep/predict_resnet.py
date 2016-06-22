@@ -4,8 +4,6 @@ import params
 import numpy as np
 import os
 import skimage.io
-import augment
-
 model_folder = '../../models/'
 
 
@@ -37,6 +35,8 @@ if __name__ == "__main__":
     from glob import glob
     import resnet
     import pandas as pd
+    import augment
+
     print "Defining network"
 
     input_var = T.tensor4('inputs')
@@ -75,23 +75,20 @@ if __name__ == "__main__":
         for image, target in zip(inputs, targets):
             ims, trs = augment.testtime_augmentation(image[0], target) #Take color channel of image
             new_inputs += ims
-            new_targets += trs
-
-        inputs = new_inputs
-        targets = new_targets
+            new_targets+=trs
 
         new_filenames = []
         for fname in filenames:
-        	for i in range(int(len(inputs)/len(filenames))):
-        		new_filenames.append(fname)
+            for i in range(int(len(inputs)/len(filenames))):
+                new_filenames.append(fname)
         #print 'inputs:',len(inputs),'filenames:',len(filenames),'new_filenames:',len(new_filenames)
-        return np.array(inputs, dtype=np.float32), targets, new_filenames
+        return np.array(new_inputs,dtype=np.float32),np.array(new_targets,dtype=np.int32), new_filenames
 
 
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
                                         batch_size=batch_size//(3*n_testtime_augmentation),
-                                        multiprocess=multiprocess, n_producers=4)
+                                        multiprocess=multiprocess, n_producers=6)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     candidates = pd.read_csv('../../data/candidates_V2.csv')

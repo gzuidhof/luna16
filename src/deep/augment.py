@@ -69,9 +69,12 @@ def augment(images):
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
-        offset = int(np.ceil((desired_size-image.shape[0])/2))
+        offset = (desired_size-image.shape[0])//2
         image = np.pad(image, offset, 'constant', constant_values=pad_value)
-
+        if image.shape[0] != desired_size:
+            new_image = np.full((image.shape[0]+1,image.shape[1]+1),fill_value=pad_value)
+            new_image[:image.shape[0],:image.shape[1]]=image
+            image = new_image
     if image.shape[0] > desired_size:
         offset = (image.shape[0]-desired_size)//2
         image = image[offset:offset+desired_size,offset:offset+desired_size]
@@ -92,7 +95,7 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
 def testtime_augmentation(image, label):
     labels = []
     images = []
-    rotations = [14,7,0,-7,-14]
+    rotations = [0]
     flips = [[0,0],[1,0],[0,1],[1,1]]
     shifts = [[0,0]]
     zooms = [0.95,1,1.05]
@@ -108,7 +111,7 @@ def testtime_augmentation(image, label):
                         image2 = image2.transpose(1,0)
                         image2[:,:] = image2[::-1,:]
                         image2 = image2.transpose(1,0)
-                    rotate(image2, r, reshape=False, output=image2)
+                    #rotate(image2, r, reshape=False, output=image2)
                     image3 = zoom(image2, [z,z])
                     image3 = crop_or_pad(image3, P.INPUT_SIZE, -3000)
                     image2 = image3
