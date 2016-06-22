@@ -57,7 +57,8 @@ if __name__ == "__main__":
     print "Defining updates.."
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
-    in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
+    #in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
+    in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/True/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
     batch_size = 600
@@ -118,8 +119,7 @@ if __name__ == "__main__":
     print "Loss", err_total / n_batches
     print "Accuracy", acc_total / n_batches
 
-    # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
-    submission = pd.DataFrame(columns=['seriesuid','coordZ','coordY','coordX','probability'])
+    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
     submission_row = 1;
 
     d = {f:[] for f in filenames}
@@ -152,4 +152,4 @@ if __name__ == "__main__":
     #print submission
     submission_path = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
     # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
-    submission.to_csv(submission_path,columns=['seriesuid','coordZ','coordY','coordX','probability'])
+    submission.to_csv(submission_path,columns=['seriesuid','coordX','coordY','coordZ','probability'])
