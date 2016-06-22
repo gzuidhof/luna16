@@ -61,6 +61,9 @@ if __name__ == "__main__":
     batch_size = 1200
     multiprocess = False
 
+    test_im = np.zeros((64,64))
+    n_testtime_augmentation = len(augment.testtime_augmentation(test_im)[0])
+
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
 
@@ -85,7 +88,7 @@ if __name__ == "__main__":
 
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
-                                        batch_size=batch_size//3,
+                                        batch_size=batch_size//(3*n_testtime_augmentation),
                                         multiprocess=multiprocess)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
