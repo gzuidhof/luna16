@@ -4,9 +4,10 @@ import numpy as np
 
 try:
     import cv2
-    import bla
     CV2_AVAILABLE=True
     print "OpenCV 2 available, using that for augmentation"
+    from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
+    from skimage.transform import warp, AffineTransform
 except:
     from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
     from skimage.transform import warp, AffineTransform
@@ -54,7 +55,7 @@ def augment(images):
                 image = image.transpose(1,0)
 
             rotate(image, rotation_degrees, reshape=False, output=image)
-            image2 = zoom(image, [zoom_factor,zoom_factor])
+            #image2 = zoom(image, [zoom_factor,zoom_factor])
             image2 = crop_or_pad(image, pixels, -3000)
             shift(image2, [shift_x,shift_y], output=image)
             #affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
@@ -90,10 +91,10 @@ OPTS = [[False,False,False], [False, False, True], [False, True, False], [False,
 
 def testtime_augmentation(image):
     images = []
-    rotations = [45,90,-45,-90]
+    rotations = [14,7,0,-7,-14]
     flips = [[0,0],[1,0],[0,1],[1,1]]
-    shifts = [[1,1],[-1,-1],[2,2],[-2,-2]]
-    zooms = [0.9,0.95,1,1.05,1.1]
+    shifts = [[2,2],[-2,-2]]
+    zooms = [0.95,1,1.05]
 
     for r in rotations:
         for f in flips:
