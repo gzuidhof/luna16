@@ -1,6 +1,6 @@
 import glob
 import pandas as pd
-
+import tqdm
 
 # !!!!!!!!!!!!!!!!!!!!!!  IMPORTANT  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # this code is made for submission files, which have a index column.
@@ -24,7 +24,7 @@ def mergeFiles(submission_path):
 	mergedSubmission.drop(mergedSubmission.columns[[0]], axis = 1, inplace = True)
 
 	# loop over all submission files in the folder 'submission' and add them to the dataframe, except form the first one
-	for index in range(1, len(submission_paths)):
+	for index in tqdm.tqdm(range(1, len(submission_paths))):
 		# create dataframe of submission file
 		submission = pd.read_csv(submission_paths[index])
 		submission['coordX'] = submission['coordX'].round(2)
@@ -36,12 +36,15 @@ def mergeFiles(submission_path):
 		mergedSubmission = pd.merge(mergedSubmission, submission, on=['seriesuid', 'coordX', 'coordY', 'coordZ'], how = 'outer')
 
 	# calculate the probabiliy of the merged rows and add this to the final data Frame
-	print mergedSubmission
+	#print mergedSubmission
 	#probability = mergedSubmission[mergedSubmission.columns[range(4, 4 + len(submission_paths))]].mean(axis = 1)
 	#mergedSubmission.drop(mergedSubmission.columns[range(4, 4 + len(submission_paths))], axis = 1, inplace = True)
 	probability = mergedSubmission[mergedSubmission.columns[slice(4, None)]].mean(axis = 1)
 	mergedSubmission.drop(mergedSubmission.columns[slice(4,None)], axis = 1, inplace = True)
 	mergedSubmission['probability'] = probability
+
+	print mergedSubmission['probability'].count()
+	print len(mergedSubmission['probability'])
 
 	mergedSubmission = mergedSubmission.fillna(0)
 
@@ -55,3 +58,6 @@ if __name__ == "__main__":
     submission_path_first_part = '.\\csvfiles'
     file = mergeFiles(submission_path_first_part)
     file.to_csv('ensemble.csv',columns=['seriesuid','coordX','coordY','coordZ','probability'])
+
+	#[0.7247510468571428, 0.6893282234285715, 0.7630714091428573]
+	#[0.7352121898571429, 0.7018790372857142, 0.7685522011428573]
