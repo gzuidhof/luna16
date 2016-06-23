@@ -57,12 +57,11 @@ if __name__ == "__main__":
     print "Defining updates.."
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
-    #in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
-    in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
+    in_pattern = '/scratch-shared/vdgugten/data/cadOWN_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 420
-    multiprocess = False
+    batch_size = 6200
+    multiprocess = True
 
     test_im = np.zeros((64,64))
     n_testtime_augmentation = len(augment.testtime_augmentation(test_im, 0)[0])
@@ -80,7 +79,7 @@ if __name__ == "__main__":
 
         new_filenames = []
         for fname in filenames:
-            for i in range(int(len(new_inputs)/len(filenames))):
+            for i in range(int(len(inputs)/len(filenames))):
                 new_filenames.append(fname)
         #print 'inputs:',len(inputs),'filenames:',len(filenames),'new_filenames:',len(new_filenames)
         return np.array(new_inputs,dtype=np.float32),np.array(new_targets,dtype=np.int32), new_filenames
@@ -89,11 +88,11 @@ if __name__ == "__main__":
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
                                         batch_size=batch_size//(3*n_testtime_augmentation),
-                                        multiprocess=multiprocess, n_producers=6)
+                                        multiprocess=multiprocess, n_producers=11)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
-    candidates = pd.read_csv('../../data/candidates_V2.csv')
-    #candidates['probability'] = float(1337)
+    candidates = pd.read_csv('../../csv/unetRelabeled.csv')
+    candidates['probability'] = float(1337)
 
     print "Predicting {} patches".format(len(filenames))
 
@@ -119,6 +118,10 @@ if __name__ == "__main__":
     print "Loss", err_total / n_batches
     print "Accuracy", acc_total / n_batches
 
+    # Z HAVE BEEN SWAPPED TO MATCH SUBMISSION
+    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'])
+    submission_row = 1;
+
     d = {f:[] for f in filenames}
 
     print "Grouping probabilities"
@@ -126,36 +129,13 @@ if __name__ == "__main__":
         d[f].append(probability)
 
     print "Filling predictions dataframe"
-
-    data = []
-    # for x in tqdm(d.iteritems()):
-    #     fname, probabilities = x
-    #     prob = np.mean(probabilities)
-    #     candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-    #     candidates.set_value(candidates_row, 'probability', prob)
-    #     submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
-    #     submission_row += 1
     for x in tqdm(d.iteritems()):
         fname, probabilities = x
         prob = np.mean(probabilities)
         candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-        #print candidates.iloc[candidates_row].values
-        data.append(list(candidates.iloc[candidates_row].values)[:-1]+[str(prob)])
-
-    submission = pd.DataFrame(columns=['seriesuid','coordX','coordY','coordZ','probability'],data=data)
-
-
-    #factor = len(all_filenames)/len(np.unique(all_filenames))
-    #for fname in np.unique(all_filenames):
-    #	prob = 0
-    #	for i in range(len(all_filenames)):
-    #		if all_filenames[i] == fname:
-    #			prob += all_probabilities[i]
-    #	prob /= factor
-    #	candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-    #	candidates.set_value(candidates_row, 'probability', prob)
-    #	submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
-    #	submission_row += 1
+        candidates.set_value(candidates_row, 'probability', prob)
+        submission.loc[candidates.index[submission_row]] = candidates.iloc[candidates_row]
+        submission_row += 1
 
     #print submission
     submission_path = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))

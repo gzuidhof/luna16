@@ -178,7 +178,7 @@ def froc_analyse(csvfile):
     print averages
 
 
-froc_analyse('E:\uni\Medical\Project\luna16\src\evaluation\OUTPUT\mymodelname\\froc_asdf_xz_bootstrapping.csv')
+froc_analyse('evaluation/OUTPUT/ens/froc_ensemble_bootstrapping.csv')
 # label_csv('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv')
 # candidates4 = ca.load_candidates('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv', False)
 # pica.evaluate_candidates.run(candidates4)
