@@ -61,7 +61,7 @@ if __name__ == "__main__":
     in_pattern = '../../data/cadV2_0.5mm_64x64_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 600
+    batch_size = 420
     multiprocess = False
 
     test_im = np.zeros((64,64))
