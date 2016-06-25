@@ -15,7 +15,7 @@ import numpy as np
 from params import params as P
 
 LR_SCHEDULE = {
-    0: 0.02,
+    0: 0.01,
     6: 0.1,
     80: 0.01,
     120: 0.001,
@@ -297,6 +297,7 @@ def define_updates(output_layer, X, Y):
     # set up loss functions for validation dataset
     test_loss = lasagne.objectives.categorical_crossentropy(T.clip(output_test,0.000001,0.999999), Y)
     test_loss = test_loss.mean()
+    test_loss = test_loss + l2_penalty
 
     test_acc = T.mean(T.eq(T.argmax(output_test, axis=1), Y), dtype=theano.config.floatX)
 
