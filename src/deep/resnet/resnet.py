@@ -15,10 +15,10 @@ import numpy as np
 from params import params as P
 
 LR_SCHEDULE = {
-    0: 0.01,
-    6: 0.1,
-    80: 0.01,
-    120: 0.001,
+    0: 0.012,
+    6: 0.12,
+    80: 0.012,
+    120: 0.0012,
 }
 
 PIXELS = P.INPUT_SIZE
