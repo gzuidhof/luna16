@@ -182,6 +182,7 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
                 # make a list of all probabilities
                 probs = []
                 for keytemp, noduletemp in nodules.iteritems():
+                    #print noduletemp.CADprobability
                     probs.append(float(noduletemp.CADprobability))
                 probs.sort(reverse=True) # sort from large to small
                 probThreshold = probs[maxNumberOfCADMarks]
@@ -520,9 +521,12 @@ def noduleCADEvaluation(results_filename,outputDir):
     print "Finished!"
 
 if __name__ == '__main__':
+    import time
+    #results_filename              = '../ensemble.csv'
+    #results_filename              = './predictions_subset3_epoch156_model1466567940_resnet_large.csv'
+    results_filename              = '../concat.csv'
 
-    results_filename              = '../../models/1466485849_resnet/asdf_xz.csv'
-    outputDir                     = './OUTPUT/mymodelname'
+    outputDir                     = './OUTPUT/concat'
 
     # execute only if run as a script
     noduleCADEvaluation(results_filename,outputDir)

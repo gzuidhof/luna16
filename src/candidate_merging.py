@@ -9,12 +9,14 @@ from pandas import DataFrame as df
 import pandas as pd
 import candidates
 import make_candidatelist_with_unet_candidates as mcwuc
-# import pipeline_candidates as pica
-# import evaluate_candidates
+import pipeline_candidates as pica
+import evaluate_candidates
 import operator
 
-ANNOTATIONLOCATION = 'E:/uni/Medical/Project/CSVFILES/CSVFILES/annotations.csv'
-MHDLOCATIONS = 'E:\uni\Medical\Project\seg-lungs-LUNA16\seg-lungs-LUNA16\\'
+ANNOTATIONLOCATION = '../data/annotations.csv'
+MHDLOCATIONS = '../data/seg-lungs-LUNA16\\'
+
+DO_OUTSIDE_LUNG_REMOVAL = False
 
 
 def merge_pipe_and_unet(unetoutput, annotations, size):
@@ -47,15 +49,18 @@ def merge_candidates(csvfile, size):
 
 def remove_pipeline(data_per_slice, imagename):
     # print 'reading for ' + imagename
-    lungmasklocation = MHDLOCATIONS + imagename + '.mhd'
-    numpyImage, numpyOrigin, numpySpacing = image_read_write.load_itk_image(lungmasklocation)
-    to_remove = []
-    for coords in data_per_slice:
-        voxel = ca.world_2_voxel(coords[::-1], numpyOrigin, numpySpacing)
-        if((numpyImage[voxel[0]][voxel[1]][voxel[2]] != 4) and (numpyImage[voxel[0]][voxel[1]][voxel[2]] != 3)):
-            to_remove.append(coords)
-    for coords in to_remove:
-        data_per_slice.remove(coords)
+
+
+    if DO_OUTSIDE_LUNG_REMOVAL:
+        lungmasklocation = MHDLOCATIONS + imagename + '.mhd'
+        numpyImage, numpyOrigin, numpySpacing = image_read_write.load_itk_image(lungmasklocation)
+        to_remove = []
+        for coords in data_per_slice:
+            voxel = ca.world_2_voxel(coords[::-1], numpyOrigin, numpySpacing)
+            if((numpyImage[voxel[0]][voxel[1]][voxel[2]] != 4) and (numpyImage[voxel[0]][voxel[1]][voxel[2]] != 3)):
+                to_remove.append(coords)
+        for coords in to_remove:
+            data_per_slice.remove(coords)
     return data_per_slice
 
 def merge_csv(inputdirec, outputdirec, file, type):
@@ -82,6 +87,7 @@ def distance_lungonly_merge(parentdict, file, size):
             data_per_slice.to_csv(directory + '\\' + imagename + '.csv', index=False)
     merge_csv(directory, parentdict, file, 'merged')
     print 'done'
+
     print 'lung-only extraction...'
     directory = parentdict + '\\' + file + 'Removed'
     if not os.path.exists(directory):
@@ -178,7 +184,8 @@ def froc_analyse(csvfile):
     print averages
 
 
-froc_analyse('E:\uni\Medical\Project\luna16\src\evaluation\OUTPUT\mymodelname\\froc_asdf_xz_bootstrapping.csv')
+#froc_analyse('evaluation/OUTPUT/ens/froc_ensemble_bootstrapping.csv')
+#froc_analyse('C:/Users/Guido/Desktop/evaluationScript/out5/froc_ensemble_bootstrapping.csv')
 # label_csv('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv')
 # candidates4 = ca.load_candidates('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv', False)
 # pica.evaluate_candidates.run(candidates4)
@@ -186,5 +193,9 @@ froc_analyse('E:\uni\Medical\Project\luna16\src\evaluation\OUTPUT\mymodelname\\f
 # annotations = 'E:/uni/Medical/Project/CSVFILES/CSVFILES/annotations.csv'
 # merge_pipe_and_unet(candidates,annotations, 2)
 # merge_candidates('E:\uni\Medical\Project\CSVFILES\CSVFILES\candidates_unet_final_45.csv', 2)
-# distance_lungonly_merge("E:\uni\Medical\Project\CSVFILES\CSVFILES\\",'candidates_unet_final_23', 2.0)
+distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_01', 2)
+distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_23', 2)
+distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_45', 2)
+distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_67', 2)
+distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_89', 2)
 # merge_csv('E:\uni\Medical\Project\CSVFILES\CSVFILES\\removeLungs', 'E:\uni\Medical\Project\CSVFILES\CSVFILES', 'AllUnet', '')

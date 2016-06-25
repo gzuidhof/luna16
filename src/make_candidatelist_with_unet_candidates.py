@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 
 # This function checks if a candidate is overlapping with an annotations in the same image
@@ -18,7 +19,7 @@ def overlapping(candidate, annotations):
     return overlap
 
 
-# This function checks if a candidate is too close real nodule the parameter "mm" 
+# This function checks if a candidate is too close real nodule the parameter "mm"
 # determined the range
 def DistanceToTPTooClose(candidate, annotations, mm):
     tooClose = False
@@ -29,7 +30,7 @@ def DistanceToTPTooClose(candidate, annotations, mm):
         ann = annotations.iloc[annIndex]
         annCoords = np.array((ann.coordX,ann.coordY,ann.coordZ))
         if abs(canCoords[0] - annCoords[0]) < mm or abs(canCoords[1] - annCoords[1]) < mm or abs(canCoords[2] - annCoords[2]) < mm:
-			tooClose = True
+			return True
 	return tooClose
 
 
@@ -58,31 +59,32 @@ def mergeCandidates(annotation, possibleCandidates):
 			z.append(can.coordZ)
 			found = True
 	return np.mean(x), np.mean(y), np.mean(z), found
-    
+
+DISTANCE=30
 
 # This fucntion makes the final list, this list exist of TPcandidate and FPcandidates,
 # if they are not lying too close to a TPcandidate given in the annotation.csv
 def fillTPCandidateList(candidates, annotation, mergedTPCandidatesAndFPCandidates):
-	
+
 	# This part of the function loops over all candidates and checks if they are overlapping
-	# with an annotation. If not then the candidate is added to the list, with label 0, if it is 
-	# lying more than 50 mm from an annotation, given the csv file annotations.csv. 
-	for indexCan in range(0, len(candidates)):
+	# with an annotation. If not then the candidate is added to the list, with label 0, if it is
+	# lying more than 50 mm from an annotation, given the csv file annotations.csv.
+	for indexCan in tqdm(range(0, len(candidates))):
 		can = candidates.iloc[indexCan]
 		possibleAnnotations = annotation[annotation['seriesuid'] == can.seriesuid]
 		if (overlapping(can, possibleAnnotations) == False):
-			if(DistanceToTPTooClose(can, possibleAnnotations, 50) == False):
+			if (DistanceToTPTooClose(can, possibleAnnotations, DISTANCE) == False):
 				mergedTPCandidatesAndFPCandidates = mergedTPCandidatesAndFPCandidates.append({'seriesuid': can.seriesuid, 'coordX': can.coordX, 'coordY': can.coordY, 'coordZ': can.coordZ, 'label': 0}, ignore_index=True)
-	
-	# This part of the function adds all the candidates to the list if they are overlapping with 
-	# an annotation. Before they are added all candidates that are also on lying in the same 
-	# annotation are merged, by taking the mean. 
-	for indexAnn in range(0,len(annotation)):
+
+	# This part of the function adds all the candidates to the list if they are overlapping with
+	# an annotation. Before they are added all candidates that are also on lying in the same
+	# annotation are merged, by taking the mean.
+	for indexAnn in tqdm(range(0,len(annotation))):
 		ann = annotation.iloc[indexAnn]
 		possibleCandidates = candidates[candidates['seriesuid'] == ann.seriesuid]
 		x, y, z, found = mergeCandidates(ann, possibleCandidates)
 		if found == True:
-			mergedTPCandidatesAndFPCandidates = mergedTPCandidatesAndFPCandidates.append({'seriesuid': ann.seriesuid, 'coordX': x, 'coordY': y, 'coordZ': z, 'label': 1}, ignore_index=True) 
+			mergedTPCandidatesAndFPCandidates = mergedTPCandidatesAndFPCandidates.append({'seriesuid': ann.seriesuid, 'coordX': x, 'coordY': y, 'coordZ': z, 'label': 1}, ignore_index=True)
 	return mergedTPCandidatesAndFPCandidates
 
 
@@ -94,9 +96,3 @@ if __name__ == "__main__":
     annotation = pd.read_csv('csv/annotations.csv')
     mergedTPCandidatesAndFPCandidates = fillTPCandidateList(candidates, annotation, mergedTPCandidatesAndFPCandidates)
     mergedTPCandidatesAndFPCandidates.to_csv('LungOnlyMergedUnet89.csv',columns=['seriesuid','coordX','coordY','coordZ','label'])
-
-
-
-
-
-
