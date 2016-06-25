@@ -68,7 +68,7 @@ class ResNetTrainer(trainer.Trainer):
             self.pre_epoch()
 
             if epoch in LR_SCHEDULE:
-                logging.info("Setting learning rate to ".format(LR_SCHEDULE[epoch]))
+                logging.info("Setting learning rate to {}".format(LR_SCHEDULE[epoch]))
                 self.l_r.set_value(LR_SCHEDULE[epoch])
 
 

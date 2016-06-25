@@ -50,6 +50,7 @@ class Trainer(object):
             plt.plot(val_vals)
             plt.ylabel(label)
             plt.xlabel("Epoch")
+            plt.ylim(0,max(1, max(val_vals)*1.5))
 
             plt.savefig(os.path.join(self.plot_folder, '{}.png'.format(label)))
             plt.close()
