@@ -70,3 +70,5 @@ models
 *.xml
 src/bla.txt
 src/evaluation/OUTPUT
+src/*.csv
+src/evaluation/*.csv
