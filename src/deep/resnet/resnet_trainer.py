@@ -57,6 +57,9 @@ class ResNetTrainer(trainer.Trainer):
         train_true = filter(lambda x: "True" in x, X_train)
         train_false = filter(lambda x: "False" in x, X_train)
 
+        print "N train true/false", len(train_true), len(train_false)
+        print X_train[:2]
+
         val_true = filter(lambda x: "True" in x, X_val)
         val_false = filter(lambda x: "False" in x, X_val)
 
