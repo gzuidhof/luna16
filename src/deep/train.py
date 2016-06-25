@@ -62,6 +62,11 @@ if __name__ == "__main__":
         X_train = glob.glob(P.FILENAMES_TRAIN)
         X_val = glob.glob(P.FILENAMES_VALIDATION)
 
+        print "N Train", len(X_train)
+        print "N Val", len(X_val)
+
+        assert len(X_train)+len(X_val) != 0
+
         train_generator = dataset_2D.load_images
         validation_generator = partial(dataset_2D.load_images, deterministic=True)
 
