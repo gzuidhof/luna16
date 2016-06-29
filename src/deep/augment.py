@@ -25,8 +25,8 @@ def augment(images):
     shift_x = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
     shift_y = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
     rotation_degrees = np.random.uniform(*P.AUGMENTATION_PARAMS['rotation_range'])
-    zoom_f = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
-    zoom_factor = 1 + (zoom_f/2-zoom_f*np.random.random())
+    zoom_factor = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
+    #zoom_factor = 1 + (zoom_f/2-zoom_f*np.random.random())
     if CV2_AVAILABLE:
         M = cv2.getRotationMatrix2D((center, center), rotation_degrees, zoom_factor)
         M[0, 2] += shift_x
