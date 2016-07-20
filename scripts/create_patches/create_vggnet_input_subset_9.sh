@@ -13,4 +13,4 @@ cd $HOME/luna16/src/data_processing
 
 #Go!!!
 echo "starting python"
-srun -u python create_xy_xz_yz_CARTESIUS.py 9 unetNew.csv
+srun -u python create_xy_xz_yz_CARTESIUS.py 9 candidates_v2.csv

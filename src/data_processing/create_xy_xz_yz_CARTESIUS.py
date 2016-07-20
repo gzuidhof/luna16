@@ -115,7 +115,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Prepare save_dir
-    save_dir = '/scratch-shared/vdgugten/data/cadOWNv2_{}mm_{}x{}_xy_xz_yz/subset{}/{}'.format(OUTPUT_SPACING[1],OUTPUT_DIM,OUTPUT_DIM,subset,'{}')
+    save_dir = '/scratch-shared/vdgugten/data/candidates_v2_{}mm_{}x{}_xy_xz_yz/subset{}/{}'.format(OUTPUT_SPACING[1],OUTPUT_DIM,OUTPUT_DIM,subset,'{}')
     if not os.path.exists(save_dir.format('True')):
         os.makedirs(save_dir.format('True'))
     if not os.path.exists(save_dir.format('False')):
