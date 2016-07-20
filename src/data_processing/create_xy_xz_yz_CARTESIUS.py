@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     subset = int(sys.argv[1])
     candidates_csv = sys.argv[2]
-
+    print 'Inputing from file ../../csv/{}'.format(candidates_csv)
     candidates = pd.read_csv('../../csv/{}'.format(candidates_csv))
 
     start_time = time.time()
