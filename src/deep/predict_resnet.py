@@ -8,7 +8,7 @@ model_folder = '../../models/'
 
 
 
-#Run with: python predict_resnet.py 1466485849_resnet 194 9
+# Run with: python predict_resnet.py 1466485849_resnet 194 9
 # To predict subset 9 of the 1466485849_resnet model at epoch 194
 # To predict multiple subsets just add them in succession (such as 123 or 09)
 
@@ -57,10 +57,10 @@ if __name__ == "__main__":
     print "Defining updates.."
     train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
-    in_pattern = '../../data/cadOWNv2_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
+    in_pattern = '/media/diskB/guido/luna16/candidates_v2_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
 
-    batch_size = 1600
+    batch_size = 1200
     multiprocess = True
 
     test_im = np.zeros((64,64))
@@ -88,10 +88,10 @@ if __name__ == "__main__":
     gen = ParallelBatchIterator(get_images_with_filenames,
                                         filenames, ordered=True,
                                         batch_size=batch_size//(3*n_testtime_augmentation),
-                                        multiprocess=multiprocess, n_producers=8)
+                                        multiprocess=multiprocess, n_producers=12)
 
     predictions_file = os.path.join(model_folder, 'predictions_subset{}_epoch{}_model{}.csv'.format(subsets,epoch,P.MODEL_ID))
-    candidates = pd.read_csv('../../data/unetNew.csv')
+    candidates = pd.read_csv('../../data/candidates_V2.csv')
 
     print "Predicting {} patches".format(len(filenames))
 
