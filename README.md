@@ -49,6 +49,3 @@ src/deep/predict_resnet <model_name> <epoch> <which subsets to predict>
 ```
 
 The prediction CSV can then be found in the model folder. All you have to do now is combine these. You could use `src/ensembleSubmissions.py` for this, which also features some equalization of predictions of the different models.
-
-I hope this helps you get started,
-Guido
