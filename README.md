@@ -14,7 +14,7 @@ A rough list of requirements:
 Convert data to 1x1x1mm_512x512 slices. A requirement is also a set of segmentations of the lungs (can be found on the LUNA16 website). Place your data in folder `data/original_lungs`:
 
 
-Use script `src/data_processing/create_same_spacing_data_ALL.py`, this may take a long time (up to 24 hours) depending on your machine.
+Use script `src/data_processing/create_same_spacing_data_NODULE.py`, this may take a long time (up to 24 hours) depending on your machine.
 
 Then, download `imagename_zspacing.csv` from [here](https://gzuidhof.stackstorage.com/s/qsqz9dERe7atYU5) and put it in the data folder.
 
